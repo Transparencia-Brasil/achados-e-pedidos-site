@@ -1,0 +1,126 @@
+.cursos{
+	h1{
+		margin: 0 auto;
+		display: table;
+	}
+	p{
+		margin: 0 auto;
+		display: table;
+		text-align: center;
+		color: #363636;
+		margin-bottom: 3%;
+
+	}
+	img{
+		margin: 25px auto;
+		display: table;
+	}
+
+}
+
+.bgColor{
+	background-color: #f9a521;
+	.box{
+		background-color: #fff;
+	    padding: 9%;
+	    margin: 7% 0 8% 0;
+	    border-radius: 5px 5px 5px 5px;
+	    height: 100%;
+    	min-height: 470px;
+	    .titulo{
+	    	font-size: 22px;
+			margin-bottom: 4%;
+	    }
+	    .categoria{
+	    	background-color: #f9a521;
+		    width: 100%;
+		    max-width: 30%;
+		    text-align: center;
+		    color: #000;
+		    padding: 1%;
+		    border-radius: 10px 10px 10px 10px;
+		    margin-bottom: 3%;
+	    }
+    	.online{
+	    	background-color: #d91f5b;
+		    width: 100%;
+		    max-width: 30%;
+		    text-align: center;
+		    color: #fff;
+		    padding: 1%;
+		    border-radius: 10px 10px 10px 10px;
+		    margin-bottom: 3%;
+	    }
+	    .relogio{
+	    	width: 100%;
+	    	float: left;
+	    	margin-bottom: 4%;
+	    	span{
+	    		padding: 4% 0 0 4%;
+	    	}
+	    }
+	    .alunos{
+	    	width: 100%;
+	    	float: left;
+	    	margin-bottom: 4%;
+	    	span{
+	    		padding: 4% 0 0 4%;
+	    	}
+	    }
+	    .onde{
+	    	width: 100%;
+	    	margin-bottom: 4%;
+	    	span{
+	    		padding: 4% 0 0 4%;
+	    	}
+	    }
+	    img{
+	    	margin: 0;
+	    	float: left;
+	    }
+	    ul.loginDesk{
+	    	list-style: none;
+			display: block;
+	        width: 100%;
+	        margin: 10% 0 0 0;
+	        li{
+	        	padding-top: 1.5%;
+	            border-radius: 25px;
+			    border: 2px solid #edf0f5;
+			    width: 145px;
+			    height: 35px;
+			    margin: -3% 5% 0 0;
+			    text-align: center;
+			    float: right;
+			    white-space: nowrap;
+			    vertical-align: middle;
+			    cursor: pointer;
+			    &:hover {
+				    text-decoration: none;
+				    background-color: #eeeeee;
+				    border-radius: 25px;
+				}
+	            a{
+	                padding-top: 5px;
+	                padding-bottom: 6px;
+	                color: #363636;
+
+	            }
+	        }
+	        li:first-child{
+	            border: 2px solid #d81755;
+	            margin-right: 17%;
+	            a{
+	                color: #d81755;
+	                padding-bottom: 4px;
+	            }
+	        }
+		}
+		.boxDois{
+			float: left;
+		    width: 100%;
+		    margin: 13.1% 0 9% 0;
+		}
+	}
+}
+

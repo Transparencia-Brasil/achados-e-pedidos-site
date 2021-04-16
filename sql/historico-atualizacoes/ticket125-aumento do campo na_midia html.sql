@@ -1,0 +1,1 @@
+ALTER TABLE na_midia MODIFY HTML text;

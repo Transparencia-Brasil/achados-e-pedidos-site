@@ -1,0 +1,87 @@
+[
+	{
+		"UltimaInteracao" : 4,
+		"Status" : "Atendido",
+		"qtd" : 11
+	},
+	{
+		"UltimaInteracao" : 4,
+		"Status" : "Não Atendido",
+		"qtd" : 100
+	},
+	{
+		"UltimaInteracao" : 4,
+		"Status" : "Parcialmente Atendido",
+		"qtd" : 223
+	},
+	{
+		"UltimaInteracao" : 5,
+		"Status" : "Atendido",
+		"qtd" : 626
+	},
+	{
+		"UltimaInteracao" : 5,
+		"Status" : "Não Atendido",
+		"qtd" : 249
+	},
+	{
+		"UltimaInteracao" : 5,
+		"Status" : "Parcialmente Atendido",
+		"qtd" : 20
+	},
+	{
+		"UltimaInteracao" : 6,
+		"Status" : "Atendido",
+		"qtd" : 1
+	},
+	{
+		"UltimaInteracao" : 6,
+		"Status" : "Não Atendido",
+		"qtd" : 4
+	},
+	{
+		"UltimaInteracao" : 6,
+		"Status" : "Parcialmente Atendido",
+		"qtd" : 1
+	},
+	{
+		"UltimaInteracao" : 7,
+		"Status" : "Atendido",
+		"qtd" : 268
+	},
+	{
+		"UltimaInteracao" : 7,
+		"Status" : "Não Atendido",
+		"qtd" : 126
+	},
+	{
+		"UltimaInteracao" : 7,
+		"Status" : "Parcialmente Atendido",
+		"qtd" : 8
+	},
+	{
+		"UltimaInteracao" : 8,
+		"Status" : "Não Atendido",
+		"qtd" : 4
+	},
+	{
+		"UltimaInteracao" : 9,
+		"Status" : "Atendido",
+		"qtd" : 42
+	},
+	{
+		"UltimaInteracao" : 9,
+		"Status" : "Não Atendido",
+		"qtd" : 51
+	},
+	{
+		"UltimaInteracao" : 9,
+		"Status" : "Parcialmente Atendido",
+		"qtd" : 1
+	},
+	{
+		"UltimaInteracao" : 11,
+		"Status" : "Atendido",
+		"qtd" : 1
+	}
+]

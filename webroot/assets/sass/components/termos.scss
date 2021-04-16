@@ -1,0 +1,36 @@
+.termos{
+	background: url("../images/home/bg-dados.jpg");
+    background-repeat: no-repeat;
+    background-position: 0 35px;
+	h1{
+		margin: 0 auto;
+		display: table;
+	}
+	p{
+		margin: 0 auto;
+	    display: table;
+	    text-align: left;
+	    color: #363636;
+	}
+	img{
+		margin: 25px auto;
+		display: table;
+	}
+	.box{
+		background-color: #edf0f5;
+	    width: 57%;
+	    margin: 0 auto;
+	    padding: 3%;
+	    border-radius: 2%;
+	    margin-bottom: 11%;
+	}
+	.logoCreative{
+		img{
+			display: block;
+		    margin: 0;
+		    margin-left: 0;
+		    margin-bottom: 2%;
+		    margin-top: 5%;
+		}
+	}
+}

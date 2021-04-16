@@ -1,0 +1,230 @@
+<div class="container"><div class="row">
+    <ul class="breadcrumb">
+      <li class="completed">Home</li>
+      <li class="active"><a href="#">Pedidos</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="container pedidosOrgaos">
+    <div class="row">
+      <div class="col-md-12 busca">
+        <form>
+          <h2>Pedidos</h2>
+          <div id="custom-search-input">
+              <div class="input-group col-md-12">
+                  <input list="fieldList" name="fieldValue" id="fieldValue" class="form-control input-lg" placeholder="Digite aqui sua busca" autocomplete="off" >
+                  <datalist id="fieldList">
+                  </datalist>
+                  <span class="input-group-btn">
+                      <button class="btn btn-info btn-lg" type="button" id="btnsearch" attr="busca_pedido">
+                          <i class="glyphicon glyphicon-search"></i>
+                      </button>
+                  </span>
+              </div>
+            <div class="text-center" style="margin-top:5px;"><a href="/pedidos/busca-avancada" style="padding-bottom:100px;">Busca avançada</a></div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3 filtro">
+        <h1>Filtrar por:</h1>
+         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading data" role="tab" id="headingOne">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            <i class="more-less glyphicon glyphicon-chevron-down"></i>
+                            Data:
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                      <form action="" method="post" data-parsley-validate data-parsley-errors-messages-disabled>
+                       <div class="col-md-6">
+                          <div class="form-group">
+                              <input type="text" name="data-de" class="form-control datePicker" id="data-de" placeholder="Data inicial" required>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                              <input type="text" class="form-control datePicker" id="data-ate" placeholder="Data final" required>
+                          </div>
+                        </div>
+<!--                         <div class="col-md-12">
+                          <div class="form-group">
+                              <input type="submit" class="form-control" value="selecionar">
+                          </div>
+                        </div> -->
+                      </form>
+                    </div>
+                </div>
+              </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingTwo">
+                    <h4 class="panel-title">
+                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            <i class="more-less glyphicon glyphicon-chevron-down"></i>
+                            Situação do pedido
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                    <div class="panel-body">
+                       <form action="" method="post" data-parsley-validate data-parsley-errors-messages-disabled>
+                         <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkEmTramitacao" class="regular-checkbox">
+                            <label for="chkEmTramitacao">Em tramitação </label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkFinalizada" class="regular-checkbox">
+                            <label for="chkFinalizada">Finalizada</label>
+                          </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+<!--
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingThree">
+                    <h4 class="panel-title">
+                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            <i class="more-less glyphicon glyphicon-chevron-down"></i>
+                            Pedidos com recurso
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                    <div class="panel-body">
+                        <form action="" method="post" id="frmPR" name="frmPR" data-parsley-validate data-parsley-errors-messages-disabled>
+                         <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkPedidosRecursoSim" class="regular-checkbox">
+                            <label for="chkPedidosRecursoSim">Sim </label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkPedidosRecursoNao" class="regular-checkbox">
+                            <label for="chkPedidosRecursoNao">Não</label>
+                          </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+-->
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingFour">
+                    <h4 class="panel-title">
+                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                            <i class="more-less glyphicon glyphicon-chevron-down"></i>
+                            Respostas do órgão público:
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                    <div class="panel-body">
+                        <form action="" method="post" data-parsley-validate data-parsley-errors-messages-disabled>
+                         <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkAtendido" class="regular-checkbox">
+                            <label for="chkAtendido">Atendido</label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkNaoAtendido" class="regular-checkbox">
+                            <label for="chkNaoAtendido">Não atendido</label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkParcAtendido" class="regular-checkbox">
+                            <label for="chkParcAtendido">Parcialmente atendido</label>
+                          </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingFive">
+                    <h4 class="panel-title">
+                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                            <i class="more-less glyphicon glyphicon-chevron-down"></i>
+                            Órgãos públicos
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseFive" class="panel-collapse collapsse" role="tabpanel" aria-labelledby="headingFive">
+                    <div class="panel-body">
+                      <form action="" method="post" data-parsley-validate data-parsley-errors-messages-disabled>
+                         <h5>Nível:</h5>
+                         <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkFederal" class="regular-checkbox">
+                            <label for="chkFederal">Federal</label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkEstadual" class="regular-checkbox">
+                            <label for="chkEstadual">Estadual</label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkMunicipal" class="regular-checkbox">
+                            <label for="chkMunicipal">Municipal</label>
+                          </div>
+                          <h5>Poder:</h5>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkLegislativo" class="regular-checkbox">
+                            <label for="chkLegislativo">Legislativo</label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkTribunal" class="regular-checkbox">
+                            <label for="chkTribunal">Tribunais de Contas</label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkExecutivo" class="regular-checkbox">
+                            <label for="chkExecutivo">Executivo</label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkJudiciario" class="regular-checkbox">
+                            <label for="chkJudiciario">Judiciário</label>
+                          </div>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkMinisterio" class="regular-checkbox">
+                            <label for="chkMinisterio">Ministério Público</label>
+                          </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="form-group">
+                      <input type="reset" class="form-control" value="Limpar">
+                  </div>
+                </div>
+            </div>
+
+        </div><!-- panel-group -->
+      </div>
+      <div id="sem-resultados" style="display:none">
+        <h3>Nada foi encontrado para o termo: "<span class="termo-display-noresult"></span>"</h3>
+      </div>
+      <div id="sem-resultados-filtros" style="display:none">
+        <h3>Nenhum pedido encontrado para essa configuração de filtro</h3>
+      </div>
+      <div id="primeira-tela">
+        <h3>Total de pedidos: <span class="hits-total-display"></span></h3>
+        <h5>Mostrando <span class="paginacao-de"></span> de <span class="paginacao-ate"></span>.</h5>
+      </div>
+      <div>
+      <div class="col-md-9">
+        <div id="cabecalho-resultados" style="display:none">
+          <h4>Resultado para: "<span class="termo-display"></span>"</h4>
+          <h5>Foram encontrados <span class="hits-total-display"></span> pedidos - Mostrando <span class="paginacao-de"></span> de <span class="paginacao-ate"></span>.</h5>
+        </div>
+        <div class="row" id="boxes-resultados">
+        </div>
+         <div class="text-center">
+          <ul class="pagination pagination-large" id="ulPagination"> 
+        </ul>
+        </div>
+      </div>
+    </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="<?=BASE_URL?>assets/js/busca.js" ></script>

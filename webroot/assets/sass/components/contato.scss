@@ -1,0 +1,101 @@
+.contato{
+	h1{
+		margin: 0 auto;
+		display: table;
+	}
+	p{
+		margin: 0 auto;
+		display: table;
+		text-align: center;
+		color: #363636;
+	}
+	img{
+		margin: 25px auto;
+		display: table;
+	}
+	form{
+		width: 50%;
+	    margin: 40px auto;
+	    display: table;
+	    .form-group {
+		    color: #7a92a3;
+		    font-weight: normal;
+		}
+	    .form-control {
+		    height: 35px;
+		    padding: 10px 20px;
+		    line-height: 1.42857;
+		    color: #7a92a3;
+		    font-weight: normal;
+		    background-color: #edf0f5;
+		    border: none;
+		    border-radius: 5px;
+		    -webkit-box-shadow: none;
+		    box-shadow: none;
+		    -webkit-transition: none;
+		    -o-transition: none;
+		    transition: none;
+		}
+		textarea{
+			resize: none;
+    		height: 145px !important;
+		}
+		.regular-checkbox {
+		    display: none;
+		}
+		.regular-checkbox + label {
+		    background-color: #fafafa;
+		    border: 1px solid #cacece;
+		    box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);
+		    padding: 9px;
+		    border-radius: 3px;
+		    display: inline-block;
+		    position: relative;
+		    margin: 5px 10px 0 17px;
+		}
+		.regular-checkbox:checked + label:after {
+		    content: '\2714';
+		    font-size: 14px;
+		    position: absolute;
+		    top: 0px;
+		    left: 3px;
+		    color: #d81755;
+		}
+		span{
+			float: right;
+    		margin: 1% 35% 0 0;
+		}
+		input.parsley-error, select.parsley-error, textarea.parsley-error{
+		    color: #B94A48;
+		    background-color: #F2DEDE !important;
+		    border: 1px solid #EED3D7 !important;
+		}
+		.bntVer {
+		    max-width: 25%;
+		    margin: 0 auto;
+		    display: table;
+		    border: none;
+		    color: #fff;
+		}
+		::-webkit-input-placeholder {
+		   color: #7a92a3;
+		   font-weight: normal;
+		}
+
+		:-moz-placeholder { /* Firefox 18- */
+		   color: #7a92a3;
+		   font-weight: normal;  
+		}
+
+		::-moz-placeholder {  /* Firefox 19+ */
+		   color: #7a92a3;
+		   font-weight: normal;  
+		}
+
+		:-ms-input-placeholder {  
+		   color: #7a92a3;
+		   font-weight: normal;  
+		}
+
+	}
+}

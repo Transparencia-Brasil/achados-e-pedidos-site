@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteRule    ^$    webroot/    [L,NC]
+    RewriteRule    (.*) webroot/$1    [L]
+</IfModule>
+
+<IfModule mod_speling.c>
+	CheckSpelling On
+	CheckCaseOnly On
+</IfModule>

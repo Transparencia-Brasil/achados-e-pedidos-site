@@ -1,0 +1,1 @@
+Alter table usuarios_admin MODIFY COLUMN Bloqueado smallint(6);

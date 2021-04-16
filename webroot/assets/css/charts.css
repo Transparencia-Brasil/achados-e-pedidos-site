@@ -1,0 +1,113 @@
+.chart-info-wrapper {
+    margin-top: -200px;
+    max-width: 340px;
+}
+.chart-info {
+    font-size: 1.6em;
+    line-height: 1em;
+}
+.chart-info-title {
+    font-size: 2em;
+}
+.chart-info-text {
+ color: #fe9301;
+}
+@media only screen and (max-width : 768px) {
+    .chart-info-wrapper {
+        margin-top: -15px;
+        margin-bottom: 30px;
+    }
+    .chart-info {
+        font-size: 1.3em;
+        line-height: 1.1em;
+    }
+    .chart-info-title {
+        font-size: 1.6em;
+    }
+}
+
+.chart-line {
+    fill: none;
+    stroke-width: 2px;
+}
+.chart-dot {
+    fill: #FFF;
+    stroke-width: 2px;
+}
+.chart-overlay {
+    fill: none;
+    pointer-events: all;
+}
+.chart-hover-line {
+    stroke: #000;
+    opacity: 0.5;
+    stroke-width: 1.5px;
+    stroke-dasharray: 10,2;
+}
+.chart-tooltip {
+    overflow: visible;
+}
+.chart-tooltip-content {
+    border: 1px solid #3e3e3e;
+    background-color: #fff;
+    border-radius: 3px;
+}
+.chart-tooltip-title {
+    background-color: #3e3e3e;
+    color: #fff;
+    padding: 5px;
+    font-size: 0.9em;
+}
+.chart-tooltip-body {
+    padding: 5px;
+}
+.chart-tooltip-body > p {
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+.chart-uf {
+    fill: #edf0f5;
+    stroke: #e1e1e1;
+    stroke-width: 2px;
+}
+.chart-uf-dot,
+.chart-bar {
+    fill: #fe9301;
+    stroke: none;
+    cursor: pointer;
+}
+.axis-y > .tick > line,
+.axis-y > .domain {
+    display: none;
+}
+
+.chart-bar-text {
+    fill: #000;
+    font-size: 0.8em;
+}
+
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.link:hover {
+  stroke-opacity: .5;
+}

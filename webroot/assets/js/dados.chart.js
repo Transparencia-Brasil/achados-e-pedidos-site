@@ -531,7 +531,9 @@
     
             var total = d3.nest()
                 .rollup(function(leaves) { return leaves.length; })
-                .entries(data);
+                .entries(entries);
+            console.log("total")
+            console.log(total)
             y.domain([0, Math.ceil(d3.max(series, function(d) { return d.value/total; }) * 10) / 10]);
             yAxis.call(d3.axisLeft(y).tickFormat(d3.format(".1%")).ticks(4));
     

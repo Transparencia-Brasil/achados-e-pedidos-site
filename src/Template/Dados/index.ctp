@@ -21,35 +21,16 @@
             <h2>Pedidos<br> na base</h2>
             <h3 class="qnt"><?=$sumario['totalPedidos']?></h3>
           </div>
+          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
+            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-nao-atendidos.jpg" alt="Pedidos não respondidos"/>
+            <h2>Pedidos<br> não respondidos</h2>
+            <h3 class="qnt"><?=$sumario['totalPedidosNaoRespondidos']?></h3>
+          </div>
 
           <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos Atendidos"/>
-            <h2>Pedidos<br> atendidos</h2>
-            <h3 class="qnt"><?=number_format($sumario['totalPedidosAtendidos']/$sumario['totalPedidos'] * 100, 1)?>%</h3>
-            <h4 class="numbers"><?=$sumario['totalPedidosAtendidos']?></h4>
-          </div>
-
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-nao-atendidos.jpg" alt="Pedidos Atendidos"/>
-            <h2>Pedidos<br> não atendidos</h2>
-            <h3 class="qnt"><?=number_format($sumario['totalPedidosNaoAtendidos']/$sumario['totalPedidos'] * 100, 1)?>%</h3>
-            <h4 class="numbers"><?=$sumario['totalPedidosNaoAtendidos']?></h4>
-          </div>
-      </div>
-      <div class="row">
-          <div class="col-md-2">&nbsp;</div>
-          <div class="col-md-4 col-sm-6 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
-            <img src="<?=BASE_URL?>assets/images/pedidos/icon-atendidos-parcialmente.png" alt="Pedidos atendidos parcialmente"/>
-            <h2>Pedidos<br> parcialmente atendidos</h2>
-            <h3 class="qnt"><?=number_format($sumario['totalPedidosParcialAtendidos']/$sumario['totalPedidos'] * 100, 1)?>%</h3>
-            <h4 class="numbers"><?=$sumario['totalPedidosParcialAtendidos']?></h4>
-          </div>
-
-          <div class="col-md-4 col-sm-6 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
-            <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-nao-classificados.png" alt="Pedidos não classificados"/>
-            <h2>Pedidos<br> não<br>classificados</h2>
-            <h3 class="qnt"><?=number_format($sumario['totalPedidosNaoClassificados']/$sumario['totalPedidos'] * 100, 1)?>%</h3>
-            <h4 class="numbers"><?=$sumario['totalPedidosNaoClassificados']?></h4>
+            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos respondidos"/>
+            <h2>Pedidos<br> respondidos</h2>
+            <h3 class="qnt"><?=$sumario['totalPedidosRespondidos']?></h3>
           </div>
       </div>
       <h2 class="text-center">Classificações de atendimento por ano</h2>
@@ -62,10 +43,8 @@
               <div class="form-group">
                   <label for="filter-tipo" class="form-inline-label">Classificação do pedido</label>
                   <select id="filter-tipo" class="form-control" name="filter-tipo">
-                      <option value="Atendido">Atendidos</option>
-                      <option value="Não Atendido">Não atendidos</option>
-                      <option value="Parcialmente Atendido">Parcialmente atendidos</option>
-                      <option value="Não Classificado">Não classificados</option>
+                      <option value="Respondido">Respondido</option>
+                      <option value="Não respondido">Não Respondido</option>
                   </select>
               </div>
           </div>
@@ -88,7 +67,7 @@
                       <option value="Executivo">Executivo</option>
                       <option value="Legislativo">Legislativo</option>
                       <option value="Judiciário">Judiciário</option>
-                      <option value="Tribunal de Contas">Tribunal de Contas</option>
+                      <option value="Tribunais de Contas">Tribunais de Contas</option>
                       <option value="Ministério Público">Ministério Público</option>
                   </select>
               </div>

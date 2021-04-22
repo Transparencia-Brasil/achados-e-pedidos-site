@@ -118,36 +118,43 @@
       <div class="row">
           <h1>TEMPO DE RESPOSTA</h1>
           <p>Segundo a Lei de Acesso (LAI), os órgãos públicos têm um prazo de até 20 dias para responder, prorrogáveis por mais dez.</p>
-
+  
+          <div class="col-md-2">&nbsp;</div>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
             <h2>Tempo médio da resposta ao pedido inicial</h2>
             <h3 class="qnt"><?=number_format($sumario['tempoMedioPrimeiraResposta'], 1)?> dias</h3>
           </div>
 
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos Atendidos"/>
-            <h2>Tempo médio de tramitação com recurso</h2>
-            <h3 class="qnt"><?=number_format($sumario['tempoMedioEmTramitacao'], 1)?> dias</h3>
-          </div>
-
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-nao-atendidos.jpg" alt="Pedidos Atendidos"/>
             <h2>Pedidos respondidos em até 20 dias</h2>
-            <h3 class="qnt"><?=number_format($sumario['totalPedidosRespondidosEmAteVinteDias']/$sumario['totalPedidos'], 1)?>%</h3>
+            <h3 class="qnt"><?=$sumario['totalPedidosRespondidosEmAteVinteDias']?>%</h3>
           </div>
       </div>
       <h2 class="text-center">Quanto tempo leva para um pedido ser respondido?</h2>
       <div class="row">
-          <div class="col-xs-4 col-xs-offset-4">
+        <div class="col-xs-4">
               <div class="form-group">
-                  <label for="filter-tipo-tempo" class="form-inline-label">Classificação do pedido</label>
+                  <label for="filter-tempo-esfera">Nível federativo</label>
+                  <select id="filter-tempo-esfera" class="form-control" name="filter-tempo-esfera">
+                      <option value="--">--</option>
+                      <option value="Federal">Federal</option>
+                      <option value="Estadual">Estadual</option>
+                      <option value="Municipal">Municipal</option>
+                  </select>
+              </div>
+          </div>
+          <div class="col-xs-4">
+              <div class="form-group">
+                  <label for="filter-tipo-tempo" class="form-inline-label">Esfera de poder</label>
                   <select id="filter-tipo-tempo" class="form-control" name="filter-tipo-tempo">
                       <option value="--">--</option>
-                      <option value="Atendido">Atendidos</option>
-                      <option value="Não Atendido">Não atendidos</option>
-                      <option value="Parcialmente Atendido">Parcialmente atendidos</option>
-                      <option value="Não Classificado">Não classificados</option>
+                      <option value="Executivo">Executivo</option>
+                      <option value="Legislativo">Legislativo</option>
+                      <option value="Judiciário">Judiciário</option>
+                      <option value="Tribunais de Contas">Tribunais de Contas</option>
+                      <option value="Ministério Público">Ministério Público</option>
                   </select>
               </div>
           </div>
@@ -159,31 +166,6 @@
       </div>
   </div>
 </section>
-
-<section class="dados">
-  <div class="container">
-      <div class="row">
-          <h1>RECURSOS</h1>
-          <p>Caso o órgão não conceda ou conceda apenas acesso parcial à informação, o cidadão pode entrar com recurso em até dez dias. O órgão terá o prazo de cinco dias para responder.</p>
-
-          <div class="col-md-2">&nbsp;</div>
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
-            <h2>Pedidos que tiveram recurso</h2>
-            <h3 class="qnt"><?=number_format($sumario['totalPedidosComRecursos']/$sumario['totalPedidos'], 1)?>%</h3>
-          </div>
-
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos Atendidos"/>
-            <h2>Pedidos com recursos e atendidos</h2>
-            <h3 class="qnt"><?=number_format($sumario['totalPedidosComRecursosAtendidos']/$sumario['totalPedidosComRecursos'], 1)?>%</h3>
-          </div>
-      </div>
-      <h2 class="text-center">Taxa de atendimento por instância recursal</h2>
-      <div id="chart-taxa-reversao"></div>
-  </div>
-</section>
-
 <script type="text/javascript">
 (function() {
     var

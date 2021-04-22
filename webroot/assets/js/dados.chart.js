@@ -470,12 +470,13 @@
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
     var filter_tipo = "--";
+    var filter_esfera = "--";
     
     var x = d3.scaleBand().rangeRound([0, width]).padding(0.01).paddingOuter(0.5),
         y = d3.scaleLinear().range([height, 0]),
         z = d3.scaleThreshold()
             .domain([6, 11, 16, 21, 26, 31, 36, 41])
-            .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "40 ou mais"]);
+            .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "mais de 40"]);
         x.domain(z.range());
     
         g.append("g")
@@ -506,18 +507,22 @@
         data.forEach(function(d) {
             d.DataEnvio = new Date(d.DataEnvio);
             d.DataResposta = new Date(d.DataResposta);
-            var timeDiff = Math.abs(d.DataResposta.getTime() - d.DataEnvio.getTime());
-            d.Tempo = Math.ceil(timeDiff / (1000 * 3600 * 24));
-            d.Grupo = z(d.Tempo);
+            d.Grupo = z(d.DiasCorridos);
         });
     
         d3.select("#filter-tipo-tempo").on("change", function() {
             filter_tipo = this.value;
             filter();
         });
+
+        d3.select("#filter-tempo-esfera").on("change", function() {
+            filter_esfera = this.value;
+            filter();
+        });
     
         function filter() {
-            var entries = _.filter(data, function(d) { return (filter_tipo !== "--") ? d.Status == filter_tipo : true });
+            var entries = _.filter(data, function(d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
+                entries = _.filter(entries, function(d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
             var series = d3.nest()
                 .key(function(d) { return d.Grupo; })
                 .rollup(function(leaves) { return leaves.length; })
@@ -541,7 +546,7 @@
                 .attr("height", 0)
                 .on("mouseover", function(d) {
                     tooltip.attr("transform", "translate("+x(d.key)+", "+(y(d.value/total)+10)+")")
-                    if (d.key == "40 ou mais") {
+                    if (d.key == "mais de 40") {
                         tooltipTitle.html(d.key+" dias")
                     } else {
                         tooltipTitle.html("De "+d.key+" dias")

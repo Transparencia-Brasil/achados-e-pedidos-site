@@ -49,22 +49,18 @@ class Dados extends Entity{
 
 
         //Tempo médios de primeira resposta (em dias)
-        $query = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta= 1 AND Pedidos.Ativo = 1']);
-        $tempoMedioPrimeiraResposta = $query->select(['tempoMedio' => 'SUM(datediff(PedidosInteracoes.DataResposta, Pedidos.DataEnvio))/count(PedidosInteracoes.Codigo)'])->contain(['PedidosInteracoes'])->first();
-        $tempoMedioPrimeiraResposta = floatval($tempoMedioPrimeiraResposta->tempoMedio);
-        //Tempo médio de tramitação (em dias)
-        // SELECT
-        // AVG(datediff(PedidosInteracoes.DataResposta, Pedidos.DataEnvio)) AS `mediaPedidos`
-        // FROM pedidos Pedidos
-        // LEFT JOIN pedidos_interacoes PedidosInteracoes ON Pedidos.Codigo = (PedidosInteracoes.CodigoPedido)
-        // WHERE PedidosInteracoes.CodigoTipoPedidoResposta = 1
-        $query1 = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta = 1 AND Pedidos.Ativo = 1']);
-        $tempoMedioEmTramitacao = $query1->select(['mediaPedidos' => 'AVG(datediff(PedidosInteracoes.DataResposta, Pedidos.DataEnvio))'])->contain(['PedidosInteracoes'])->first();
-        $tempoMedioEmTramitacao = floatval($tempoMedioEmTramitacao->mediaPedidos);
+        //  "SELECT AVG(DATEDIFF(DataResposta, DataEnvio)) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta;"
+        //Total de pedidos na base de dados
+        $query = "SELECT AVG(DATEDIFF(DataResposta, DataEnvio)) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta";
+        $tempoMedioPrimeiraResposta = $connection->execute($query)->fetchAll('assoc');
+        $tempoMedioPrimeiraResposta = floatval($tempoMedioPrimeiraResposta[0]["MediaDiasResposta"]);
+        
         //Total de pedidos respondidos em até 20 dias
-        $query2 = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta = 1 AND datediff(PedidosInteracoes.DataResposta, Pedidos.DataEnvio) <= 20 AND Pedidos.Ativo = 1']);
-        $totalPedidosRespondidosEmAteVinteDias = $query2->select(['totalPedidos' => 'count(Pedidos.Codigo)'])->contain(['PedidosInteracoes'])->first();
-        $totalPedidosRespondidosEmAteVinteDias = floatval($totalPedidosRespondidosEmAteVinteDias->totalPedidos);
+        //  "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta;"
+        $query = "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta";
+        $totalPedidosRespondidosEmAteVinteDias = $connection->execute($query)->fetchAll('assoc');
+        $totalPedidosRespondidosEmAteVinteDias = floatval($totalPedidosRespondidosEmAteVinteDias[0]["PedidosNoPrazo"]) * 100;
+
         //Total de pedidos com recurso
         $query3 = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta IN (4,5,6,7,8,9,10,11) AND Pedidos.Ativo = 1']);
         $totalPedidosComRecursos = $query3->select(['totalPedidos' => 'count(distinct(Pedidos.Codigo))'])->contain(['PedidosInteracoes'])->first();
@@ -82,7 +78,6 @@ class Dados extends Entity{
             ,'totalPedidosRespondidosEmAteVinteDias'=>$totalPedidosRespondidosEmAteVinteDias
             ,'totalPedidosComRecursos'=>$totalPedidosComRecursos
             ,'totalPedidosComRecursosAtendidos'=>$totalPedidosComRecursosAtendidos
-            ,'tempoMedioEmTramitacao'=>$tempoMedioEmTramitacao
         ];
 
         return $results;
@@ -208,11 +203,17 @@ class Dados extends Entity{
     // }
 
     public function PedidosTempoMedioDeTramitacao() {
-        $pedidos = TableRegistry::get("Pedidos");
-        $query = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta = 1 AND Pedidos.Ativo = 1']);
-        $pedidosTempoMedioDeTramitacao = $query->select(['Codigo' => 'Pedidos.Codigo','Status' => 'StatusPedido.Nome','DataEnvio' => 'Pedidos.DataEnvio','DataResposta' => 'PedidosInteracoes.DataResposta'])->contain(['PedidosInteracoes'])->matching('StatusPedido')->all();
 
-        return json_encode($pedidosTempoMedioDeTramitacao);
+        $connection = ConnectionManager::get('default');
+        $query = "SELECT * FROM v_pedidos_count_dias_resposta";
+        return  json_encode($connection->execute($query)->fetchAll('assoc'));
+
+
+        // $pedidos = TableRegistry::get("Pedidos");
+        // $query = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta = 1 AND Pedidos.Ativo = 1']);
+        // $pedidosTempoMedioDeTramitacao = $query->select(['Codigo' => 'Pedidos.Codigo','Status' => 'StatusPedido.Nome','DataEnvio' => 'Pedidos.DataEnvio','DataResposta' => 'PedidosInteracoes.DataResposta'])->contain(['PedidosInteracoes'])->matching('StatusPedido')->all();
+
+        // return json_encode($pedidosTempoMedioDeTramitacao);
     }
 
 

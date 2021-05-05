@@ -592,7 +592,7 @@ CREATE TABLE `pedidos` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER pedidosModeracoes AFTER INSERT ON pedidos 
+/*!50003 CREATE*//*!50003 TRIGGER pedidosModeracoes AFTER INSERT ON pedidos 
  FOR EACH ROW
    BEGIN
     IF NEW.CodigoTipoOrigem = 3 THEN

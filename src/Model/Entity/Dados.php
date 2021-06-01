@@ -34,13 +34,13 @@ class Dados extends Entity{
         $connection = ConnectionManager::get('default');
         
         //Total de pedidos na base de dados
-        $query = "SELECT count(*) as total FROM tblai.v_pedidos_ativos_groups";
+        $query = "SELECT count(*) as total FROM v_pedidos_ativos_groups";
         
         $totalPedido_array = $connection->execute($query)->fetchAll('assoc');
         $totalPedidos = $totalPedido_array[0]["total"];
 
         //Total de pedidos não-respondidos e respondidos
-        $query = "SELECT * FROM tblai.v_pedidos_count_sresposta ORDER BY StatusResposta ASC";
+        $query = "SELECT * FROM v_pedidos_count_sresposta ORDER BY StatusResposta ASC";
         $totalPedidosRespostas_array = $connection->execute($query)->fetchAll('assoc');
         $totalPedidosNaoRespondidos = $totalPedidosRespostas_array[0]["TotalPedidos"];
         $totalPedidosRespondidos = $totalPedidosRespostas_array[1]["TotalPedidos"];
@@ -127,7 +127,7 @@ class Dados extends Entity{
         $connection = ConnectionManager::get('default');
         
         //Total de pedidos na base de dados
-        $query = "SELECT DATE_FORMAT(DataEnvio, '%Y') as ano, count(*) as qtd, StatusResposta as status  FROM tblai.v_pedidos_ativos_status_resposta where DATE_FORMAT(DataEnvio, '%Y') >= 2012 AND Ativo = 1 group by ano, status";
+        $query = "SELECT DATE_FORMAT(DataEnvio, '%Y') as ano, count(*) as qtd, StatusResposta as status  FROM v_pedidos_ativos_status_resposta where DATE_FORMAT(DataEnvio, '%Y') >= 2012 AND Ativo = 1 group by ano, status";
         
         $atendimentoPedidosPorAno_arr = $connection->execute($query)->fetchAll('assoc');
         // $totalPedidos = $totalPedido_array[0]["total"];

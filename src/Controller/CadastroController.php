@@ -62,10 +62,6 @@ class CadastroController extends AppController
 
             $erros = $usuario->ValidarPasso1();
 
-            if(strcmp(strtolower($sessao->read("palavra")), strtolower($this->request->data["Captcha"])) !== 0){
-                $erros["Captcha"] = "Caracteres inválidos. Por favor, digite os caracteres da imagem acima.";
-            }
-
             if(count($erros) == 0)
             {
                 $status = $usuario->salvar();              

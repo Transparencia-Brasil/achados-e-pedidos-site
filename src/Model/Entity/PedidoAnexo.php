@@ -66,7 +66,7 @@ class PedidoAnexo extends Entity{
                 $pedidoAnexo->CodigoPedidoInteracao = $codigoPedidoInteracao;
 				$status = $pedidoAnexo->Salvar($arquivo);
 			}
-			$pedidoAnexo->ES_AtualizarInserirAnexosPorPedido();
+			$pedidoAnexo->ES_AtualizarInserirAnexosPorPedido(null);
         }
         catch(Exception $ex){
             // logar erro no banco

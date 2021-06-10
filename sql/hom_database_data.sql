@@ -267,8 +267,8 @@ insert into moderacao_status
 insert into tipo_curso (Nome)
 values ('Presencial'), ('Online');
 
-insert into tipo_documento (Nome)
-values ('CPF'), ('CNPJ');
+insert into tipo_documento (Codigo, Nome)
+values (1,'CPF'), (2,'CNPJ');
 
 insert into tipo_genero(Nome)
 values ('Masculino'), ('Feminino'), ('Outros');
@@ -276,8 +276,8 @@ values ('Masculino'), ('Feminino'), ('Outros');
 insert into tipo_target(Nome)
 values ('Self'), ('Blank'), ('Frame');
 
-insert into tipo_usuario(Nome)
-values ('Padrão'), ('Jornalista'), ('Ong'), ('Agente');
+insert into tipo_usuario(Codigo,Nome)
+values (1,'Padrão'), (2,'Jornalista'), (3,'Ong'), (4,'Agente');
 
 insert into tipo_pedido_situacao(Codigo,Nome)
 values (1,'Em Tramitação'), (2,'Finalizado'), (3,'Finalizado - Não obteve resposta');

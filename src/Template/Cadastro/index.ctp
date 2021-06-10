@@ -54,18 +54,6 @@
               </div>
             </div>
             <div class="col-md-12">
-              <div class="captcha text-center">
-                <img src="<?=BASE_URL?>cadastro/gerarCaptcha/300/100/25/6" id="captcha" />
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                  <?=$this->Form->text('Captcha', ['id' => 'captcha', 'class' => 'form-control', 'placeholder' => "Digite os caracteres da imagem acima.", 'maxlength' => 10]) ?>
-                  <?=$this->ValidationText->exibirErro($erros, "Captcha"); ?>
-                  <?=$this->ValidationText->exibirErro($erros, "ErroInterno"); ?>
-              </div>
-            </div>
-            <div class="col-md-12">
               <div class="form-group">
                 <span>Aceito receber mensagens do Achados e Pedidos.</span>
                 <?=$this->Form->checkbox('AceiteComunicacao', ['id' => 'AceiteComunicacao', 'class' => 'regular-checkbox']) ?>

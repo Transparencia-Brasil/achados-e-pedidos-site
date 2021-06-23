@@ -107,7 +107,7 @@ O projeto é realizado pela ONG Transparência Brasil e pela Associação Brasil
         <a href="http://www.fiquemsabendo.com.br/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-fiquem-sabendo.png" alt="Fiquem Sabendo"></a>
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12">
-        <a href="https://medium.aosfatos.org/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-aos-fatos.png" alt="Aos Fatos"></a>
+        <a href="https://www.aosfatos.org/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-aos-fatos.png" alt="Aos Fatos"></a>
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12"></a>
         <a href="http://livre.jor.br/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-livrejor.png" alt="Livre jor"></a>
@@ -116,13 +116,13 @@ O projeto é realizado pela ONG Transparência Brasil e pela Associação Brasil
         <a href="http://artigo19.org/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-aticle19.png" alt="Artigo 19"></a>
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12">
-        <a href="" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-lupa.png" alt="Lupa"></a>
+        <a href="https://piaui.folha.uol.com.br/lupa/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-lupa.png" alt="Lupa"></a>
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12">
         <a href="http://br.okfn.org/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-open-knowledge-brasil.png" alt="Open Knowledge Brasil"></a>
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12">
-        <a href="http://eaivereador.org/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-eai-vereador.png" alt="E ai Vereador"></a>
+        <a href="https://www.facebook.com/eaivereador/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-eai-vereador.png" alt="E ai Vereador"></a>
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12">
         <a href="http://www.soudapaz.org/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-parceiro-soudapaz.png" alt="Sou da Paz"></a>

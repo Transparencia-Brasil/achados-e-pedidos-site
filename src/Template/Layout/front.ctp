@@ -72,7 +72,7 @@ $titulo = isset($title) ? " - " . $title : "";
                 </a>
                 <img src="<?=BASE_URL?>assets/images/home/logo-tranparencia-divisao.png" alt="Tranparência Brasil" class="img-div hidden-xs">
                 <a href="http://www.transparencia.org.br/" target="_blank">
-                  <img src="<?=BASE_URL?>assets/images/home/logo-tranparencia.png" alt="Tranparência Brasil" class="img-last">
+                  <img src="<?=BASE_URL?>assets/images/home/tb-logo-cinza.png" alt="Tranparência Brasil" class="img-last">
                 </a>
               </div>
               </div>

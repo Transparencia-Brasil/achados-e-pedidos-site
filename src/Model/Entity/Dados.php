@@ -180,8 +180,14 @@ class Dados extends Entity{
         $connection = ConnectionManager::get('default');
         
         //Total de pedidos na base de dados
-        $query = "select StatusResposta as status, NomeNivelFederativo as nivel, NomePoder as poder, SiglaUf as sigla, SiglaUf as uf, TotalPedidos as qtd from v_pedidos_count_sresposta_nfederativo_poder_uf";
-        
+        $query = "SELECT pdnfuf.StatusResposta,pdnfuf.NomePoder,pdnfuf.SiglaUF,pdnfuf.TotalPedidos,countPoder.TotalPedidosPoder FROM v_pedidos_count_sresposta_nfederativo_poder_uf as pdnfuf LEFT JOIN (select NomeEsferaPoder, count(*) as TotalPedidosPoder from v_pedidos_count_dias_resposta group by NomeEsferaPoder order by TotalPedidosPoder desc) as countPoder ON pdnfuf.NomePoder = countPoder.NomeEsferaPoder WHERE pdnfuf.NomeNivelFederativo <> 'Federal';";
+
+
+        // {StatusResposta: "Não respondido", SiglaUF: "AC", TotalPedidos: "2", TotalPedidosPoder: "103513"}
+
+        // {"Não respondido":111, "Respondido":111, SiglaUF: "AC", TotalPedidos: "2"}
+
+
         $pedidos = $connection->execute($query)->fetchAll('assoc');
         // print_r($query);
         // die();

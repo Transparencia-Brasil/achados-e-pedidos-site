@@ -8,22 +8,32 @@
 <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 
 <!-- Create an element where the map will take place -->
-<svg id="my_dataviz" width="400" height="300"></svg>
+<svg id="my_dataviz"></svg>
 
 
 <script>
 
+var
+    marginB = { top: 0, right: 0, bottom: 0, left: 0 },
+    viewBoxB = { width: 600, height: 460 },
+    widthB = viewBoxB.width - marginB.left - marginB.right,
+    heightB = viewBoxB.height - marginB.top - marginB.bottom
+
 // The svg
-var svg = d3.select("svg"),
-  width = +svg.attr("width"),
-  height = +svg.attr("height");
+var svgB = d3.select("svg")
+.attr("version", "1.1")
+.attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
+.attr("width", "100%"),
+gB = svgB.append("g").attr("transform", "translate(" + marginB.left + "," + marginB.top + ")")
+
 
 // Map and projection
 var path = d3.geoPath();
-var projection = d3.geoMercator()
-  .scale(70)
-  .center([0,20])
-  .translate([width / 2, height / 2]);
+var projection = d3.geoAlbers()
+  .scale(700)
+  .center([-44, -15])
+  .rotate([0, 0])
+  .parallels([0, 0])
 
 // Data and color scale
 var data = d3.map();
@@ -40,7 +50,7 @@ d3.queue()
 function ready(error, topo) {
 
   // Draw the map
-  svg.append("g")
+  svgB.append("g")
     .selectAll("path")
     .data(topo.features)
     .enter()
@@ -51,7 +61,10 @@ function ready(error, topo) {
       )
       // set the color of each country
       .attr("fill", function (d) {
+        console.log("fill")
+        console.log(data)
         d.total = data.get(d.id) || 0;
+        console.log(d.total)
         return colorScale(d.total);
       });
     }

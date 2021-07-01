@@ -130,7 +130,7 @@
             .on("mousemove", mousemove)
             .on("mouseleave", mouseleave)
     }
-    d3.json("/api/atendimentoPedidosPorAnoETipo", draw);
+    //d3.json("/api/atendimentoPedidosPorAnoETipo", draw);
     // d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_stacked.csv", draw);
 })();
 //FIM Grafico classificações de atendimento por ano
@@ -331,7 +331,7 @@
         }
     }
 
-    d3.json("/api/atendimentoPedidosPorAnoETipo", draw);
+    //d3.json("/api/atendimentoPedidosPorAnoETipo", draw);
 })();
 //FIM Grafico classificações de atendimento por ano
 (function () {
@@ -348,7 +348,7 @@
             .attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
             .attr("width", "100%"),
         gB = svgB.append("g").attr("transform", "translate(" + marginB.left + "," + marginB.top + ")"),
-        projection = d3.geoMercator()
+        projection = d3.geoAlbers()
             .center([-44, -15])
             .rotate([0, 0])
             .parallels([0, 0])
@@ -409,24 +409,55 @@
                 .rollup(function (l) { return { "sum": d3.sum(l, function (ld) { return ld.qtd; }) } })
                 .entries(data);
 
+
+                var subgroups = d3.map(data, function (d) { return (d.status) }).keys()
+                console.log(subgroups);
+                //["Nitrogen", "normal", "stress"]
+                //[Não respondido, Respondido]
+        
+                var subgroupsWithValues = [];
+                var r = [];
+                var count = 0;
+                data.forEach(function(item) {
+                    r[item.status] = item.qtd;
+                    // console.log(r)
+                    if (count++ == 1) {
+                        r["ano"] = item.ano;
+                        console.log("count")
+                        subgroupsWithValues.push(r);
+                        r = [];
+                        count = 0;
+                    }    
+                });
+                
+                // List of groups = species here = value of the first column called group -> I show them on the X axis
+                // var groups = d3.map(data, function (d) { return (d.group) }).keys()
+                var groups = d3.map(data, function (d) { return (d.ano) }).keys()
+
             // var features = _lodash.map(ufs.features, function(item) {
             //     return _lodash.extend(item, _lodash.find(seriesMap, { key: item.id }));
             // });
+            var color_range = ["#910130","#F9A521","#B27D5C","#F5E59D"];
+            var colorScale = d3.scaleThreshold()
+            .domain([0.20, 0.40, 0.60, 0.80])
+            .range(color_range);
+
+            
+            // .range(d3.schemeBlues[5]);
 
             gB.selectAll(".chart-uf")
                 .data(ufs.features)
                 .enter().append("path")
                 .attr("class", "chart-uf")
-                .attr("d", map);
+                .attr("d", map)
+                .attr("fill", function (d) { console.log(d); return colorScale(0.20);});
 
-            var mapDots = gB.selectAll(".chart-uf-dot")
-                .data(ufs.features)
-                .enter().append("circle")
-                .attr("id", function (d) { return d.id; })
-                .attr("class", "chart-uf-dot")
-                .attr("r", 0)
-                .style("opacity", 0.5)
-                .attr("transform", function (d) { return "translate(" + map.centroid(d) + ")"; });
+            // var mapDots = gB.selectAll(".chart-uf-dot")
+            //     .data(ufs.features)
+            //     .enter().append("circle")
+            //     .attr("id", function (d) { return d.id; })
+            //     .attr("class", "chart-uf-dot")
+            //     .attr("fill", function (d) { return "#fff000"; });
 
             var gBars = gC.append("g").attr("class", "chart-bars");
 
@@ -717,7 +748,7 @@
         filter();
     }
 
-    d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
+    //d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
 })();
 
 (function () {
@@ -843,5 +874,5 @@
             });
 
     }
-    d3.json("/api/taxaDeReversao", draw);
+    //d3.json("/api/taxaDeReversao", draw);
 })();

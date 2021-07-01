@@ -34,6 +34,7 @@
           </div>
       </div>
       <h2 class="text-center">Classificações de atendimento por ano</h2>
+      <div id="my_dataviz"></div>
       <div id="chart-atendimento"></div>
       <p>&nbsp;</p>
       <h2 class="text-center">Atendimento da LAI no Brasil</h2>
@@ -85,6 +86,12 @@
               <input type="radio" name="order-by" id="order-by-uf" class="order-by" value="uf"> Alfabética
             </label>
           </div>
+      </div>
+
+      <div class="row">
+      <div class="col-12">
+          <div id="chart-pedidos-uf-mapa2"></div>
+      </div>
       </div>
 
       <div class="row">
@@ -172,6 +179,8 @@
         order = 0,
         scriptMap = [
         "<?=BASE_URL?>assets/js/d3/4.12.0/d3.min.js",
+        "https://d3js.org/d3-scale-chromatic.v1.min.js",
+        "https://d3js.org/d3-geo-projection.v2.min.js",
         "<?=BASE_URL?>assets/js/topojson/3.0.2/topojson.min.js",
         "<?=BASE_URL?>assets/js/lodash.js/4.17.4/lodash.min.js",
         "<?=BASE_URL?>assets/js/dados.chart.js"];

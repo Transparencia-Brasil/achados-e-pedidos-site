@@ -91,7 +91,7 @@ O projeto é realizado pela ONG Transparência Brasil e pela Associação Brasil
           <a href="http://www.abraji.org.br/" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-abraji.png" alt="Logo Abraji" class="img-responsive" style="margin-top:12px;"></a>
       </div>
       <div class="col-md-6 col-sm-12 col-xs-12">
-        <a href="https://www.transparencia.org.br/apoie/doacoes" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-tb-ap.png" alt="Logo Tranparencia" class="img-responsive"></a>
+        <a href="https://www.transparencia.org.br/apoie/doacoes" target="_blank"><img src="<?=BASE_URL?>assets/images/institucional/logo-tb.svg" alt="Logo Tranparencia" class="img-responsive"></a>
       </div>
     </div>
 </div>

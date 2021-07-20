@@ -14,7 +14,7 @@
       <div class="row">
           <h1>DADOS</h1>
           <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="--">
-          <p>Veja qual foi a classificação de atendimento dos pedidos de Acesso à Informação cadastrados no Achados e Pedidos.</p>
+          <p>Veja a taxa de resposta dos pedidos de acesso à informação cadastrados no Achados e Pedidos.<br>Pedidos respondidos são aqueles que receberam algum tipo de resposta do órgão público (sem considerar recursos)<br>Pedidos não respondidos são aqueles que não receberam resposta do órgão público (mesmo depois de uma reclamação pela omissão ter sido apresentada)<br>Os dados não indicam se a resposta foi satisfatória ou adequada.</p>
 
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
@@ -33,10 +33,10 @@
             <h3 class="qnt"><?=$sumario['totalPedidosRespondidos']?></h3>
           </div>
       </div>
-      <h2 class="text-center">Classificações de atendimento por ano</h2>
+      <h2 class="text-center">Taxa de resposta por ano</h2>
       <div id="chart-atendimento"></div>
       <p>&nbsp;</p>
-      <h2 class="text-center">Atendimento da LAI no Brasil</h2>
+      <h2 class="text-center">Pedidos respondidos - Brasil e UFs</h2>
 
       <div class="row">
           <div class="col-xs-4">
@@ -117,7 +117,7 @@
   <div class="container">
       <div class="row">
           <h1>TEMPO DE RESPOSTA</h1>
-          <p>Segundo a Lei de Acesso (LAI), os órgãos públicos têm um prazo de até 20 dias para responder, prorrogáveis por mais dez.</p>
+          <p>Segundo a Lei de Acesso (LAI), os órgãos públicos têm até 20 dias para responder a um pedido. O prazo pode ser prorrogado por 10 dias.</p>
   
           <div class="col-md-2">&nbsp;</div>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
@@ -127,12 +127,13 @@
           </div>
 
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-nao-atendidos.jpg" alt="Pedidos Atendidos"/>
+            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos Atendidos"/>
             <h2>Pedidos respondidos em até 20 dias</h2>
             <h3 class="qnt"><?=$sumario['totalPedidosRespondidosEmAteVinteDias']?>%</h3>
           </div>
       </div>
       <h2 class="text-center">Quanto tempo leva para um pedido ser respondido?</h2>
+      <p>Tempo expresso em dias. Refere-se ao tempo que levou para o órgão dar algum tipo de resposta ao pedido (sem considerar se a resposta foi satisfatória ou adequada). Não inclui respostas a recursos.</p>
       <div class="row">
         <div class="col-xs-4">
               <div class="form-group">

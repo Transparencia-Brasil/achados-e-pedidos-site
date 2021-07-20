@@ -14,11 +14,7 @@
       <div class="row">
           <h1>DADOS</h1>
           <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="--">
-          <p>Veja a taxa de resposta dos pedidos de acesso à informação cadastrados no Achados e Pedidos. </p>
-          <p>Pedidos respondidos são aqueles que receberam algum tipo de resposta do órgão público (sem considerar recursos)</p>
-          <p>Pedidos não respondidos são aqueles que não receberam resposta do órgão público (mesmo depois de uma reclamação pela omissão ter sido apresentada)</p>
-          <p>Os dados não indicam se a resposta foi satisfatória ou adequada.</p>
-
+          <p>Veja a taxa de resposta dos pedidos de acesso à informação cadastrados no Achados e Pedidos.<br>Pedidos respondidos são aqueles que receberam algum tipo de resposta do órgão público (sem considerar recursos)<br>Pedidos não respondidos são aqueles que não receberam resposta do órgão público (mesmo depois de uma reclamação pela omissão ter sido apresentada)<br>Os dados não indicam se a resposta foi satisfatória ou adequada.</p>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
             <h2>Pedidos<br> na base</h2>

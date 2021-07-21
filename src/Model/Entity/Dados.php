@@ -134,6 +134,17 @@ class Dados extends Entity{
         return json_encode($atendimentoPedidosPorAno_arr);
     }
 
+    public function PedidosAtendimentoPorAno() {
+        $connection = ConnectionManager::get('default');
+        
+        $query = "SELECT Count(CodigoPedido) as Qtd, year(DataEnvio) As Ano, StatusResposta FROM v_pedidos_ativos_status_resposta Group By Ano, StatusResposta";
+
+
+        $pedidos = $connection->execute($query)->fetchAll('assoc');
+        return json_encode($pedidos);
+    }
+
+
     /* -------------------------------------------------------------*/
     //1.2 Mapa: Pedidos por UF, Poder e Nível
     /* -------------------------------------------------------------*/

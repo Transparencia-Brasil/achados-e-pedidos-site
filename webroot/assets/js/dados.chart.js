@@ -1,337 +1,206 @@
-
 //Grafico classificações de atendimento por ano
 (function () {
-    var
-        margin = { top: 20, right: 50, bottom: 30, left: 50 },
-        viewBox = { width: 860, height: 400 },
-        width = viewBox.width - margin.left - margin.right,
-        height = viewBox.height - margin.top - margin.bottom,
-        dot = { radius: 3 },
-        svg = d3.select("#chart-atendimento").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
-            .attr("width", "100%"),
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+    var margin = {top: 40, right: 30, bottom: 10, left: 50},
+        width = 960 - margin.left - margin.right,
+        height = 470 - margin.top - margin.bottom;   
 
-    var x = d3.scaleBand().rangeRound([0, width]).padding(1),
-        y = d3.scaleLinear().range([height, 0]),
-        z = d3.scaleOrdinal(["#ffa401", "#FA0F54", "#969696", "#B27D5C"]);
+    var svg = d3.select("#chart-atendimento")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", (height + margin.top + margin.bottom) + 20)
+        .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
 
-    var line = d3.line()
-        .x(function (d) { return x(d.ano); })
-        .y(function (d) { return y(+d.qtd / d.sum); });
+    // - 
+    var subgroups = ["Respondidos","NaoRespondidos"];
 
-    function draw(error, data) {
-        console.log(data);
-        // List of subgroups = header of the csv files = soil condition here
-        // var subgroups = data.columns.slice(1)
-        var subgroups = d3.map(data, function (d) { return (d.status) }).keys()
-        console.log(subgroups);
-        //["Nitrogen", "normal", "stress"]
-        //[Não respondido, Respondido]
+    // - Legenda              
+    svg.append("g")
+    .attr("class", "legendLinear")
+    .attr("transform", "translate(2,-40)");
 
-        var subgroupsWithValues = [];
-        var r = [];
-        var count = 0;
-        data.forEach(function(item) {
-            r[item.status] = item.qtd;
-            // console.log(r)
-            if (count++ == 1) {
-                r["ano"] = item.ano;
-                console.log("count")
-                subgroupsWithValues.push(r);
-                r = [];
-                count = 0;
-            }    
-        });
-        
-        // List of groups = species here = value of the first column called group -> I show them on the X axis
-        // var groups = d3.map(data, function (d) { return (d.group) }).keys()
-        var groups = d3.map(data, function (d) { return (d.ano) }).keys()
-        //(4) ["banana", "poacee", "sorgho", "triticum"] 
-        // [2021,2020,2019,2018]
-        // Add X axis
-        var x = d3.scaleBand()
-            .domain(groups)
-            .range([0, width])
-            .padding([0.2])
-        svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x).tickSizeOuter(0));
+    
+    svg.select(".legendLinear")
+    .append('rect')          
+    .attr("width",24)
+    .attr("height",24)
+    .attr('stroke', 'black')
+    .attr('fill', '#fbc064');
+    
+    svg.select(".legendLinear")
+    .append('text')       
+    .attr("y",20)
+    .attr("x",30)
+    .attr('stroke', 'black')
+    .text('Não Respondidos');
 
-        // Add Y axis
-        var y = d3.scaleLinear()
-            .domain([0, 60])
-            .range([height, 0]);
-        svg.append("g")
-            .call(d3.axisLeft(y));
+    svg.select(".legendLinear")
+    .append('rect')  
+    .attr("x",160)       
+    .attr("width",24)
+    .attr("height",24)
+    .attr('stroke', 'black')
+    .attr('fill', '#e45d88');
 
-        // color palette = one color per subgroup
-        var color = d3.scaleOrdinal()
-            .domain(subgroups)
-            .range(['#F9A521', '#D81755'])
+    svg.select(".legendLinear")
+    .append('text')     
+    .attr("y",20)
+    .attr("x",190)  
+    .attr('stroke', 'black')
+    .text('Respondidos');
 
-        //stack the data? --> stack per subgroup
-        var stackedData = d3.stack()
-            .keys(subgroups)
-            (subgroupsWithValues)
-        console.log(stackedData);
-        // ----------------
-        // Create a tooltip
-        // ----------------
-        var tooltip = d3.select("#my_dataviz")
-            .append("div")
-            .style("opacity", 0)
-            .attr("class", "tooltip")
-            .style("background-color", "white")
-            .style("border", "solid")
-            .style("border-width", "1px")
-            .style("border-radius", "5px")
-            .style("padding", "10px")
-
-        // Three function that change the tooltip when user hover / move / leave a cell
-        var mouseover = function (d) {
-            var subgroupName = d3.select(this.parentNode).datum().key;
-            var subgroupValue = d.data[subgroupName];
-            tooltip
-                .html("subgroup: " + subgroupName + "<br>" + "Value: " + subgroupValue)
-                .style("opacity", 1)
-        }
-        var mousemove = function (d) {
-            tooltip
-                .style("left", (d3.mouse(this)[0] + 90) + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
-                .style("top", (d3.mouse(this)[1]) + "px")
-        }
-        var mouseleave = function (d) {
-            tooltip
-                .style("opacity", 0)
-        }
-
-        // Show the bars
-        svg.append("g")
-            .selectAll("g")
-            // Enter in the stack data = loop key per key = group per group
-            .data(stackedData)
-            .enter().append("g")
-            .attr("fill", function (d) { console.log(d.key) 
-                return color(d.key); })
-            .selectAll("rect")
-            // enter a second time = loop subgroup per subgroup to add all rectangles
-            .data(function (d) { return d; })
-            .enter().append("rect")
-            .attr("x", function (d) { return x(d.data.ano); })
-            .attr("y", function (d) { console.log(d) 
-                return y(d[1]); })
-            .attr("height", function (d) { console.log(d[0] + " - " + d[1]) 
-            return y(d[0]) - y(d[1]); })
-            .attr("width", x.bandwidth())
-            .attr("stroke", "grey")
-            .on("mouseover", mouseover)
-            .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave)
-    }
-    //d3.json("/api/atendimentoPedidosPorAnoETipo", draw);
-    // d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_stacked.csv", draw);
-})();
-//FIM Grafico classificações de atendimento por ano
-
-
-
-
-
-
-
-
-
-
-
-
-//Grafico classificações de atendimento por ano
-(function () {
-    var
-        margin = { top: 20, right: 50, bottom: 30, left: 50 },
-        viewBox = { width: 860, height: 400 },
-        width = viewBox.width - margin.left - margin.right,
-        height = viewBox.height - margin.top - margin.bottom,
-        dot = { radius: 3 },
-        svg = d3.select("#chart-atendimento").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
-            .attr("width", "100%"),
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    var parseTime = d3.timeParse("%Y");
-
-    var x = d3.scaleBand().rangeRound([0, width]).padding(1),
-        y = d3.scaleLinear().range([height, 0]),
-        z = d3.scaleOrdinal(["#ffa401", "#FA0F54", "#969696", "#B27D5C"]);
-
-    var line = d3.line()
-        .x(function (d) { return x(d.ano); })
-        .y(function (d) { return y(+d.qtd / d.sum); });
-
+    // - 
     function draw(error, data) {
         if (error) throw error;
 
-        var series = d3.nest().key(function (d) { return d.status; }).sortKeys(d3.ascending).entries(data);
-        var series2 = d3.nest().key(function (d) { return d.ano; }).sortValues(function (a, b) { return b.qtd - a.qtd; }).entries(data);
+        // Consolida os Anos e Unicos Registros
+        var anosDataq = data.map(el => el.Ano)
+            .filter((value, index, self) => self.indexOf(value) === index); // Distinct 
 
-        x.domain(data.map(function (d) { return d.ano; }));
-        // y.domain([d3.min(data, function(d) { return +d.qtd }), d3.max(data, function(d) { return +d.qtd })]);
-        z.domain(series.map(function (d) { return d.key; }));
+        var dataC = [];
+        anosDataq.forEach(function(el, i, arr) {
+            var anoNovoItem = {
+                Respondido: 0,
+                NaoRespondido: 0,
+                Total: 0,
+                PercRespondidos: 0,
+                Ano: el
+            };
 
-        series2 = _.map(series2, function (item) {
-            var sum = d3.sum(item.values, function (d) { return +d.qtd; });
-            item.values.forEach(function (v) {
-                v.sum = sum;
+            // -
+            data.filter(el2 => el2.Ano == el).forEach(function(itemAno, iItemAno) {
+                var valor = parseInt(itemAno.Qtd);
+                
+                if(itemAno.StatusResposta == "Respondido") {
+                    anoNovoItem.Respondido += valor;
+                } else {
+                    anoNovoItem.NaoRespondido += valor;
+                }
             });
-            return item;
+
+            // -
+            dataC[i] = anoNovoItem;
         });
 
-        g.append("g")
-            .attr("class", "chart-axis chart-axis--x")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
+        data = dataC;
 
-        g.append("g")
-            .attr("class", "chart-axis chart-axis--y")
-            .call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
+        // Calcula a Porcentagem
+        data.forEach(function(el, i, arr) {
+            var respondidos = el.Respondido;
+            var naoRespondidos = el.NaoRespondido;
+            
+            // - Calcula Porcentagem
+            el.Total = naoRespondidos +  respondidos;
+            if(respondidos > 0 && naoRespondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
+            else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
+            else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
 
-        var focus = g.append('g')
-            .attr('class', 'focus')
-            .style('display', 'none');
-        var focus2 = g.append('g')
-            .attr('class', 'focus');
-        focus.append('line')
-            .attr('class', 'chart-hover-line')
-            .attr('y1', 0)
-            .attr('y2', height);
+            el.PercNaoRespondidos = 1.00 - el.PercRespondidos;
+        });
 
-        var serie = g.selectAll(".series")
-            .data(series)
-            .enter().append("g")
-            .attr("class", "series");
+         // Add X axis
+      var x = d3.scaleBand()
+        .domain(anosDataq)
+        .range([0, width])
+        .padding([0.2])
+        svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).tickSizeOuter(0));
 
-        serie.append("path")
-            .attr("class", "chart-line")
-            .attr("d", function (d) { return line(d.values); })
-            .style("stroke", function (d) { return z(d.key); })
-            .attr("opacity", 0)
-            .transition(500)
-            .attr("opacity", 1);
+        // Add Y axis
+        var y = d3.scaleLinear()
+        .domain([0.0,1.0])
+        .range([ height, 0 ]);
+        svg.append("g")
+        .call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
 
-        serie
-            .selectAll("circle.line")
-            .data(function (d) { return d.values })
-            .enter()
-            .append("circle")
-            .attr("class", "chart-dot")
-            .attr("cx", function (d) { return x(d.ano); })
-            .attr("cy", function (d) { return y(+d.qtd / d.sum); })
-            .attr("stroke", function (d) { return z(d.status) })
-            .attr("r", 0)
-            .transition(500)
-            .attr("r", dot.radius);
+        var color = d3.scaleOrdinal()
+            .domain(subgroups)
+            .range(['#e45d88','#fbc064'])
 
-        var tooltip = svg.append("foreignObject")
-            .attr("class", "chart-tooltip")
-            .attr("x", 60)
-            .attr("y", 0)
-            .attr("width", 150)
-            .attr("height", 100)
-            .style("display", "none");
-        var tooltipContent = tooltip.append('xhtml:div')
-            .attr("class", "chart-tooltip-content");
-        var tooltipTitle = tooltipContent.append('div')
-            .attr('class', 'chart-tooltip-title');
-        var tooltipBody = tooltipContent.append('div')
-            .attr('class', 'chart-tooltip-body');
-        var tooltipTips = tooltipBody.selectAll('.chart-tip')
-            .data(series2)
-            .enter()
-            .append('p')
-            .attr('class', 'chart-tip');
-
-        var tooltipDots = focus2.selectAll('.chart-dot-hover')
-            .data(series)
-            .enter()
-            .append('circle')
-            .attr("class", "chart-dot-hover")
-            .attr("r", dot.radius * 3)
-            .style("display", "none")
-            .style("opacity", 0.3);
-
-        svg.append('rect')
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .attr("class", "chart-overlay")
-            .attr("width", width)
-            .attr("height", height)
-            .on("mouseover", mouseover)
-            .on("mouseout", mouseout)
-            .on("mousemove", mousemove);
-
-        var timeScales = d3.map(data, function (d) { return x(d.ano); }).keys();
-
-        function mouseover() {
-            focus.style("display", null);
-            tooltip.style("display", null);
-            tooltipDots.style("display", null);
-        }
-        function mouseout() {
-            focus.style("display", "none");
-            tooltip.style("display", "none");
-            tooltipDots.style("display", "none");
-        }
-        function mousemove() {
-            var xMouse = d3.mouse(this)[0];
-            var yMouse = d3.mouse(this)[1];
-            var i = d3.bisect(timeScales, xMouse, 1);
-            var di = series2[i - 1];
-            focus.attr("transform", "translate(" + x(di.key) + ",0)");
-            var xTooltip = x(di.key);
-            if (xTooltip > 500) {
-                xTooltip = xTooltip - 170;
-            }
-            tooltip.attr("transform", "translate(" + xTooltip + "," + yMouse + ")");
-            tooltipTitle.text(di.key);
-            tooltipDots
-                .attr("cx", x(di.key))
-                .attr("cy", function (d, j) {
-                    if (typeof (di.values[j]) !== 'undefined') {
-                        return y(+di.values[j].qtd / di.values[j].sum);
-                    } else {
-                        return height * 2;
+        //stack the data? --> stack per subgroup
+        var stackedData = d3.stack()
+                .keys(subgroups)
+                .value(function(obj, key) {
+                    if(key == "Respondidos") {
+                        return obj.PercRespondidos;
+                    }
+                    else if(key == "NaoRespondidos") {
+                        return obj.PercNaoRespondidos;
                     }
                 })
-                .attr("fill", function (d, j) {
-                    if (typeof (di.values[j]) !== 'undefined') {
-                        return z(di.values[j].status);
-                    } else {
-                        return "#fff";
-                    }
-                });
-            tooltipTips.text(function (d, j) {
-                if (typeof (di.values[j]) !== 'undefined') {
-                    return capitalizeFirstLetter(di.values[j].status) + ": " + di.values[j].qtd;
-                } else {
-                    return "";
-                }
-            })
-                .style("color", function (d, j) {
-                    if (typeof (di.values[j]) !== 'undefined') {
-                        return z(di.values[j].status);
-                    } else {
-                        return "#fff";
-                    }
-                });
-        }
+                (data)
 
-        function capitalizeFirstLetter(s) {
-            return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-        }
+        // Barra do Gráfico
+        svg.append("g")
+        .selectAll("g")
+        .data(stackedData)
+        .enter().append("g")
+            .attr("fill", function(d) {
+                 return color(d.key); 
+            })
+            .selectAll("rect")
+            .data(function(d) { 
+                return d; 
+            })
+            .enter().append("rect") // Cria a Barra 
+            .attr("x", function(d) { 
+                return x(d.data.Ano); 
+            })
+            .attr("y", function(d) { 
+                return y(d[1]);
+             })
+            .attr("height", function(d) {
+                 return y(d[0]) - y(d[1]);
+             })
+            .attr("width",x.bandwidth());
+
+        // Legendas dos Respondidos
+        var legendaBarrasResp = svg.append("g")
+        .selectAll("g")
+        .data(data)
+        .enter().append("g");
+
+        legendaBarrasResp.append("text")
+            .text(function(d) { 
+                return (d.PercRespondidos * 100).toFixed(0) + "%";
+            })
+            .attr("x", function(d){
+                return x(d.Ano) + x.bandwidth()/2;
+            })
+            .attr("y", function(d){
+                return  y(0) - ((y(0) - y(d.PercRespondidos)) / 2);
+            })
+            .attr("font-family" , "sans-serif")
+            .attr("font-size" , "14px")
+            .attr("fill" , "black")
+            .attr("text-anchor", "middle");
+
+        // Legendas dos Não Respondidos
+        var legendaBarrasNaoResp = svg.append("g")
+        .selectAll("g")
+        .data(data)
+        .enter().append("g");
+
+        legendaBarrasNaoResp.append("text")
+            .text(function(d) { 
+                return (d.PercNaoRespondidos * 100).toFixed(0) + "%";
+            })
+            .attr("x", function(d){
+                return x(d.Ano) + x.bandwidth()/2;
+            })
+            .attr("y", function(d){
+                return  ((y(0) - y(d.PercNaoRespondidos)) / 2);
+            })
+            .attr("font-family" , "sans-serif")
+            .attr("font-size" , "14px")
+            .attr("fill" , "black")
+            .attr("text-anchor", "middle");
     }
 
-    //d3.json("/api/atendimentoPedidosPorAnoETipo", draw);
+    d3.json("/api/PedidosAtendimentoPorAno", draw);
 })();
 //FIM Grafico classificações de atendimento por ano
 (function () {
@@ -398,9 +267,7 @@
         .range(color_range);
 
         var legend = d3.legendColor()
-            .scale(d3.scaleLinear()
-            .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
-                .range(color_range))
+            .scale(colorScale)
             .cells([1.0,0.80, 0.60, 0.40, 0.20,0.0])
             .labelFormat(d3.format(".0%"))
             .title("% Respondidos");

@@ -367,6 +367,30 @@
                 .scale(700),
             map = d3.geoPath().projection(projection);
 
+        let mouseOver = function(d) {
+            d3.selectAll(".chart-uf")
+                .transition()
+                .duration(200)
+                .style("opacity", .85)
+                .style("stroke", "transparent")
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .style("opacity", 1)
+                .style("stroke", "black")
+            }
+        
+        let mouseLeave = function(d) {
+            d3.selectAll(".chart-uf")
+                .transition()
+                .duration(200)
+                .style("opacity", .85)
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .style("stroke", "transparent")
+            }
+
         var mapScale = d3.scaleLinear().range([dotB.minRadius, dotB.maxRadius]).domain([0, 1])
 
         var tooltipB = svgB.append("foreignObject")
@@ -481,13 +505,21 @@
                         var procura = data.filter(el => el.SiglaUf == sigla);                    
 
                         return colorScale(procura[0].PercRespondidos);
-                    })
+                    })                    
+                    // Efeito Hover
+                    .style("opacity", .85)
+                    .style("stroke", "transparent")
+                    .on("mouseover", mouseOver )
+                    .on("mouseleave", mouseLeave )
+                    // Tooltip do Estado + Porcentagem 
                     .append("title")
-                    .text(function (d) {  // Tooltip do Estado + Porcentagem 
+                    .text(function (d) {  
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUf == sigla);                    
 
-                        return d.properties.nome + ", " + (procura[0].PercRespondidos * 100).toFixed(1) + "%";
+                        return d.properties.nome + ", " + (procura[0].PercRespondidos * 100).toFixed(1) + "%" +
+                        "\r\n Respondidos: " + procura[0].Respondido + 
+                        "\r\n Não Respondidos: " + procura[0].NaoRespondido;
                     });
         }
         d3.json("/assets/data/br.json", drawMap);

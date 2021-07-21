@@ -392,16 +392,16 @@
             }           
 
         // Range de Cores
-        var color_range = ["#910130","#F9A521","#B27D5C","#F5E59D"];
-        var colorScale = d3.scaleThreshold()
-        .domain([0.20, 0.40, 0.60, 0.80])
+        var color_range = ["#969696","#940131","#cd134f","#ec7340","#fab94f","#f6e197"];
+        var colorScale = d3.scaleLinear()
+        .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
         .range(color_range);
 
         var legend = d3.legendColor()
-            .scale(d3.scaleLog()
-            .domain([0.20, 0.40, 0.60, 0.80])
+            .scale(d3.scaleLinear()
+            .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
                 .range(color_range))
-            .cells([0.80, 0.60, 0.40, 0.20])
+            .cells([1.0,0.80, 0.60, 0.40, 0.20,0.0])
             .labelFormat(d3.format(".0%"))
             .title("% Respondidos");
             svgB.append("g")
@@ -502,7 +502,7 @@
                 el.Total = naoRespondidos +  respondidos;
                 if(respondidos > 0 && naoRespondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
                 else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
-                else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 100; }
+                else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
             });
 
             // Altera a Cor dos Estados de Acordo com a Porcentagem 

@@ -179,8 +179,20 @@ class Dados extends Entity{
     public function PedidosPorUFPoderENivel() {
         $connection = ConnectionManager::get('default');
         
+        $connection->execute("call sp_count_total()")->execute();
+
         //Total de pedidos na base de dados
-        $query = "SELECT pdnfuf.StatusResposta,pdnfuf.NomePoder,pdnfuf.SiglaUF,pdnfuf.TotalPedidos,countPoder.TotalPedidosPoder FROM v_pedidos_count_sresposta_nfederativo_poder_uf as pdnfuf LEFT JOIN (select NomeEsferaPoder, count(*) as TotalPedidosPoder from v_pedidos_count_dias_resposta group by NomeEsferaPoder order by TotalPedidosPoder desc) as countPoder ON pdnfuf.NomePoder = countPoder.NomeEsferaPoder WHERE pdnfuf.NomeNivelFederativo <> 'Federal';";
+        $query = "select m.SiglaUf,
+                    m.NomeNivelFederativo,
+                    m.NomePoder,
+                    v.TotalPedidos as NaoRespondido,
+                    v2.TotalPedidos Respondido
+                    from maps as m
+                    left join v_count_total_nao_respondido as v
+                    on (m.NomeNivelFederativo = v.NomeNivelFederativo and m.NomePoder = v.NomePoder and v.SiglaUf = m.SiglaUf)
+                    left join v_count_total_respondido as v2
+                    on (m.NomeNivelFederativo = v2.NomeNivelFederativo and m.NomePoder = v2.NomePoder and v2.SiglaUf = m.SiglaUf)
+                    where m.SiglaUF is not null";
 
 
         // {StatusResposta: "Não respondido", SiglaUF: "AC", TotalPedidos: "2", TotalPedidosPoder: "103513"}

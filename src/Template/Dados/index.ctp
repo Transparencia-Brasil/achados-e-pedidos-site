@@ -40,7 +40,7 @@
       <h2 class="text-center">Atendimento da LAI no Brasil</h2>
 
       <div class="row">
-          <div class="col-xs-4">
+          <!--<div class="col-xs-4">
               <div class="form-group">
                   <label for="filter-tipo" class="form-inline-label">Classificação do pedido</label>
                   <select id="filter-tipo" class="form-control" name="filter-tipo">
@@ -48,7 +48,7 @@
                       <option value="Não respondido">Não Respondido</option>
                   </select>
               </div>
-          </div>
+          </div>-->
           <div class="col-xs-4">
               <div class="form-group">
                   <label for="filter-nivel">Nível federativo</label>
@@ -86,12 +86,6 @@
               <input type="radio" name="order-by" id="order-by-uf" class="order-by" value="uf"> Alfabética
             </label>
           </div>
-      </div>
-
-      <div class="row">
-      <div class="col-12">
-          <div id="chart-pedidos-uf-mapa2"></div>
-      </div>
       </div>
 
       <div class="row">

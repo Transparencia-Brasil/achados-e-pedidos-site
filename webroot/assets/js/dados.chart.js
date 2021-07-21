@@ -336,304 +336,170 @@
 //FIM Grafico classificações de atendimento por ano
 (function () {
     var _lodash = _.noConflict();
-    var unidadesFederativas = [{ "ID": "0", "Sigla": "ÓrgãosFederais", "Nome": "Órgãos Federais" }, { "ID": "1", "Sigla": "AC", "Nome": "Acre" }, { "ID": "2", "Sigla": "AL", "Nome": "Alagoas" }, { "ID": "3", "Sigla": "AM", "Nome": "Amazonas" }, { "ID": "4", "Sigla": "AP", "Nome": "Amapá" }, { "ID": "5", "Sigla": "BA", "Nome": "Bahia" }, { "ID": "6", "Sigla": "CE", "Nome": "Ceará" }, { "ID": "7", "Sigla": "DF", "Nome": "Distrito Federal" }, { "ID": "8", "Sigla": "ES", "Nome": "Espírito Santo" }, { "ID": "9", "Sigla": "GO", "Nome": "Goiás" }, { "ID": "10", "Sigla": "MA", "Nome": "Maranhão" }, { "ID": "11", "Sigla": "MG", "Nome": "Minas Gerais" }, { "ID": "12", "Sigla": "MS", "Nome": "Mato Grosso do Sul" }, { "ID": "13", "Sigla": "MT", "Nome": "Mato Grosso" }, { "ID": "14", "Sigla": "PA", "Nome": "Pará" }, { "ID": "15", "Sigla": "PB", "Nome": "Paraíba" }, { "ID": "16", "Sigla": "PE", "Nome": "Pernambuco" }, { "ID": "17", "Sigla": "PI", "Nome": "Piauí" }, { "ID": "18", "Sigla": "PR", "Nome": "Paraná" }, { "ID": "19", "Sigla": "RJ", "Nome": "Rio de Janeiro" }, { "ID": "20", "Sigla": "RN", "Nome": "Rio Grande do Norte" }, { "ID": "21", "Sigla": "RO", "Nome": "Rondônia" }, { "ID": "22", "Sigla": "RR", "Nome": "Roraima" }, { "ID": "23", "Sigla": "RS", "Nome": "Rio Grande do Sul" }, { "ID": "24", "Sigla": "SC", "Nome": "Santa Catarina" }, { "ID": "25", "Sigla": "SE", "Nome": "Sergipe" }, { "ID": "26", "Sigla": "SP", "Nome": "São Paulo" }, { "ID": "27", "Sigla": "TO", "Nome": "Tocantins" }];
-    var
-        marginB = { top: 0, right: 0, bottom: 0, left: 0 },
-        viewBoxB = { width: 600, height: 460 },
-        widthB = viewBoxB.width - marginB.left - marginB.right,
-        heightB = viewBoxB.height - marginB.top - marginB.bottom,
-        dotB = { minRadius: 3, maxRadius: 30 },
-        svgB = d3.select("#chart-pedidos-uf-mapa").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
-            .attr("width", "100%"),
-        gB = svgB.append("g").attr("transform", "translate(" + marginB.left + "," + marginB.top + ")"),
-        projection = d3.geoAlbers()
-            .center([-44, -15])
-            .rotate([0, 0])
-            .parallels([0, 0])
-            .scale(700),
-        map = d3.geoPath().projection(projection);
+    var pedidosPorUFPoderENivelCache = [];
 
-    var mapScale = d3.scaleLinear().range([dotB.minRadius, dotB.maxRadius]).domain([0, 1]);
-    var
-        filter_tipo = "Respondido",
-        filter_nivel = "--",
-        filter_poder = "--",
-        order_by = "perc";
-
-    var tooltipB = svgB.append("foreignObject")
-        .attr("class", "chart-tooltip")
-        .attr("x", 0)
-        .attr("y", heightB - 100)
-        .attr("width", 150)
-        .attr("height", 100)
-        .style("display", "none");
-    var tooltipContentB = tooltipB.append('xhtml:div')
-        .attr("class", "chart-tooltip-content");
-    var tooltipTitleB = tooltipContentB.append('div')
-        .attr("class", 'chart-tooltip-title');
-    var tooltipBodyB = tooltipContentB.append('div')
-        .attr('class', 'chart-tooltip-body');
-
-    var
-        marginC = { top: 20, right: 60, bottom: 20, left: 90 },
-        viewBoxC = { width: 400, height: 460 },
-        widthC = viewBoxC.width - marginC.left - marginC.right,
-        heightC = viewBoxC.height - marginC.top - marginC.bottom,
-        dotC = { minRadius: 1, maxRadius: 35 },
-        svgC = d3.select("#chart-pedidos-uf-barras").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 " + viewBoxC.width + " " + viewBoxC.height)
-            .attr("width", "100%"),
-        gC = svgC.append("g").attr("transform", "translate(" + marginC.left + "," + marginC.top + ")"),
-        xC = d3.scaleLinear().range([0, widthC]),
-        yC = d3.scaleBand().range([heightC, 0]).paddingInner(0.05);
-
-    function drawMap(error, br) {
+    d3.json("/api/pedidosPorUFPoderENivel", function drawMapData(error, data) {
         if (error) throw error;
-        var ufs = topojson.feature(br, br.objects.br);
 
-        d3.json("/api/pedidosPorUFPoderENivel", function drawMapData(error, data) {
+        pedidosPorUFPoderENivelCache = data;
+        doDrawMap();
+    });
+
+    function doDrawMap() {
+        $("#chart-pedidos-uf-mapa").empty();
+
+        var unidadesFederativas = [{ "ID": "0", "Sigla": "ÓrgãosFederais", "Nome": "Órgãos Federais" }, { "ID": "1", "Sigla": "AC", "Nome": "Acre" }, { "ID": "2", "Sigla": "AL", "Nome": "Alagoas" }, { "ID": "3", "Sigla": "AM", "Nome": "Amazonas" }, { "ID": "4", "Sigla": "AP", "Nome": "Amapá" }, { "ID": "5", "Sigla": "BA", "Nome": "Bahia" }, { "ID": "6", "Sigla": "CE", "Nome": "Ceará" }, { "ID": "7", "Sigla": "DF", "Nome": "Distrito Federal" }, { "ID": "8", "Sigla": "ES", "Nome": "Espírito Santo" }, { "ID": "9", "Sigla": "GO", "Nome": "Goiás" }, { "ID": "10", "Sigla": "MA", "Nome": "Maranhão" }, { "ID": "11", "Sigla": "MG", "Nome": "Minas Gerais" }, { "ID": "12", "Sigla": "MS", "Nome": "Mato Grosso do Sul" }, { "ID": "13", "Sigla": "MT", "Nome": "Mato Grosso" }, { "ID": "14", "Sigla": "PA", "Nome": "Pará" }, { "ID": "15", "Sigla": "PB", "Nome": "Paraíba" }, { "ID": "16", "Sigla": "PE", "Nome": "Pernambuco" }, { "ID": "17", "Sigla": "PI", "Nome": "Piauí" }, { "ID": "18", "Sigla": "PR", "Nome": "Paraná" }, { "ID": "19", "Sigla": "RJ", "Nome": "Rio de Janeiro" }, { "ID": "20", "Sigla": "RN", "Nome": "Rio Grande do Norte" }, { "ID": "21", "Sigla": "RO", "Nome": "Rondônia" }, { "ID": "22", "Sigla": "RR", "Nome": "Roraima" }, { "ID": "23", "Sigla": "RS", "Nome": "Rio Grande do Sul" }, { "ID": "24", "Sigla": "SC", "Nome": "Santa Catarina" }, { "ID": "25", "Sigla": "SE", "Nome": "Sergipe" }, { "ID": "26", "Sigla": "SP", "Nome": "São Paulo" }, { "ID": "27", "Sigla": "TO", "Nome": "Tocantins" }];
+        var
+            marginB = { top: 0, right: 0, bottom: 0, left: 0 },
+            viewBoxB = { width: 600, height: 460 },
+            widthB = viewBoxB.width - marginB.left - marginB.right,
+            heightB = viewBoxB.height - marginB.top - marginB.bottom,
+            dotB = { minRadius: 3, maxRadius: 30 },
+            svgB = d3.select("#chart-pedidos-uf-mapa").append('svg')
+                .attr("version", "1.1")
+                .attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
+                .attr("width", "100%"),
+            gB = svgB.append("g").attr("transform", "translate(" + marginB.left + "," + marginB.top + ")"),
+            projection = d3.geoAlbers()
+                .center([-44, -15])
+                .rotate([0, 0])
+                .parallels([0, 0])
+                .scale(700),
+            map = d3.geoPath().projection(projection);
+
+        var mapScale = d3.scaleLinear().range([dotB.minRadius, dotB.maxRadius]).domain([0, 1])
+
+        var tooltipB = svgB.append("foreignObject")
+            .attr("class", "chart-tooltip")
+            .attr("x", 0)
+            .attr("y", heightB - 100)
+            .attr("width", 150)
+            .attr("height", 100)
+            .style("display", "none");
+        var tooltipContentB = tooltipB.append('xhtml:div')
+            .attr("class", "chart-tooltip-content");
+        var tooltipTitleB = tooltipContentB.append('div')
+            .attr("class", 'chart-tooltip-title');
+        var tooltipBodyB = tooltipContentB.append('div')
+            .attr('class', 'chart-tooltip-body');
+
+        var
+            marginC = { top: 20, right: 60, bottom: 20, left: 90 },
+            viewBoxC = { width: 400, height: 460 },
+            widthC = viewBoxC.width - marginC.left - marginC.right,
+            heightC = viewBoxC.height - marginC.top - marginC.bottom,
+            dotC = { minRadius: 1, maxRadius: 35 },
+            svgC = d3.select("#chart-pedidos-uf-barras").append('svg')
+                .attr("version", "1.1")
+                .attr("viewBox", "0 0 " + viewBoxC.width + " " + viewBoxC.height)
+                .attr("width", "100%"),
+            gC = svgC.append("g").attr("transform", "translate(" + marginC.left + "," + marginC.top + ")"),
+            xC = d3.scaleLinear().range([0, widthC]),
+            yC = d3.scaleBand().range([heightC, 0]).paddingInner(0.05);
+
+        function drawMap(error, br) {
             if (error) throw error;
+            var ufs = topojson.feature(br, br.objects.br);
+            data = pedidosPorUFPoderENivelCache;
 
-            var seriesMap = d3.nest()
-                .key(function (d) { return d.sigla; })
-                .sortKeys(d3.descending)
-                .entries(data);
-            var seriesMapDomain = d3.nest()
-                .rollup(function (l) { return { "max": d3.max(l, function (ld) { return ld.qtd; }), "min": d3.min(l, function (ld) { return ld.qtd; }), "sum": d3.sum(l, function (ld) { return ld.qtd; }) } })
-                .entries(data);
-            var seriesSum = d3.nest()
-                .key(function (d) { return d.sigla; })
-                .rollup(function (l) { return { "sum": d3.sum(l, function (ld) { return ld.qtd; }) } })
-                .entries(data);
+                // Range de Cores
+                var color_range = ["#910130","#F9A521","#B27D5C","#F5E59D"];
+                var colorScale = d3.scaleThreshold()
+                .domain([0.20, 0.40, 0.60, 0.80])
+                .range(color_range);
 
+            // Filtra os Resultados
+            var nivelFederativo = $("#filter-nivel").val();
+            var esferaPoder = $("#filter-poder").val();
 
-                var subgroups = d3.map(data, function (d) { return (d.status) }).keys()
-                console.log(subgroups);
-                //["Nitrogen", "normal", "stress"]
-                //[Não respondido, Respondido]
-        
-                var subgroupsWithValues = [];
-                var r = [];
-                var count = 0;
-                data.forEach(function(item) {
-                    r[item.status] = item.qtd;
-                    // console.log(r)
-                    if (count++ == 1) {
-                        r["ano"] = item.ano;
-                        console.log("count")
-                        subgroupsWithValues.push(r);
-                        r = [];
-                        count = 0;
-                    }    
+            if(nivelFederativo !== "--") {
+                data = data.filter(function(el) {
+                    return el.NomeNivelFederativo == nivelFederativo;
                 });
+            }
+
+            if(esferaPoder !== "--") {
+                    data = data.filter(function(el) {
+                        return el.NomePoder == esferaPoder;
+                    });        
+            }
+
+            // Consolida os Dados por Estado
+            var ufsData = data.map(el => el.SiglaUf)
+                .filter((value, index, self) => self.indexOf(value) === index); // Distinct 
+
+            // Recria o Dados Consolidados
+            var dataC = [];
+            ufsData.forEach(function(el, i, arr) {
+                var ufNovoItem = {
+                    Respondido: 0,
+                    NaoRespondido: 0,
+                    Total: 0,
+                    PercRespondidos: 0,
+                    SiglaUf: el 
+                };
+
+                // -
+                data.filter(el2 => el2.SiglaUf == el).forEach(function(itemUf, iItemUf) {
+                    var respondidos = itemUf.Respondido;
+                    var naoRespondidos = itemUf.NaoRespondido;
+                    
+                    // -
+                    if(respondidos == null) { respondidos = 0 } else { respondidos = parseInt(respondidos) };
+                    if(naoRespondidos == null) { naoRespondidos = 0 } else { naoRespondidos = parseInt(naoRespondidos) };
+                    
+                    ufNovoItem.Respondido += respondidos;
+                    ufNovoItem.NaoRespondido += naoRespondidos;
+                });
+
+                // -
+                dataC[i] = ufNovoItem;
+            });
+
+            data = dataC;
+
+            // Calcula a Porcentagem
+            data.forEach(function(el, i, arr) {
+                var respondidos = el.Respondido;
+                var naoRespondidos = el.NaoRespondido;
                 
-                // List of groups = species here = value of the first column called group -> I show them on the X axis
-                // var groups = d3.map(data, function (d) { return (d.group) }).keys()
-                var groups = d3.map(data, function (d) { return (d.ano) }).keys()
+                // - Calcula Porcentagem
+                el.Total = naoRespondidos +  respondidos;
+                if(respondidos > 0 && naoRespondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
+                else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
+                else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 100; }
+            });
 
-            // var features = _lodash.map(ufs.features, function(item) {
-            //     return _lodash.extend(item, _lodash.find(seriesMap, { key: item.id }));
-            // });
-            var color_range = ["#910130","#F9A521","#B27D5C","#F5E59D"];
-            var colorScale = d3.scaleThreshold()
-            .domain([0.20, 0.40, 0.60, 0.80])
-            .range(color_range);
-
-            
-            // .range(d3.schemeBlues[5]);
-
+            // Altera a Cor dos Estados de Acordo com a Porcentagem 
             gB.selectAll(".chart-uf")
-                .data(ufs.features)
-                .enter().append("path")
-                .attr("class", "chart-uf")
-                .attr("d", map)
-                .attr("fill", function (d) { console.log(d); return colorScale(0.20);});
+                    .data(ufs.features)
+                    .enter().append("path")
+                    .attr("class", "chart-uf")
+                    .attr("d", map)
+                    .attr("fill", function (d) { 
+                        var sigla = d.id;
+                        var procura = data.filter(el => el.SiglaUf == sigla);                    
 
-            // var mapDots = gB.selectAll(".chart-uf-dot")
-            //     .data(ufs.features)
-            //     .enter().append("circle")
-            //     .attr("id", function (d) { return d.id; })
-            //     .attr("class", "chart-uf-dot")
-            //     .attr("fill", function (d) { return "#fff000"; });
-
-            var gBars = gC.append("g").attr("class", "chart-bars");
-
-            gC.append("g")
-                .attr("class", "axis axis-x")
-                .attr("transform", "translate(0," + heightC + ")")
-                .call(d3.axisBottom(xC).ticks(2, ".1%"));
-            var yAxis = gC.append("g")
-                .attr("class", "axis axis-y")
-                .call(d3.axisLeft(yC));
-
-            d3.select("#filter-tipo").on("change", function () {
-                filter_tipo = this.value;
-                filter();
-            });
-            d3.select("#filter-nivel").on("change", function () {
-                filter_nivel = this.value;
-                filter();
-            });
-            d3.select("#filter-poder").on("change", function () {
-                filter_poder = this.value;
-                filter();
-            });
-            d3.selectAll(".order-by").on("change", function () {
-                order_by = this.value;
-                filter();
-            });
-
-            function setInfo(title, qtd, sum) {
-                var preposition = '';
-                if (filter_nivel === "Municipal" && (filter_poder === "Executivo" || filter_poder === "Legislativo" || filter_poder === "Tribunal de Contas")) {
-                    d3.select("#chart-pedidos-uf-footer").style("display", null);
-                } else {
-                    d3.select("#chart-pedidos-uf-footer").style("display", "none");
-                }
-                if (filter_nivel === "Municipal" && filter_poder == "Ministério Público") {
-                    d3.select("#chart-info-uf").style("opacity", 0);
-                    d3.select("#chart-info-all").style("display", "none");
-                    d3.select("#chart-info-error").style("display", null);
-                    d3.select("#chart-info-error").html("Não há Ministério Público<br>no nível municipal.");
-                    return;
-                }
-                if (filter_nivel === "Municipal" && filter_poder == "Judiciário") {
-                    d3.select("#chart-info-uf").style("opacity", 0);
-                    d3.select("#chart-info-all").style("display", "none");
-                    d3.select("#chart-info-error").style("display", null);
-                    d3.select("#chart-info-error").html("Não há Poder Judiciário<br>no nível municipal.");
-                    return;
-                }
-
-                d3.select("#chart-info-uf").style("opacity", 1);
-                d3.select("#chart-info-all").style("display", null);
-                d3.select("#chart-info-error").style("display", "none");
-                d3.select("#chart-info-uf").text(title);
-                if (filter_nivel === "--") {
-                    d3.select("#chart-info-nivel-w").style("display", "none");
-                    preposition = 'No';
-                } else {
-                    d3.select("#chart-info-nivel-w").style("display", null);
-                    preposition = 'no';
-                }
-                if (filter_poder === "--") {
-                    d3.select("#chart-info-poder-w").style("display", "none");
-                } else {
-                    d3.select("#chart-info-poder-w").style("display", null);
-                }
-                d3.select("#chart-info-tipo").text(filter_tipo.toLowerCase() + "s");
-                d3.select("#chart-info-nivel").text(filter_nivel.toLowerCase());
-                d3.select("#chart-info-poder-prep").text(preposition);
-                d3.select("#chart-info-poder").text(capitalizeFirstLetter(filter_poder));
-                d3.select("#chart-info-qtd").text(qtd);
-                d3.select("#chart-info-perc").text(d3.format(".1%")(qtd / sum));
-                d3.select("#chart-pedidos-uf-info").style("display", null);
-                return;
-            }
-
-            function capitalizeFirstLetter(s) {
-                return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-            }
-
-            function filter() {
-                var entries = _lodash.filter(data, function (d) { return (filter_tipo !== "--") ? d.status == filter_tipo : true });
-                entries = _lodash.filter(entries, function (d) { return (filter_nivel !== "--") ? d.nivel == filter_nivel : true });
-                entries = _lodash.filter(entries, function (d) { return (filter_poder !== "--") ? d.poder == filter_poder : true });
-                entriesGroup = d3.nest()
-                    .key(function (d) { return d.sigla; })
-                    .rollup(function (l) { return { "sum": d3.sum(l, function (ld) { return ld.qtd; }) } })
-                    .entries(entries);
-                if (order_by == "uf") {
-                    entriesGroup.sort(function (a, b) {
-                        return d3.descending(a.key, b.key);
-                    });
-                } else {
-                    entriesGroup.sort(function (a, b) {
-                        var sA = _lodash.find(seriesSum, { key: a.key });
-                        var sB = _lodash.find(seriesSum, { key: b.key });
-                        return (b.value.sum / sB.value.sum) - (a.value.sum / sA.value.sum);
-                    });
-                }
-                var entriesGroupSum = d3.sum(entries, function (d) { return d.qtd; });
-                setInfo("Brasil", entriesGroupSum, seriesMapDomain.sum);
-
-                yC.domain(entriesGroup.map(function (d) { return d.key }));
-                yAxis.call(d3.axisLeft(yC));
-
-                gBars.selectAll(".chart-bar").remove();
-                gBars.selectAll(".chart-bar-text").remove();
-                var bars = gBars.selectAll(".chart-bar")
-                    .data(entriesGroup)
-                    .enter().append("rect")
-                    .attr("id", function (d) { return "bar-" + d.key; })
-                    .attr("class", "chart-bar")
-                    .attr("x", 0)
-                    .attr("y", function (d) { return yC(d.key); })
-                    .attr("height", yC.bandwidth())
-                    .attr("width", 0)
-                    .attr("opacity", 0.5);
-                var texts = gBars.selectAll(".chart-bar-text")
-                    .data(entriesGroup)
-                    .enter().append("text")
-                    .attr("id", function (d) { return "bar-text-" + d.key; })
-                    .attr("class", "chart-bar-text")
-                    .attr("x", function (d) {
-                        var s = _lodash.find(seriesSum, { key: d.key });
-                        return xC(d.value.sum / s.value.sum) + 5;
+                        return colorScale(procura[0].PercRespondidos);
                     })
-                    .attr("y", function (d) { return yC(d.key) + (yC.bandwidth() * 0.5); })
-                    .attr("dy", "0.5em")
-                    .style("opacity", 0)
-                    .text(function (d) { return d.value.sum + " pedidos"; });
+                    .append("title")
+                    .text(function (d) {  // Tooltip do Estado + Porcentagem 
+                        var sigla = d.id;
+                        var procura = data.filter(el => el.SiglaUf == sigla);                    
 
-                gB.selectAll(".chart-uf-dot").attr("r", 0);
-                entriesGroup.forEach(function (e) {
-                    var s = _lodash.find(seriesSum, { key: e.key });
-                    if (s.value.sum > 0) {
-                        d3.select("#" + e.key).transition(500).attr("r", mapScale(e.value.sum / s.value.sum));
-                        d3.select("#bar-" + e.key).transition(500).attr("width", xC(e.value.sum / s.value.sum));
-                        d3.select("#" + e.key)
-                            .on("mouseover", function (d) {
-                                d3.select(this).style("opacity", 1);
-                                d3.select("#bar-" + e.key).style("opacity", 1);
-                                d3.select("#bar-text-" + e.key).style("opacity", 1);
-                                setInfo(_lodash.find(unidadesFederativas, { Sigla: e.key }).Nome, e.value.sum, s.value.sum);
-                            })
-                            .on("mouseout", function (d) {
-                                d3.select(this).style("opacity", 0.5);
-                                d3.select("#bar-" + e.key).style("opacity", 0.5);
-                                d3.select("#bar-text-" + e.key).style("opacity", 0);
-                                setInfo("Brasil", entriesGroupSum, seriesMapDomain.sum);
-                            });
-                        d3.select("#bar-" + e.key)
-                            .on("mouseover", function (d) {
-                                d3.select(this).style("opacity", 1);
-                                d3.select("#" + e.key).style("opacity", 1);
-                                d3.select("#bar-text-" + e.key).style("opacity", 1);
-                                if (d.key == "Órgãos Federais") {
-                                    var title = "Órgãos Federais"
-                                } else {
-                                    var title = _lodash.find(unidadesFederativas, { Sigla: e.key }).Nome
-                                }
-                                setInfo(title, e.value.sum, s.value.sum);
-                            })
-                            .on("mouseout", function (d) {
-                                d3.select(this).style("opacity", 0.5);
-                                d3.select("#" + e.key).style("opacity", 0.5);
-                                d3.select("#bar-text-" + e.key).style("opacity", 0);
-                                setInfo("Brasil", entriesGroupSum, seriesMapDomain.sum);
-                            });
-                    }
-                });
-            }
-            filter();
-        });
-    }
+                        return d.properties.nome + ", " + (procura[0].PercRespondidos * 100).toFixed(1) + "%";
+                    });
+        }
+        d3.json("/assets/data/br.json", drawMap);
+    }  
 
-    d3.json("/assets/data/br.json", drawMap);
+    $("#filter-nivel").change(function() {
+        doDrawMap();
+    });
+    
+    $("#filter-poder").change(function() {
+        doDrawMap();
+    });
 })();
 
 (function () {

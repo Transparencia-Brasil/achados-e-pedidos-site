@@ -389,10 +389,26 @@
                 .transition()
                 .duration(200)
                 .style("stroke", "transparent")
-            }
+            }           
 
-        var mapScale = d3.scaleLinear().range([dotB.minRadius, dotB.maxRadius]).domain([0, 1])
+        // Range de Cores
+        var color_range = ["#910130","#F9A521","#B27D5C","#F5E59D"];
+        var colorScale = d3.scaleThreshold()
+        .domain([0.20, 0.40, 0.60, 0.80])
+        .range(color_range);
 
+        var legend = d3.legendColor()
+            .scale(d3.scaleLog()
+            .domain([0.20, 0.40, 0.60, 0.80])
+                .range(color_range))
+            .cells([0.80, 0.60, 0.40, 0.20])
+            .labelFormat(d3.format(".0%"))
+            .title("% Respondidos");
+            svgB.append("g")
+            .attr("transform", "translate(60,360)")
+            .call(legend);  
+
+        // -
         var tooltipB = svgB.append("foreignObject")
             .attr("class", "chart-tooltip")
             .attr("x", 0)
@@ -421,16 +437,11 @@
             xC = d3.scaleLinear().range([0, widthC]),
             yC = d3.scaleBand().range([heightC, 0]).paddingInner(0.05);
 
+
         function drawMap(error, br) {
             if (error) throw error;
             var ufs = topojson.feature(br, br.objects.br);
             data = pedidosPorUFPoderENivelCache;
-
-                // Range de Cores
-                var color_range = ["#910130","#F9A521","#B27D5C","#F5E59D"];
-                var colorScale = d3.scaleThreshold()
-                .domain([0.20, 0.40, 0.60, 0.80])
-                .range(color_range);
 
             // Filtra os Resultados
             var nivelFederativo = $("#filter-nivel").val();

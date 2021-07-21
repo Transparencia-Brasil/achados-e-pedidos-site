@@ -173,6 +173,7 @@
         order = 0,
         scriptMap = [
         "<?=BASE_URL?>assets/js/d3/4.12.0/d3.min.js",
+        "<?=BASE_URL?>assets/js/d3/4.12.0/d3.legend.min.js",
         "https://d3js.org/d3-scale-chromatic.v1.min.js",
         "https://d3js.org/d3-geo-projection.v2.min.js",
         "<?=BASE_URL?>assets/js/topojson/3.0.2/topojson.min.js",

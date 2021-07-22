@@ -93,7 +93,7 @@
             
             // - Calcula Porcentagem
             el.Total = naoRespondidos +  respondidos;
-            if(respondidos > 0 && naoRespondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
+            if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
             else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
             else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
 
@@ -215,9 +215,8 @@
     });
 
     function doDrawMap() {
-        $("#chart-pedidos-uf-mapa").empty();
-
-        var unidadesFederativas = [{ "ID": "0", "Sigla": "ÓrgãosFederais", "Nome": "Órgãos Federais" }, { "ID": "1", "Sigla": "AC", "Nome": "Acre" }, { "ID": "2", "Sigla": "AL", "Nome": "Alagoas" }, { "ID": "3", "Sigla": "AM", "Nome": "Amazonas" }, { "ID": "4", "Sigla": "AP", "Nome": "Amapá" }, { "ID": "5", "Sigla": "BA", "Nome": "Bahia" }, { "ID": "6", "Sigla": "CE", "Nome": "Ceará" }, { "ID": "7", "Sigla": "DF", "Nome": "Distrito Federal" }, { "ID": "8", "Sigla": "ES", "Nome": "Espírito Santo" }, { "ID": "9", "Sigla": "GO", "Nome": "Goiás" }, { "ID": "10", "Sigla": "MA", "Nome": "Maranhão" }, { "ID": "11", "Sigla": "MG", "Nome": "Minas Gerais" }, { "ID": "12", "Sigla": "MS", "Nome": "Mato Grosso do Sul" }, { "ID": "13", "Sigla": "MT", "Nome": "Mato Grosso" }, { "ID": "14", "Sigla": "PA", "Nome": "Pará" }, { "ID": "15", "Sigla": "PB", "Nome": "Paraíba" }, { "ID": "16", "Sigla": "PE", "Nome": "Pernambuco" }, { "ID": "17", "Sigla": "PI", "Nome": "Piauí" }, { "ID": "18", "Sigla": "PR", "Nome": "Paraná" }, { "ID": "19", "Sigla": "RJ", "Nome": "Rio de Janeiro" }, { "ID": "20", "Sigla": "RN", "Nome": "Rio Grande do Norte" }, { "ID": "21", "Sigla": "RO", "Nome": "Rondônia" }, { "ID": "22", "Sigla": "RR", "Nome": "Roraima" }, { "ID": "23", "Sigla": "RS", "Nome": "Rio Grande do Sul" }, { "ID": "24", "Sigla": "SC", "Nome": "Santa Catarina" }, { "ID": "25", "Sigla": "SE", "Nome": "Sergipe" }, { "ID": "26", "Sigla": "SP", "Nome": "São Paulo" }, { "ID": "27", "Sigla": "TO", "Nome": "Tocantins" }];
+        $("#chart-pedidos-uf-mapa").empty();       
+        $("#chart-pedidos-uf-barras").empty();      
         var
             marginB = { top: 0, right: 0, bottom: 0, left: 0 },
             viewBoxB = { width: 600, height: 460 },
@@ -292,18 +291,98 @@
 
         var
             marginC = { top: 20, right: 60, bottom: 20, left: 90 },
-            viewBoxC = { width: 400, height: 460 },
+            viewBoxC = { width: 450, height: 500 },
             widthC = viewBoxC.width - marginC.left - marginC.right,
             heightC = viewBoxC.height - marginC.top - marginC.bottom,
-            dotC = { minRadius: 1, maxRadius: 35 },
-            svgC = d3.select("#chart-pedidos-uf-barras").append('svg')
-                .attr("version", "1.1")
-                .attr("viewBox", "0 0 " + viewBoxC.width + " " + viewBoxC.height)
-                .attr("width", "100%"),
-            gC = svgC.append("g").attr("transform", "translate(" + marginC.left + "," + marginC.top + ")"),
-            xC = d3.scaleLinear().range([0, widthC]),
-            yC = d3.scaleBand().range([heightC, 0]).paddingInner(0.05);
+            svgC = d3.select("#chart-pedidos-uf-barras").append("svg")
+            .attr("width", widthC + marginC.left + marginC.right + 230)
+            .attr("height", heightC + marginC.top + marginC.bottom + 20)
+          .append("g")
+            .attr("transform",
+                  "translate(" + marginC.left + "," + marginC.top + ")");
 
+
+        function drawBarras(data) {
+            // 
+            var orderByPerc = $("#order-by-perc").is(":checked");
+            var orderByUf = $("#order-by-uf").is(":checked");
+
+            // Ordena os Dados
+            if(orderByPerc) {
+                data = data.sort(function(a,b) {
+                    return a.PercRespondidos - b.PercRespondidos;                    
+                });
+            } else if(orderByUf) {
+                data = data.sort(function(a,b) {
+                    return a.SiglaUf.localeCompare(b.SiglaUf, 'pt-BR', { sensitivity: 'base' });
+                });                
+            }
+
+            // Consolida os Dados por Estado
+            var ufsData = data.map(el => el.SiglaUf)
+                .filter((value, index, self) => self.indexOf(value) === index); // Distinct 
+
+            // Add X axis
+            var x = d3.scaleLinear()
+            .domain([0.0, 1.0])
+            .range([ 0, widthC]);
+            svgC.append("g")
+            .attr("transform", "translate(0," + heightC + ")")
+            .call(d3.axisBottom(x).tickFormat(d3.format(".0%")))
+            .selectAll("text")
+                .attr("transform", "translate(-10,0)rotate(-45)")
+                .style("text-anchor", "end");
+
+              // Y axis
+            var y = d3.scaleBand()
+            .range([ 0, heightC ])
+            .domain(data.map(function(d) { return d.SiglaUf; }))
+            .padding(.1);
+            svgC.append("g")
+            .call(d3.axisLeft(y))
+
+
+            //Bars
+            svgC.selectAll("myRect")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", x(0) )
+            .attr("y", function(d) { return y(d.SiglaUf); })
+            .attr("width", function(d) { return x(d.PercRespondidos); })
+            .attr("height", y.bandwidth() )
+            .attr("fill", "#fe9301")
+            .style("opacity", 0.5)
+            .on("mouseover", function(d) {
+                d3.select(this).style("opacity", 1);
+                d3.select("#bartext-" + d.SiglaUf).style("opacity", 1);
+            })
+            .on("mouseout", function(d) {
+                d3.select(this).style("opacity", 0.5);
+                d3.select("#bartext-" + d.SiglaUf).style("opacity", 0);
+            });
+
+            // Texto da Quantidades de Pedidos
+            svgC.selectAll("myText")
+            .data(data)
+            .enter()
+            .append("text")
+            .attr("x", function(d) {
+                return x(d.PercRespondidos) + 5; 
+            })
+            .attr("y", function(d) { return y(d.SiglaUf) + 10; })
+            .attr("width", 100)
+            .attr("height", y.bandwidth() )
+            .attr("fill", "#000")
+            .attr("id", function(d) {
+                return "bartext-" + d.SiglaUf;
+            })
+            .style("opacity", 0)
+            .style("z-index", 1000)
+            .text(function(d) {
+                return d.Respondido + " pedidos";
+            });
+        }
 
         function drawMap(error, br) {
             if (error) throw error;
@@ -367,7 +446,7 @@
                 
                 // - Calcula Porcentagem
                 el.Total = naoRespondidos +  respondidos;
-                if(respondidos > 0 && naoRespondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
+                if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
                 else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
                 else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
             });
@@ -399,6 +478,8 @@
                         "\r\n Respondidos: " + procura[0].Respondido + 
                         "\r\n Não Respondidos: " + procura[0].NaoRespondido;
                     });
+
+                drawBarras(data);
         }
         d3.json("/assets/data/br.json", drawMap);
     }  
@@ -408,6 +489,14 @@
     });
     
     $("#filter-poder").change(function() {
+        doDrawMap();
+    });
+
+    $("#order-by-perc").change(function() {
+        doDrawMap();
+    });
+
+    $("#order-by-uf").change(function() {
         doDrawMap();
     });
 })();

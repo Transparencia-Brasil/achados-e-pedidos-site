@@ -893,7 +893,7 @@ function limparBusca() {
 }
 
 function setAPIScope() {
-    if (inputBuscaAvancada.val().length > 0) {
+    if (inputBuscaAvancada.val() != undefined && inputBuscaAvancada.val().length > 0) {
         return scopeSearch;
     } else {
         return scopeSearchOnlyPedidos;

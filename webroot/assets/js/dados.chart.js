@@ -613,7 +613,7 @@
         filter();
     }
 
-    //d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
+    d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
 })();
 
 (function () {
@@ -739,5 +739,5 @@
             });
 
     }
-    //d3.json("/api/taxaDeReversao", draw);
+    d3.json("/api/taxaDeReversao", draw);
 })();

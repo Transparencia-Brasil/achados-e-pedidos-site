@@ -27,14 +27,14 @@
     .attr("width",24)
     .attr("height",24)
     .attr('stroke', 'black')
-    .attr('fill', '#fbc064');
+    .attr('fill', '#e45d88');
     
     svg.select(".legendLinear")
     .append('text')       
     .attr("y",20)
     .attr("x",30)
     .attr('stroke', 'black')
-    .text('Não Respondidos');
+    .text('Respondidos');
 
     svg.select(".legendLinear")
     .append('rect')  
@@ -42,14 +42,14 @@
     .attr("width",24)
     .attr("height",24)
     .attr('stroke', 'black')
-    .attr('fill', '#e45d88');
+    .attr('fill', '#fbc064');
 
     svg.select(".legendLinear")
     .append('text')     
     .attr("y",20)
     .attr("x",190)  
     .attr('stroke', 'black')
-    .text('Respondidos');
+    .text('Não Respondidos');
 
     // - 
     function draw(error, data) {
@@ -205,6 +205,7 @@
 //FIM Grafico classificações de atendimento por ano
 (function () {
     var _lodash = _.noConflict();
+    var unidadesFederativas = [{"ID": "0","Sigla": "ÓrgãosFederais","Nome": "Órgãos Federais"},{"ID": "1","Sigla": "AC","Nome": "Acre"}, {"ID": "2","Sigla": "AL","Nome": "Alagoas"}, {"ID": "3","Sigla": "AM","Nome": "Amazonas"}, {"ID": "4","Sigla": "AP","Nome": "Amapá"}, {"ID": "5","Sigla": "BA","Nome": "Bahia"}, {"ID": "6","Sigla": "CE","Nome": "Ceará"}, {"ID": "7","Sigla": "DF","Nome": "Distrito Federal"}, {"ID": "8","Sigla": "ES","Nome": "Espírito Santo"}, {"ID": "9","Sigla": "GO","Nome": "Goiás"}, {"ID": "10","Sigla": "MA","Nome": "Maranhão"}, {"ID": "11","Sigla": "MG","Nome": "Minas Gerais"}, {"ID": "12","Sigla": "MS","Nome": "Mato Grosso do Sul"}, {"ID": "13","Sigla": "MT","Nome": "Mato Grosso"}, {"ID": "14","Sigla": "PA","Nome": "Pará"}, {"ID": "15","Sigla": "PB","Nome": "Paraíba"}, {"ID": "16","Sigla": "PE","Nome": "Pernambuco"}, {"ID": "17","Sigla": "PI","Nome": "Piauí"}, {"ID": "18","Sigla": "PR","Nome": "Paraná"}, {"ID": "19","Sigla": "RJ","Nome": "Rio de Janeiro"}, {"ID": "20","Sigla": "RN","Nome": "Rio Grande do Norte"}, {"ID": "21","Sigla": "RO","Nome": "Rondônia"}, {"ID": "22","Sigla": "RR","Nome": "Roraima"}, {"ID": "23","Sigla": "RS","Nome": "Rio Grande do Sul"}, {"ID": "24","Sigla": "SC","Nome": "Santa Catarina"}, {"ID": "25","Sigla": "SE","Nome": "Sergipe"}, {"ID": "26","Sigla": "SP","Nome": "São Paulo"}, {"ID": "27","Sigla": "TO","Nome": "Tocantins"}];
     var pedidosPorUFPoderENivelCache = [];
 
     d3.json("/api/pedidosPorUFPoderENivel", function drawMapData(error, data) {
@@ -218,6 +219,7 @@
         $("#chart-pedidos-uf-mapa").empty();       
         $("#chart-pedidos-uf-barras").empty();      
         var
+            totais = { Respondidos : 0, NaoRespondidos : 0, Total: 0},
             marginB = { top: 0, right: 0, bottom: 0, left: 0 },
             viewBoxB = { width: 600, height: 460 },
             widthB = viewBoxB.width - marginB.left - marginB.right,
@@ -233,31 +235,7 @@
                 .rotate([0, 0])
                 .parallels([0, 0])
                 .scale(700),
-            map = d3.geoPath().projection(projection);
-
-        let mouseOver = function(d) {
-            d3.selectAll(".chart-uf")
-                .transition()
-                .duration(200)
-                .style("opacity", .85)
-                .style("stroke", "transparent")
-            d3.select(this)
-                .transition()
-                .duration(200)
-                .style("opacity", 1)
-                .style("stroke", "black")
-            }
-        
-        let mouseLeave = function(d) {
-            d3.selectAll(".chart-uf")
-                .transition()
-                .duration(200)
-                .style("opacity", .85)
-            d3.select(this)
-                .transition()
-                .duration(200)
-                .style("stroke", "transparent")
-            }           
+            map = d3.geoPath().projection(projection);            
 
         // Range de Cores
         var color_range = ["#969696","#940131","#cd134f","#ec7340","#fab94f","#f6e197"];
@@ -271,7 +249,7 @@
             .labelFormat(d3.format(".0%"))
             .title("% Respondidos");
             svgB.append("g")
-            .attr("transform", "translate(60,360)")
+            .attr("transform", "translate(60,20)")
             .call(legend);  
 
         // -
@@ -301,7 +279,7 @@
             .attr("transform",
                   "translate(" + marginC.left + "," + marginC.top + ")");
 
-
+                 
         function drawBarras(data) {
             // 
             var orderByPerc = $("#order-by-perc").is(":checked");
@@ -449,7 +427,18 @@
                 if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
                 else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
                 else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
+
+                // - Totais Gerais
+                totais.Respondidos = totais.Respondidos + respondidos;
+                totais.NaoRespondidos = totais.NaoRespondidos + naoRespondidos;
+                totais.Total = totais.Total + el.Total;
             });
+
+            // Perc. Total Geral
+            if(  totais.Respondidos > 0) {  totais.PercRespondidos = (( totais.Respondidos/totais.Total)); }
+            else if(totais.Respondidos == 0 &&  totais.NaoRespondidos > 0) { totais.PercRespondidos = 0; }
+            else if(totais.Respondidos == 0 &&  totais.NaoRespondidos == 0) { totais.PercRespondidos = 1; }
+            setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
 
             // Altera a Cor dos Estados de Acordo com a Porcentagem 
             gB.selectAll(".chart-uf")
@@ -466,21 +455,51 @@
                     // Efeito Hover
                     .style("opacity", .85)
                     .style("stroke", "transparent")
-                    .on("mouseover", mouseOver )
-                    .on("mouseleave", mouseLeave )
-                    // Tooltip do Estado + Porcentagem 
-                    .append("title")
-                    .text(function (d) {  
-                        var sigla = d.id;
-                        var procura = data.filter(el => el.SiglaUf == sigla);                    
+                    //  Legenda Geral do Filtro
+                    .on("mouseover", function(d) {
+                        d3.selectAll(".chart-uf")
+                            .transition()
+                            .duration(200)
+                            .style("opacity", .85)
+                            .style("stroke", "transparent");
 
-                        return d.properties.nome + ", " + (procura[0].PercRespondidos * 100).toFixed(1) + "%" +
-                        "\r\n Respondidos: " + procura[0].Respondido + 
-                        "\r\n Não Respondidos: " + procura[0].NaoRespondido;
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                            .style("opacity", 1)
+                            .style("stroke", "black");
+                        
+                        var sigla = d.id;
+                        var procura = data.filter(el => el.SiglaUf == sigla);   
+
+                        setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla}).Nome,
+                                procura[0].PercRespondidos, procura[0].Respondido);                        
+                    })
+                    .on("mouseout", function(d) {                        
+                        d3.selectAll(".chart-uf")
+                        .transition()
+                        .duration(200)
+                        .style("opacity", .85);
+
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                            .style("stroke", "transparent");
+                    
+                        setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
                     });
 
-                drawBarras(data);
+            drawBarras(data);
+            $("#chart-pedidos-uf-info").fadeIn();
         }
+
+
+        function setMapInfo(title, perc, total) {
+            $("#chart-info-uf").html(title);
+            $("#chart-info-qtd").html(total);
+            $("#chart-info-perc").html((perc * 100).toFixed(1));
+        }
+
         d3.json("/assets/data/br.json", drawMap);
     }  
 

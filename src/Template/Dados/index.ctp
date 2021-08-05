@@ -94,10 +94,11 @@
                 <h4 id="chart-info-uf" class="chart-info-title chart-info-text"></h4>
                 <div class="chart-info" id="chart-info-error"></div>
                 <div class="chart-info" id="chart-info-all">
-                    <span id="chart-info-nivel-w">No nível <span id="chart-info-nivel" class="chart-info-text"></span>,</span><span id="chart-info-poder-w"> no <br>
-                    <span id="chart-info-poder" class="chart-info-text"></span>,</span> <span id="chart-info-qtd" class="chart-info-text"></span> pedidos<br>
-                    foram <span id="chart-info-tipo" class="chart-info-text"></span>, <br>
-                    <span id="chart-info-perc" class="chart-info-text"></span> do total de pedidos<br>correspondentes para este filtro.
+                   <!-- <span id="chart-info-nivel-w">No nível <span id="chart-info-nivel" class="chart-info-text"></span>,</span><span id="chart-info-poder-w"> no <br>
+                    <span id="chart-info-poder" class="chart-info-text"></span>,</span> -->
+                    <span id="chart-info-qtd" class="chart-info-text"></span> pedidos<br>
+                    foram <span id="chart-info-tipo" class="chart-info-text">respondidos</span>, <br>
+                    <span id="chart-info-perc" class="chart-info-text"></span>% do total de pedidos<br>correspondentes para este filtro.
                 </div>
               </div>
           </div>

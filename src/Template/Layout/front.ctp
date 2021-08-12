@@ -20,7 +20,7 @@ $titulo = isset($title) ? " - " . $title : "";
             <?= $cakeDescription ?>
             <?= $titulo ?>
         </title>
-        <meta name="description" content="Portal LAI - Achados e perdidos">
+        <meta name="description" content="Portal LAI - Achados e Pedidos">
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">

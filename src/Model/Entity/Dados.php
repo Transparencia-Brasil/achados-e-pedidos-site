@@ -134,6 +134,17 @@ class Dados extends Entity{
         return json_encode($atendimentoPedidosPorAno_arr);
     }
 
+    public function PedidosAtendimentoPorAno() {
+        $connection = ConnectionManager::get('default');
+        
+        $query = "SELECT Count(CodigoPedido) as Qtd, year(DataEnvio) As Ano, StatusResposta FROM v_pedidos_ativos_status_resposta Group By Ano, StatusResposta";
+
+
+        $pedidos = $connection->execute($query)->fetchAll('assoc');
+        return json_encode($pedidos);
+    }
+
+
     /* -------------------------------------------------------------*/
     //1.2 Mapa: Pedidos por UF, Poder e Nível
     /* -------------------------------------------------------------*/
@@ -179,9 +190,27 @@ class Dados extends Entity{
     public function PedidosPorUFPoderENivel() {
         $connection = ConnectionManager::get('default');
         
+        $connection->execute("call sp_count_total()")->execute();
+
         //Total de pedidos na base de dados
-        $query = "select StatusResposta as status, NomeNivelFederativo as nivel, NomePoder as poder, SiglaUf as sigla, SiglaUf as uf, TotalPedidos as qtd from v_pedidos_count_sresposta_nfederativo_poder_uf";
-        
+        $query = "select m.SiglaUf,
+                    m.NomeNivelFederativo,
+                    m.NomePoder,
+                    v.TotalPedidos as NaoRespondido,
+                    v2.TotalPedidos Respondido
+                    from maps as m
+                    left join v_count_total_nao_respondido as v
+                    on (m.NomeNivelFederativo = v.NomeNivelFederativo and m.NomePoder = v.NomePoder and v.SiglaUf = m.SiglaUf)
+                    left join v_count_total_respondido as v2
+                    on (m.NomeNivelFederativo = v2.NomeNivelFederativo and m.NomePoder = v2.NomePoder and v2.SiglaUf = m.SiglaUf)
+                    where m.SiglaUF is not null";
+
+
+        // {StatusResposta: "Não respondido", SiglaUF: "AC", TotalPedidos: "2", TotalPedidosPoder: "103513"}
+
+        // {"Não respondido":111, "Respondido":111, SiglaUF: "AC", TotalPedidos: "2"}
+
+
         $pedidos = $connection->execute($query)->fetchAll('assoc');
         // print_r($query);
         // die();

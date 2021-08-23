@@ -259,7 +259,7 @@ insert into pais(Codigo, Nome)
 select codigo, nome from paises;
 
 insert into tipo_objeto
-(Nome) values ('Pedidos'),('Agentes'),('Usuarios'),('Comentários');
+(Codigo,Nome) values (1,'Pedidos'),(2,'Agentes'),(3,'Usuarios'),(4,'Comentários');
 
 insert into moderacao_status
 (Nome) values ('Pendente'),('Aprovado'),('Bloqueado');

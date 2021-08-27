@@ -381,27 +381,42 @@
         function drawMap(error, br) {
             if (error) throw error;
             var ufs = topojson.feature(br, br.objects.br);
-            data = pedidosPorUFPoderENivelCache;
 
             // Filtra os Resultados
             var nivelFederativo = $("#filter-nivel").val();
             var esferaPoder = $("#filter-poder").val();
 
+            data = pedidosPorUFPoderENivelCache
+            .map(function(el) {
+                var el2 = Object.assign({}, el);
+
+                // - Se o Nivel federativo for Federal, Considera tudo como BR
+
+                if(nivelFederativo == "Federal")
+                {
+                    el2.SiglaUf = "BR";
+                }
+
+                return el2;
+            });;
+
             if(nivelFederativo !== "--") {
                 data = data.filter(function(el) {
-                    return el.NomeNivelFederativo == nivelFederativo;
-                });
+                    return nivelFederativo == "Federal" ? true : el.NomeNivelFederativo == nivelFederativo;
+                })
             }
 
             if(esferaPoder !== "--") {
-                    data = data.filter(function(el) {
-                        return el.NomePoder == esferaPoder;
-                    });
+                data = data.filter(function(el) {
+                    return el.NomePoder == esferaPoder;
+                });
             }
 
             // Consolida os Dados por Estado
-            var ufsData = data.map(el => el.SiglaUf)
+            var ufsData = data
+                .map(el => el.SiglaUf)
                 .filter((value, index, self) => self.indexOf(value) === index); // Distinct
+
 
             // Recria o Dados Consolidados
             var dataC = [];
@@ -466,7 +481,7 @@
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUf == sigla);
 
-                        return colorScale(procura[0].PercRespondidos);
+                        return procura.length == 0 ? colorScale(0) : colorScale(procura[0].PercRespondidos);
                     })
                     // Efeito Hover
                     .style("opacity", .85)

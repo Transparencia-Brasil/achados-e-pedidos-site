@@ -70,15 +70,11 @@
 }
 
 .chart-uf {
-    /* fill: #edf0f5; */
+    fill: #edf0f5;
     stroke: #e1e1e1;
     stroke-width: 2px;
 }
-
-.chart-uf-dot {
-    stroke: none;
-    cursor: pointer;
-}
+.chart-uf-dot,
 .chart-bar {
     fill: #fe9301;
     stroke: none;

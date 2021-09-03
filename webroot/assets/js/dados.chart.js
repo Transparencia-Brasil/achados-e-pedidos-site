@@ -1,63 +1,63 @@
 //Grafico classificações de atendimento por ano
 (function () {
-    
+
     var margin = {top: 40, right: 30, bottom: 10, left: 50},
         width = 960 - margin.left - margin.right,
-        height = 470 - margin.top - margin.bottom;   
+        height = 470 - margin.top - margin.bottom;
 
     var svg = d3.select("#chart-atendimento")
         .append("svg")
-            .attr("width", width + margin.left + margin.right)
+            .attr("width", width + margin.left + margin.right + 200)
             .attr("height", (height + margin.top + margin.bottom) + 20)
         .append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
 
-    // - 
+    // -
     var subgroups = ["Respondidos","NaoRespondidos"];
 
-    // - Legenda              
+    // - Legenda
     svg.append("g")
     .attr("class", "legendLinear")
-    .attr("transform", "translate(2,-40)");
+    .attr("transform", "translate(900,145)");
 
-    
+
     svg.select(".legendLinear")
-    .append('rect')          
+    .append('rect')
     .attr("width",24)
     .attr("height",24)
     .attr('stroke', 'black')
     .attr('fill', '#e45d88');
-    
+
     svg.select(".legendLinear")
-    .append('text')       
+    .append('text')
     .attr("y",20)
     .attr("x",30)
     .attr('stroke', 'black')
     .text('Respondidos');
 
     svg.select(".legendLinear")
-    .append('rect')  
-    .attr("x",160)       
+    .append('rect')
+    .attr("y",44)
     .attr("width",24)
     .attr("height",24)
     .attr('stroke', 'black')
     .attr('fill', '#fbc064');
 
     svg.select(".legendLinear")
-    .append('text')     
-    .attr("y",20)
-    .attr("x",190)  
+    .append('text')
+    .attr("y",64)
+    .attr("x",30)
     .attr('stroke', 'black')
     .text('Não Respondidos');
 
-    // - 
+    // -
     function draw(error, data) {
         if (error) throw error;
 
         // Consolida os Anos e Unicos Registros
         var anosDataq = data.map(el => el.Ano)
-            .filter((value, index, self) => self.indexOf(value) === index); // Distinct 
+            .filter((value, index, self) => self.indexOf(value) === index); // Distinct
 
         var dataC = [];
         anosDataq.forEach(function(el, i, arr) {
@@ -72,7 +72,7 @@
             // -
             data.filter(el2 => el2.Ano == el).forEach(function(itemAno, iItemAno) {
                 var valor = parseInt(itemAno.Qtd);
-                
+
                 if(itemAno.StatusResposta == "Respondido") {
                     anoNovoItem.Respondido += valor;
                 } else {
@@ -90,7 +90,7 @@
         data.forEach(function(el, i, arr) {
             var respondidos = el.Respondido;
             var naoRespondidos = el.NaoRespondido;
-            
+
             // - Calcula Porcentagem
             el.Total = naoRespondidos +  respondidos;
             if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
@@ -106,6 +106,7 @@
         .range([0, width])
         .padding([0.2])
         svg.append("g")
+        .attr("class","xaxis")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x).tickSizeOuter(0));
 
@@ -113,12 +114,27 @@
         var y = d3.scaleLinear()
         .domain([0.0,1.0])
         .range([ height, 0 ]);
+
+        var y_axis = d3.axisLeft().scale(y)
+            .tickValues([0, .25, .5, .75, 1])
+            .tickFormat(d3.format(".0%"));
+
         svg.append("g")
-        .call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
+        .attr("class","yaxis")
+        .call(y_axis);
 
         var color = d3.scaleOrdinal()
             .domain(subgroups)
-            .range(['#e45d88','#fbc064'])
+            .range(['#e45d88','#fbc064']);
+
+        svg.select(".yaxis")
+            .selectAll("text")
+            .style("font-size","15px");
+
+        svg.select(".xaxis")
+            .selectAll("text")
+            .style("font-size","16px");
+
 
         //stack the data? --> stack per subgroup
         var stackedData = d3.stack()
@@ -139,17 +155,17 @@
         .data(stackedData)
         .enter().append("g")
             .attr("fill", function(d) {
-                 return color(d.key); 
+                 return color(d.key);
             })
             .selectAll("rect")
-            .data(function(d) { 
-                return d; 
+            .data(function(d) {
+                return d;
             })
-            .enter().append("rect") // Cria a Barra 
-            .attr("x", function(d) { 
-                return x(d.data.Ano); 
+            .enter().append("rect") // Cria a Barra
+            .attr("x", function(d) {
+                return x(d.data.Ano);
             })
-            .attr("y", function(d) { 
+            .attr("y", function(d) {
                 return y(d[1]);
              })
             .attr("height", function(d) {
@@ -164,7 +180,7 @@
         .enter().append("g");
 
         legendaBarrasResp.append("text")
-            .text(function(d) { 
+            .text(function(d) {
                 return (d.PercRespondidos * 100).toFixed(0) + "%";
             })
             .attr("x", function(d){
@@ -185,7 +201,7 @@
         .enter().append("g");
 
         legendaBarrasNaoResp.append("text")
-            .text(function(d) { 
+            .text(function(d) {
                 return (d.PercNaoRespondidos * 100).toFixed(0) + "%";
             })
             .attr("x", function(d){
@@ -216,8 +232,8 @@
     });
 
     function doDrawMap() {
-        $("#chart-pedidos-uf-mapa").empty();       
-        $("#chart-pedidos-uf-barras").empty();      
+        $("#chart-pedidos-uf-mapa").empty();
+        $("#chart-pedidos-uf-barras").empty();
         var
             totais = { Respondidos : 0, NaoRespondidos : 0, Total: 0},
             marginB = { top: 0, right: 0, bottom: 0, left: 0 },
@@ -235,7 +251,7 @@
                 .rotate([0, 0])
                 .parallels([0, 0])
                 .scale(700),
-            map = d3.geoPath().projection(projection);            
+            map = d3.geoPath().projection(projection);
 
         // Range de Cores
         var color_range = ["#969696","#940131","#cd134f","#ec7340","#fab94f","#f6e197"];
@@ -250,7 +266,7 @@
             .title("% Respondidos");
             svgB.append("g")
             .attr("transform", "translate(60,20)")
-            .call(legend);  
+            .call(legend);
 
         // -
         var tooltipB = svgB.append("foreignObject")
@@ -279,26 +295,26 @@
             .attr("transform",
                   "translate(" + marginC.left + "," + marginC.top + ")");
 
-                 
+
         function drawBarras(data) {
-            // 
+            //
             var orderByPerc = $("#order-by-perc").is(":checked");
             var orderByUf = $("#order-by-uf").is(":checked");
 
             // Ordena os Dados
             if(orderByPerc) {
                 data = data.sort(function(a,b) {
-                    return a.PercRespondidos - b.PercRespondidos;                    
+                    return a.PercRespondidos - b.PercRespondidos;
                 });
             } else if(orderByUf) {
                 data = data.sort(function(a,b) {
                     return a.SiglaUf.localeCompare(b.SiglaUf, 'pt-BR', { sensitivity: 'base' });
-                });                
+                });
             }
 
             // Consolida os Dados por Estado
             var ufsData = data.map(el => el.SiglaUf)
-                .filter((value, index, self) => self.indexOf(value) === index); // Distinct 
+                .filter((value, index, self) => self.indexOf(value) === index); // Distinct
 
             // Add X axis
             var x = d3.scaleLinear()
@@ -346,7 +362,7 @@
             .enter()
             .append("text")
             .attr("x", function(d) {
-                return x(d.PercRespondidos) + 5; 
+                return x(d.PercRespondidos) + 5;
             })
             .attr("y", function(d) { return y(d.SiglaUf) + 10; })
             .attr("width", 100)
@@ -365,27 +381,42 @@
         function drawMap(error, br) {
             if (error) throw error;
             var ufs = topojson.feature(br, br.objects.br);
-            data = pedidosPorUFPoderENivelCache;
 
             // Filtra os Resultados
             var nivelFederativo = $("#filter-nivel").val();
             var esferaPoder = $("#filter-poder").val();
 
+            data = pedidosPorUFPoderENivelCache
+            .map(function(el) {
+                var el2 = Object.assign({}, el);
+
+                // - Se o Nivel federativo for Federal, Considera tudo como BR
+
+                if(nivelFederativo == "Federal")
+                {
+                    el2.SiglaUf = "BR";
+                }
+
+                return el2;
+            });;
+
             if(nivelFederativo !== "--") {
                 data = data.filter(function(el) {
-                    return el.NomeNivelFederativo == nivelFederativo;
-                });
+                    return nivelFederativo == "Federal" ? true : el.NomeNivelFederativo == nivelFederativo;
+                })
             }
 
             if(esferaPoder !== "--") {
-                    data = data.filter(function(el) {
-                        return el.NomePoder == esferaPoder;
-                    });        
+                data = data.filter(function(el) {
+                    return el.NomePoder == esferaPoder;
+                });
             }
 
             // Consolida os Dados por Estado
-            var ufsData = data.map(el => el.SiglaUf)
-                .filter((value, index, self) => self.indexOf(value) === index); // Distinct 
+            var ufsData = data
+                .map(el => el.SiglaUf)
+                .filter((value, index, self) => self.indexOf(value) === index); // Distinct
+
 
             // Recria o Dados Consolidados
             var dataC = [];
@@ -395,18 +426,18 @@
                     NaoRespondido: 0,
                     Total: 0,
                     PercRespondidos: 0,
-                    SiglaUf: el 
+                    SiglaUf: el
                 };
 
                 // -
                 data.filter(el2 => el2.SiglaUf == el).forEach(function(itemUf, iItemUf) {
                     var respondidos = itemUf.Respondido;
                     var naoRespondidos = itemUf.NaoRespondido;
-                    
+
                     // -
                     if(respondidos == null) { respondidos = 0 } else { respondidos = parseInt(respondidos) };
                     if(naoRespondidos == null) { naoRespondidos = 0 } else { naoRespondidos = parseInt(naoRespondidos) };
-                    
+
                     ufNovoItem.Respondido += respondidos;
                     ufNovoItem.NaoRespondido += naoRespondidos;
                 });
@@ -421,7 +452,7 @@
             data.forEach(function(el, i, arr) {
                 var respondidos = el.Respondido;
                 var naoRespondidos = el.NaoRespondido;
-                
+
                 // - Calcula Porcentagem
                 el.Total = naoRespondidos +  respondidos;
                 if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
@@ -440,18 +471,18 @@
             else if(totais.Respondidos == 0 &&  totais.NaoRespondidos == 0) { totais.PercRespondidos = 1; }
             setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
 
-            // Altera a Cor dos Estados de Acordo com a Porcentagem 
+            // Altera a Cor dos Estados de Acordo com a Porcentagem
             gB.selectAll(".chart-uf")
                     .data(ufs.features)
                     .enter().append("path")
                     .attr("class", "chart-uf")
                     .attr("d", map)
-                    .attr("fill", function (d) { 
+                    .attr("fill", function (d) {
                         var sigla = d.id;
-                        var procura = data.filter(el => el.SiglaUf == sigla);                    
+                        var procura = data.filter(el => el.SiglaUf == sigla);
 
-                        return colorScale(procura[0].PercRespondidos);
-                    })                    
+                        return procura.length == 0 ? colorScale(0) : colorScale(procura[0].PercRespondidos);
+                    })
                     // Efeito Hover
                     .style("opacity", .85)
                     .style("stroke", "transparent")
@@ -467,15 +498,15 @@
                             .transition()
                             .duration(200)
                             .style("opacity", 1)
-                            .style("stroke", "black");
-                        
+                            .style("stroke", "#999999");
+
                         var sigla = d.id;
-                        var procura = data.filter(el => el.SiglaUf == sigla);   
+                        var procura = data.filter(el => el.SiglaUf == sigla);
 
                         setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla}).Nome,
-                                procura[0].PercRespondidos, procura[0].Respondido);                        
+                                procura[0].PercRespondidos, procura[0].Respondido);
                     })
-                    .on("mouseout", function(d) {                        
+                    .on("mouseout", function(d) {
                         d3.selectAll(".chart-uf")
                         .transition()
                         .duration(200)
@@ -485,7 +516,7 @@
                             .transition()
                             .duration(200)
                             .style("stroke", "transparent");
-                    
+
                         setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
                     });
 
@@ -501,12 +532,12 @@
         }
 
         d3.json("/assets/data/br.json", drawMap);
-    }  
+    }
 
     $("#filter-nivel").change(function() {
         doDrawMap();
     });
-    
+
     $("#filter-poder").change(function() {
         doDrawMap();
     });

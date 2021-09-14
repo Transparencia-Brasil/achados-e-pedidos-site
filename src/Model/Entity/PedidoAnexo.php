@@ -13,7 +13,7 @@ use App\Controller\Component\UNumeroComponent;
 use App\Controller\Component\UCurlComponent;
 
 class PedidoAnexo extends Entity{
-	
+
 	public $PASTA_UPLOAD = WWW_ROOT . "uploads". DS . "pedidos" . DS;
 	public $EXTENSOES_VALIDAS = ["pdf","xls","txt","xlsx", "doc","docx", "csv","rar","zip","7z","jpg","jpeg","png"];
 	//Ricardo:maio 2017 - Por uma questão de segurança o certo era validar também o mime do arquivo
@@ -40,9 +40,9 @@ class PedidoAnexo extends Entity{
 			$tamanho = $arquivoStream['size']/1048576;
 
 			if($tamanho > 200){
-				$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa os 200MB permitidos por arquivo."; 
+				$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa os 200MB permitidos por arquivo.";
 			}
-		
+
 			$extensao = pathinfo($arquivoStream['name'], PATHINFO_EXTENSION);
 
 			if(array_search(strtolower($extensao), $this->EXTENSOES_VALIDAS) === false){
@@ -94,7 +94,7 @@ class PedidoAnexo extends Entity{
 		$contador = 1;
 
 		while(true)
-		{	
+		{
 			if(!file_exists($this->PASTA_UPLOAD . $novoNome . '_' . $contador . '.' . $extensao)){
 				break;
 			}
@@ -120,7 +120,7 @@ class PedidoAnexo extends Entity{
 		/* efetua loop de arquivos para validar */
         $contador = 0;
         $tamanhoArquivosTotal =0;
-        foreach ($arquivos as $arquivo) {	
+        foreach ($arquivos as $arquivo) {
 
 	       	 $tamanhoArquivosTotal += $arquivo["size"];
 	       	 $validou = $this->Validar($arquivo);
@@ -129,25 +129,25 @@ class PedidoAnexo extends Entity{
 	       	 	$errosArquivo["Erro"] = $validou["Arquivo"];
 	       	 	return $errosArquivo;
 	       	 }
-	         
+
 	         if($contador >20){
 	         	$errosArquivo["Erro"] = "Só é permitido 20 arquivos por interação";
 	         }
 
 	        $contador++;
-	        
+
     	}
 
     	$tamanhoEmMegaBytes = round($tamanhoArquivosTotal/1048576);
 
     	if($tamanhoEmMegaBytes > 900){
     		$errosArquivo["Erro"] = "O tamanho do lote é: ".$tamanhoEmMegaBytes
-    		." MB e o máximo por interação 900MB"; 
+    		." MB e o máximo por interação 900MB";
     	}
 
 
 
-    	
+
         return $errosArquivo;
 	}
 
@@ -160,7 +160,7 @@ class PedidoAnexo extends Entity{
 		return $elementos;
 	}
 
-	public function apagarpastas() 
+	public function apagarpastas()
 	{
 		$connection = ConnectionManager::get('default');
 		$connection->execute('SET FOREIGN_KEY_CHECKS = 0');
@@ -255,25 +255,25 @@ class PedidoAnexo extends Entity{
 		$results = $connection->execute($query)->fetchAll('assoc');
 		try{
 			if(count($results) > 0){
+                $batch = array();
+                $count = 1;
 
-				foreach($results as $item){
+                // Envia por Lote
+                foreach($results as $item){
+                    array_push($batch, $item);
 
-					$codigo = $item["anexos_codigo"];
-					$json = json_encode($item);
-					$url = ES_URL . 'anexos/gravar/' . $codigo;
+                    if($count >= 100) {
+                        $count= 0;
+                        $this->ES_EnviarBulkAnexos($batch);
+                    }
 
-					$retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
-
-					if($retorno !== false)
-					{
-						//debug($retorno);
-						$retornoJson = json_decode($retorno);
-						if($retornoJson->success != null){
-							// atualiza pra cada item no banco local
-							$this->ES_InserirAtualizarLocalmente($codigo);	
-						}
-					}
+                    $count++;
 				}
+
+                // Envia o Restante
+                if($count >= 100) {
+                    $this->ES_EnviarBulkAnexos($batch);
+                }
 			}
 		}catch(Exception $ex)
 		{
@@ -282,8 +282,27 @@ class PedidoAnexo extends Entity{
 			$variaveis = "Erro ao enviar anexo ao elastic search:" . (is_null($codigoPedidoAnexo) ? "0" : $codigoPedidoAnexo);
 			UStringComponent::registrarErro($url, $ex, $variaveis);
 		}
-		
+
 	}
+
+    private function ES_EnviarBulkAnexos($anexos) {
+        $json = json_encode($anexos);
+        $url = ES_URL . 'anexos/gravar-varios';
+
+        $retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
+
+        if($retorno !== false)
+        {
+            //debug($retorno);
+            $retornoJson = json_decode($retorno);
+            if($retornoJson->success != null){
+                // atualiza pra cada item no banco local
+                foreach ($anexos as $i => $anexo) {
+                    $this->ES_InserirAtualizarLocalmente($anexo["anexos_codigo"]);
+                }
+            }
+        }
+    }
 
 	//2017-03-14 Paulo Campos: Criada funcao para inserir anexos em bloco por pedido
 	public function ES_AtualizarInserirAnexosPorPedido($codigoPedido)
@@ -372,7 +391,7 @@ class PedidoAnexo extends Entity{
 						$retornoJson = json_decode($retorno);
 						if($retornoJson->success != null){
 							// atualiza pra cada item no banco local
-							$this->ES_InserirAtualizarLocalmente($codigo);	
+							$this->ES_InserirAtualizarLocalmente($codigo);
 						}
 					}
 				}
@@ -384,7 +403,7 @@ class PedidoAnexo extends Entity{
 			$variaveis = "Erro ao enviar anexo ao elastic search:" . (is_null($codigoPedidoAnexo) ? "0" : $codigoPedidoAnexo);
 			UStringComponent::registrarErro($url, $ex, $variaveis);
 		}
-		
+
 	}
 
 	public function ES_InserirAtualizarLocalmente($codigo)
@@ -401,7 +420,7 @@ class PedidoAnexo extends Entity{
 			$elemento->Alteracao = $data;
 		}
 
-		$conn_es_pedido_interacao_anexo->save($elemento);	
+		$conn_es_pedido_interacao_anexo->save($elemento);
 	}
 
 	public function ES_RemoverAnexoPorInteracao($codigoPedidoInteracao)
@@ -430,10 +449,10 @@ class PedidoAnexo extends Entity{
 			if($retorno !== false)
 			{
 				$retornoJson = json_decode($retorno);
-				
+
 				if(strpos($retorno, "error") === false){
 					// atualiza pra cada item no banco local
-					$this->ES_InserirAtualizarLocalmente($codigoPedidoAnexo);	
+					$this->ES_InserirAtualizarLocalmente($codigoPedidoAnexo);
 				}
 			}
 		}catch(Exception $ex)

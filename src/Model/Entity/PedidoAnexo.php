@@ -11,6 +11,8 @@ use App\Controller\Component\UDataComponent;
 use App\Controller\Component\UStringComponent;
 use App\Controller\Component\UNumeroComponent;
 use App\Controller\Component\UCurlComponent;
+use Psy\Exception\ThrowUpException;
+use Exception;
 
 class PedidoAnexo extends Entity{
 
@@ -233,8 +235,8 @@ class PedidoAnexo extends Entity{
 				   	DATE_FORMAT(a.DataEnvio,"%Y-%m-%d") pedidos_data_envio,
 				    a.FoiProrrogado pedidos_foi_prorrogado,
 				    a.Anonimo pedidos_anonimo,
-				    case when b.Codigo is null Then 0 Else 1 end JaEnviado
-				from
+				    case when b.Codigo is null Then 0 Else 1 end JaEnviado ' ;
+		$from = ' from
 					pedidos a join
 				    pedidos_interacoes pi on a.Codigo = pi.CodigoPedido join
 				    pedidos_anexos pa on pa.CodigoPedidoInteracao = pi.Codigo left join
@@ -252,26 +254,24 @@ class PedidoAnexo extends Entity{
 				where
 					a.Ativo = 1 ' . $filtro;
 
-		$results = $connection->execute($query)->fetchAll('assoc');
+        $query = $query . $from;
+        $countQuery = 'Select Count(*) As Qtd '. $from;
+        $countResult = $connection->execute($countQuery)->fetchAll('assoc');
+        $CntAnexos =  $countResult[0]["Qtd"];
+
 		try{
-			if(count($results) > 0){
-                $batch = array();
-                $count = 1;
+			if(count($CntAnexos) > 0){
+                $qtdLotes = ceil($CntAnexos / 300);
+                Log::info("Lotes: " . $qtdLotes);
 
-                // Envia por Lote
-                foreach($results as $item){
-                    array_push($batch, $item);
+                for ($iLote=0; $iLote < $qtdLotes ; $iLote++) {
+                    $pular = $iLote * 300;
+                    $queryLimite = $query . " ORDER BY pa.Codigo DESC LIMIT 100 OFFSET $pular";
 
-                    if($count >= 100) {
-                        $count= 0;
-                        $this->ES_EnviarBulkAnexos($batch);
-                    }
+                    $batch =  $connection->execute($queryLimite)->fetchAll('assoc');
 
-                    $count++;
-				}
+                    Log::info("Anexos: " . count($batch));
 
-                // Envia o Restante
-                if($count >= 100) {
                     $this->ES_EnviarBulkAnexos($batch);
                 }
 			}
@@ -279,7 +279,7 @@ class PedidoAnexo extends Entity{
 		{
 			// logar erro no banco
 			$url = $_SERVER['REQUEST_URI'];
-			$variaveis = "Erro ao enviar anexo ao elastic search:" . (is_null($codigoPedidoAnexo) ? "0" : $codigoPedidoAnexo);
+			$variaveis = "Erro ao enviar os anexos!";
 			UStringComponent::registrarErro($url, $ex, $variaveis);
 		}
 
@@ -289,11 +289,15 @@ class PedidoAnexo extends Entity{
         $json = json_encode($anexos);
         $url = ES_URL . 'anexos/gravar-varios';
 
+
+        Log::info("Indexando Batch: " . count($anexos));
+
         $retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
 
         if($retorno !== false)
         {
-            //debug($retorno);
+            Log::info("Batch enviado!");
+            Log::info($retorno);
             $retornoJson = json_decode($retorno);
             if($retornoJson->success != null){
                 // atualiza pra cada item no banco local
@@ -301,6 +305,12 @@ class PedidoAnexo extends Entity{
                     $this->ES_InserirAtualizarLocalmente($anexo["anexos_codigo"]);
                 }
             }
+        }
+        else {
+            Log::info("Batch falhou!");
+            $variaveis = "Erro ao enviar os anexos!";
+            $url = $_SERVER['REQUEST_URI'];
+			UStringComponent::registrarErro($url, new Exception("Falha na indexação dos anexos!"), $variaveis);
         }
     }
 

@@ -6,6 +6,7 @@ use Cake\Network\Email\Email;
 use Cake\Controller\Component;
 use Cake\I18n\Time;
 use Cake\Filesystem\File;
+use Cake\Log\Log;
 
 class UCurlComponent extends Component
 {
@@ -16,21 +17,24 @@ class UCurlComponent extends Component
 	{
 		$ch = curl_init($url);
 
-		$headers = array('Accept: application/json','Content-Type: application/json'); 
+		$headers = array('Accept: application/json','Content-Type: application/json');
 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	  	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);  
+	  	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 	  	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	  	curl_setopt($ch, CURLOPT_POSTFIELDS,$dados);
-	  	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1); 
+	  	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 	  	curl_setopt($ch, CURLOPT_VERBOSE, true);
-	  	
-	  	$result = curl_exec($ch);
-	  	
+
+        if( ! $result = curl_exec($ch))
+        {
+            Log::info("CURL ERROR: " . print_r(curl_error($ch), true));
+        }
+
 		curl_close($ch);
-	  
+
 	  	return $result;
-	}	
+	}
 }
 
 ?>

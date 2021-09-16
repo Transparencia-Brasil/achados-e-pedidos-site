@@ -9,7 +9,7 @@ use App\Model\Entity\PedidoAnexo;
 //use App\Model\Entity\Moderacao;
 use Cake\ORM\TableRegistry;
 use Cake\I18n\Time;
-
+use App\Controller\Component\UTaskComponent;
 class PedidosController extends AppController{
 
     public $paginate = [
@@ -32,13 +32,13 @@ class PedidosController extends AppController{
 	public function index($id = null)
 	{
         $title = $this->request->query('t');
-        
+
         if (!empty($title)) {
             $query = ['Pedidos.Titulo LIKE' => '%'.$title.'%'];
-        } else { 
+        } else {
             $query = ["1" => "1"];
         }
-        
+
         $pedidos = $this->paginate($this->Pedidos->find('all')->where(['Pedidos.Ativo' => true])->where($query)->contain(['Agentes'])->order(['Pedidos.Criacao' => 'DESC']));
         // $this->render('/Error/error400');
         // $pedidos = $this->paginate($this->Pedidos->find('all')->where(['Pedidos.Ativo' => true])->where($query)->contain(['Agentes'])->order(['Pedidos.Criacao' => 'DESC']));
@@ -119,18 +119,16 @@ class PedidosController extends AppController{
         $pedidoBU = new Pedido();
         $pedidoInteracaoEdicaoBU = new PedidoInteracao();
         $pedidoAnexoEdicaoBU = new PedidoAnexo();
-        $mostraMensagem = false;
-        if ($this->request->is(['post', 'put'])) {
-            //Coloca os pedidos na tabela moderacoes e já deixa com o status 2 (aprovado). Se os pedidos não forem in
-            // $moderacao = new Moderacao();
-            // $moderacao->InserirPedidosNaoModerados();
+        $estadoIndexacao = UTaskComponent::estadoTarefa("EsIndexarPedidos");
+        $executandoIndexacao = UTaskComponent::estaRodando("EsIndexarPedidos");
 
-            $pedidoBU->ES_InserirAtualizarPedidos();
-            $pedido_interacao_codigo = null; //insere novo pedido no ES
-            $pedidoInteracaoEdicaoBU->ES_AtualizarInserirInteracoes($pedido_interacao_codigo);
-            $pedido_anexo_codigo = null; //insere novo anexo no ES
-            $pedidoAnexoEdicaoBU->ES_AtualizarInserirAnexos($pedido_anexo_codigo);
-            $mostraMensagem = true;
+        if ($this->request->is(['post', 'put'])) {
+            // Inicia o Processo em Plano de Fundo para a Indexação
+            if(!$executandoIndexacao) {
+                UTaskComponent::iniciarTarefa("EsIndexarPedidos");
+                $estadoIndexacao = "NEW";
+                $executandoIndexacao = true;
+            }
         }
 
         $TotalImportados = $pedidoBU->TotalPedidosModerados("and pedidos.CodigoTipoOrigem = 3",$moderacao = false);
@@ -146,7 +144,8 @@ class PedidosController extends AppController{
         $this->set('TotalPendentesAnexosPastasES', $TotalPendentesAnexosPastasES);
         $this->set('TotalPendentesAnexosES', $TotalPendentesAnexosES);
         $this->set('TotalImportados', $TotalImportados);
-        $this->set('mostraMensagem', $mostraMensagem);
+        $this->set('estadoIndexacao', $estadoIndexacao);
+        $this->set('executandoIndexacao', $executandoIndexacao);
         $this->set('pedidoBU', $pedidoBU);
     }
 

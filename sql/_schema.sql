@@ -592,7 +592,7 @@ CREATE TABLE `pedidos` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*//*!50003 TRIGGER pedidosModeracoes AFTER INSERT ON pedidos 
+/*!50003 CREATE*//*!50003 TRIGGER pedidosModeracoes AFTER INSERT ON pedidos
  FOR EACH ROW
    BEGIN
     IF NEW.CodigoTipoOrigem = 3 THEN
@@ -1133,7 +1133,7 @@ DROP TABLE IF EXISTS `v_pedidos_ativos_groups`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_ativos_groups`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_ativos_groups` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_ativos_groups` AS SELECT
  1 AS `CodigoPedido`,
  1 AS `Ativo`,
  1 AS `DataEnvio`,
@@ -1153,7 +1153,7 @@ DROP TABLE IF EXISTS `v_pedidos_ativos_status_resposta`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_ativos_status_resposta`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_ativos_status_resposta` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_ativos_status_resposta` AS SELECT
  1 AS `CodigoPedido`,
  1 AS `DataEnvio`,
  1 AS `Ativo`,
@@ -1168,7 +1168,7 @@ DROP TABLE IF EXISTS `v_pedidos_ativos_status_resposta_ignorado`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_ativos_status_resposta_ignorado`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_ativos_status_resposta_ignorado` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_ativos_status_resposta_ignorado` AS SELECT
  1 AS `CodigoPedido`,
  1 AS `Ativo`,
  1 AS `DataEnvio`,
@@ -1183,7 +1183,7 @@ DROP TABLE IF EXISTS `v_pedidos_ativos_status_resposta_nao_respondido`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_ativos_status_resposta_nao_respondido`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_ativos_status_resposta_nao_respondido` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_ativos_status_resposta_nao_respondido` AS SELECT
  1 AS `CodigoPedido`,
  1 AS `Ativo`,
  1 AS `DataEnvio`,
@@ -1198,7 +1198,7 @@ DROP TABLE IF EXISTS `v_pedidos_ativos_status_resposta_respondido`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_ativos_status_resposta_respondido`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_ativos_status_resposta_respondido` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_ativos_status_resposta_respondido` AS SELECT
  1 AS `CodigoPedido`,
  1 AS `Ativo`,
  1 AS `DataEnvio`,
@@ -1213,7 +1213,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_nfederativo`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_nfederativo`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_nfederativo` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_nfederativo` AS SELECT
  1 AS `NomeNivelFederativo`,
  1 AS `TotalPedidos`*/;
 SET character_set_client = @saved_cs_client;
@@ -1226,7 +1226,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_nfederativo_poder_uf`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_nfederativo_poder_uf`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_nfederativo_poder_uf` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_nfederativo_poder_uf` AS SELECT
  1 AS `NomeNivelFederativo`,
  1 AS `NomePoder`,
  1 AS `SiglaUF`,
@@ -1241,7 +1241,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_nfederativo_uf`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_nfederativo_uf`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_nfederativo_uf` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_nfederativo_uf` AS SELECT
  1 AS `NomeNivelFederativo`,
  1 AS `SiglaUF`,
  1 AS `TotalPedidos`*/;
@@ -1255,7 +1255,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_poder`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_poder`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_poder` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_poder` AS SELECT
  1 AS `NomePoder`,
  1 AS `TotalPedidos`*/;
 SET character_set_client = @saved_cs_client;
@@ -1268,7 +1268,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_poder_uf`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_poder_uf`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_poder_uf` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_poder_uf` AS SELECT
  1 AS `NomePoder`,
  1 AS `SiglaUF`,
  1 AS `TotalPedidos`*/;
@@ -1282,7 +1282,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_sresposta`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_sresposta`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_sresposta` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_sresposta` AS SELECT
  1 AS `StatusResposta`,
  1 AS `TotalPedidos`*/;
 SET character_set_client = @saved_cs_client;
@@ -1295,7 +1295,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_sresposta_nfederativo`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_sresposta_nfederativo`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_sresposta_nfederativo` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_sresposta_nfederativo` AS SELECT
  1 AS `StatusResposta`,
  1 AS `NomeNivelFederativo`,
  1 AS `TotalPedidos`*/;
@@ -1309,7 +1309,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_sresposta_nfederativo_poder`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_sresposta_nfederativo_poder`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_sresposta_nfederativo_poder` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_sresposta_nfederativo_poder` AS SELECT
  1 AS `StatusResposta`,
  1 AS `NomeNivelFederativo`,
  1 AS `NomePoder`,
@@ -1324,7 +1324,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_sresposta_nfederativo_poder_uf`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_sresposta_nfederativo_poder_uf`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_sresposta_nfederativo_poder_uf` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_sresposta_nfederativo_poder_uf` AS SELECT
  1 AS `Ativo`,
  1 AS `StatusResposta`,
  1 AS `NomeNivelFederativo`,
@@ -1341,7 +1341,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_sresposta_nfederativo_uf`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_sresposta_nfederativo_uf`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_sresposta_nfederativo_uf` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_sresposta_nfederativo_uf` AS SELECT
  1 AS `StatusResposta`,
  1 AS `NomeNivelFederativo`,
  1 AS `SiglaUF`,
@@ -1356,7 +1356,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_sresposta_poder`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_sresposta_poder`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_sresposta_poder` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_sresposta_poder` AS SELECT
  1 AS `StatusResposta`,
  1 AS `NomePoder`,
  1 AS `TotalPedidos`*/;
@@ -1370,7 +1370,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_sresposta_poder_uf`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_sresposta_poder_uf`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_sresposta_poder_uf` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_sresposta_poder_uf` AS SELECT
  1 AS `StatusResposta`,
  1 AS `NomePoder`,
  1 AS `SiglaUF`,
@@ -1385,7 +1385,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_sresposta_uf`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_sresposta_uf`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_sresposta_uf` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_sresposta_uf` AS SELECT
  1 AS `StatusResposta`,
  1 AS `SiglaUF`,
  1 AS `TotalPedidos`*/;
@@ -1399,7 +1399,7 @@ DROP TABLE IF EXISTS `v_pedidos_count_uf`;
 /*!50001 DROP VIEW IF EXISTS `v_pedidos_count_uf`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_pedidos_count_uf` AS SELECT 
+/*!50001 CREATE VIEW `v_pedidos_count_uf` AS SELECT
  1 AS `SiglaUF`,
  1 AS `TotalPedidos`*/;
 SET character_set_client = @saved_cs_client;

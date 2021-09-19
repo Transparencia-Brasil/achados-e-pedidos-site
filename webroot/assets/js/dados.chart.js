@@ -7,7 +7,7 @@
 
     var svg = d3.select("#chart-atendimento")
         .append("svg")
-            .attr("width", width + margin.left + margin.right)
+            .attr("width", width + margin.left + margin.right + 200)
             .attr("height", (height + margin.top + margin.bottom) + 20)
         .append("g")
             .attr("transform",
@@ -19,8 +19,7 @@
     // - Legenda
     svg.append("g")
     .attr("class", "legendLinear")
-    .attr("transform", "translate(2,-40)");
-
+    .attr("transform", "translate(900,145)");
 
     svg.select(".legendLinear")
     .append('rect')
@@ -39,6 +38,7 @@
     svg.select(".legendLinear")
     .append('rect')
     .attr("x",160)
+    .attr("y",44)
     .attr("width",24)
     .attr("height",24)
     .attr('stroke', 'black')
@@ -46,8 +46,8 @@
 
     svg.select(".legendLinear")
     .append('text')
-    .attr("y",20)
-    .attr("x",190)
+    .attr("y",64)
+    .attr("x",30)
     .attr('stroke', 'black')
     .text('Não Respondidos');
 
@@ -106,6 +106,7 @@
         .range([0, width])
         .padding([0.2])
         svg.append("g")
+        .attr("class","xaxis")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x).tickSizeOuter(0));
 
@@ -113,12 +114,27 @@
         var y = d3.scaleLinear()
         .domain([0.0,1.0])
         .range([ height, 0 ]);
+
+        var y_axis = d3.axisLeft().scale(y)
+            .tickValues([0, .25, .5, .75, 1])
+            .tickFormat(d3.format(".0%"));
+
         svg.append("g")
-        .call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
+        .attr("class","yaxis")
+        .call(y_axis);
 
         var color = d3.scaleOrdinal()
             .domain(subgroups)
-            .range(['#e45d88','#fbc064'])
+            .range(['#e45d88','#fbc064']);
+
+        svg.select(".yaxis")
+            .selectAll("text")
+            .style("font-size","15px");
+
+        svg.select(".xaxis")
+            .selectAll("text")
+            .style("font-size","16px");
+
 
         //stack the data? --> stack per subgroup
         var stackedData = d3.stack()
@@ -371,28 +387,42 @@
         function drawMap(error, br) {
             if (error) throw error;
             var ufs = topojson.feature(br, br.objects.br);
-            data = pedidosPorUFPoderENivelCache;
 
             // Filtra os Resultados
             var nivelFederativo = $("#filter-nivel").val();
             var esferaPoder = $("#filter-poder").val();
 
+            data = pedidosPorUFPoderENivelCache
+            .map(function(el) {
+                var el2 = Object.assign({}, el);
+
+                // - Se o Nivel federativo for Federal, Considera tudo como BR
+
+                if(nivelFederativo == "Federal")
+                {
+                    el2.SiglaUf = "BR";
+                }
+
+                return el2;
+            });;
+
             if(nivelFederativo !== "--") {
                 data = data.filter(function(el) {
-                    return el.NomeNivelFederativo == nivelFederativo;
-                });
+                    return nivelFederativo == "Federal" ? true : el.NomeNivelFederativo == nivelFederativo;
+                })
             }
 
             if(esferaPoder !== "--") {
-                    data = data.filter(function(el) {
-                        return el.NomePoder == esferaPoder;
-                    });
+                data = data.filter(function(el) {
+                    return el.NomePoder == esferaPoder;
+                });
             }
 
             // Consolida os Dados por Estado
-            var ufsData = data.map(el => el.SiglaUf)
+            var ufsData = data
+                .map(el => el.SiglaUf)
                 .filter((value, index, self) => self.indexOf(value) === index); // Distinct
-
+          
             // Recria o Dados Consolidados
             var dataC = [];
             ufsData.forEach(function(el, i, arr) {
@@ -455,8 +485,7 @@
                     .attr("fill", function (d) {
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUf == sigla);
-
-                        return colorScale(procura[0].PercRespondidos);
+                        return procura.length == 0 ? colorScale(0) : colorScale(procura[0].PercRespondidos);
                     })
                     // Efeito Hover
                     .style("opacity", .85)
@@ -472,9 +501,9 @@
                         d3.select(this)
                             .transition()
                             .duration(200)
-                            .style("opacity", 1)
-                            .style("stroke", "black");
-
+                            .style("opacity", 1)              
+                            .style("stroke", "#999999");
+              
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUf == sigla);
 

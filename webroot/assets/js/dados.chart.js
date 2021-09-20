@@ -37,7 +37,7 @@
 
     svg.select(".legendLinear")
     .append('rect')
-    .attr("x",160)
+    .attr("x",0)
     .attr("y",44)
     .attr("width",24)
     .attr("height",24)
@@ -173,7 +173,7 @@
                  return y(d[0]) - y(d[1]);
              })
             .attr("width",x.bandwidth())
-            .style("cursor", "help")
+            .style("cursor", "pointer")
             .append("title") // Titulo da Barra
             .html(function(d) {
                 return d.data.Total + " pedidos no total.";

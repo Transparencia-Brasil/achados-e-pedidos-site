@@ -21,7 +21,6 @@
     .attr("class", "legendLinear")
     .attr("transform", "translate(900,145)");
 
-
     svg.select(".legendLinear")
     .append('rect')
     .attr("width",24)
@@ -38,6 +37,7 @@
 
     svg.select(".legendLinear")
     .append('rect')
+    .attr("x",0)
     .attr("y",44)
     .attr("width",24)
     .attr("height",24)
@@ -161,7 +161,8 @@
             .data(function(d) {
                 return d;
             })
-            .enter().append("rect") // Cria a Barra
+            .enter()
+            .append("rect") // Cria a Barra
             .attr("x", function(d) {
                 return x(d.data.Ano);
             })
@@ -171,7 +172,12 @@
             .attr("height", function(d) {
                  return y(d[0]) - y(d[1]);
              })
-            .attr("width",x.bandwidth());
+            .attr("width",x.bandwidth())
+            .style("cursor", "pointer")
+            .append("title") // Titulo da Barra
+            .html(function(d) {
+                return d.data.Total + " pedidos no total.";
+            });
 
         // Legendas dos Respondidos
         var legendaBarrasResp = svg.append("g")
@@ -416,8 +422,7 @@
             var ufsData = data
                 .map(el => el.SiglaUf)
                 .filter((value, index, self) => self.indexOf(value) === index); // Distinct
-
-
+          
             // Recria o Dados Consolidados
             var dataC = [];
             ufsData.forEach(function(el, i, arr) {
@@ -480,7 +485,6 @@
                     .attr("fill", function (d) {
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUf == sigla);
-
                         return procura.length == 0 ? colorScale(0) : colorScale(procura[0].PercRespondidos);
                     })
                     // Efeito Hover
@@ -497,9 +501,9 @@
                         d3.select(this)
                             .transition()
                             .duration(200)
-                            .style("opacity", 1)
+                            .style("opacity", 1)              
                             .style("stroke", "#999999");
-
+              
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUf == sigla);
 

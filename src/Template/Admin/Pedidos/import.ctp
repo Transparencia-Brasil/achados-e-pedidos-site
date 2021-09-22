@@ -29,11 +29,23 @@
 					</div>
 					<div class="box-content">
 <?php
-	if ($mostraMensagem) {
+	if ($estadoIndexacao == "OKAY") {
 ?>
 						<div class="messagesList">
 							<span class='title'>
 								<span class="label label-success">Pedidos sincronizados com sucesso</span>
+							</span>
+						</div>
+<?php
+	}
+?>
+
+<?php
+	if ( ($estadoIndexacao == "NEW" || $estadoIndexacao == "RUNNING") && $executandoIndexacao) {
+?>
+						<div class="messagesList">
+							<span class='title'>
+								<span class="label label-alert">Executando</span>
 							</span>
 						</div>
 <?php
@@ -53,11 +65,25 @@
 								<td><h2><?=$TotalPendentesAnexosES;?></h2></td>
 							</tr>
 						</table>
+<?php
+	if (!$executandoIndexacao) {
+?>
 						<?=$this->Form->create($pedidoBU, ['class' => 'form-horizontal']) ?>
 						<div>
 						  	<button type="submit" class="btn btn-primary">Importar pedidos para o elastic search</button>
 						</div>
 						<?=$this->Form->end();?>
+<?php
+	}
+    else
+    {
+?>
+<div>
+    <button type="button" class="btn btn-primary" onclick="document.location.reload(true);">Atualizar</button>
+</div>
+<?php
+	}
+?>
 					</div>
-				</div><!--/span-->	
+				</div><!--/span-->
 			</div><!--/row-->

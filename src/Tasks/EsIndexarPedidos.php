@@ -1,7 +1,13 @@
 <?php
 
-file_put_contents(TMP . "/EsIndexarPedidos.task", "RUNNING");
-file_put_contents(TMP . "/EsIndexarPedidos.pid", getmypid());
+//file_put_contents(TMP . "/EsIndexarPedidos.task", "RUNNING");
+//file_put_contents(TMP . "/EsIndexarPedidos.pid", getmypid());
+
+$tmp = dirname(__DIR__) . '/../tmp';
+
+file_put_contents( $tmp . "/EsIndexarPedidos.task", "RUNNING");
+file_put_contents( $tmp . "/EsIndexarPedidos.pid", getmypid());
+
 require dirname(__DIR__) . '/../config/bootstrap.php';
 
 
@@ -22,4 +28,4 @@ $pedidoInteracaoEdicaoBU->ES_AtualizarInserirInteracoes($pedido_interacao_codigo
 $pedido_anexo_codigo = null; //insere novo anexo no ES
 $pedidoAnexoEdicaoBU->ES_AtualizarInserirAnexos($pedido_anexo_codigo);
 
-file_put_contents(TMP . "EsIndexarPedidos.task", "OKAY");
+file_put_contents($tmp . "EsIndexarPedidos.task", "OKAY");

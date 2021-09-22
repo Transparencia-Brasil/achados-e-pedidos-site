@@ -2,8 +2,10 @@
 (function () {
 
     var margin = {top: 40, right: 30, bottom: 10, left: 50},
-        width = 960 - margin.left - margin.right,
-        height = 470 - margin.top - margin.bottom;
+    width = 960 - margin.left - margin.right,
+    height = 470 - margin.top - margin.bottom,
+    tooltip , tooltipBody, tooltipContent, tooltipTitle;
+
 
     var svg = d3.select("#chart-atendimento")
         .append("svg")
@@ -173,10 +175,19 @@
                  return y(d[0]) - y(d[1]);
              })
             .attr("width",x.bandwidth())
-            .style("cursor", "pointer")
-            .append("title") // Titulo da Barra
-            .html(function(d) {
-                return d.data.Total + " pedidos no total.";
+            .style("cursor", "help")
+            .on("mouseover", function (d) {
+                tooltip.attr("transform", "translate(" + x(d.data.Ano) + ", " + y(d[1]) + ")")
+                tooltipTitle.html(d.data.Ano);
+
+                tooltipBody.html("<p class='chart-tip'>" + d.data.Total + " pedidos</p><p>"
+                + d.data.Respondido + " pedidos respondidos</p><p>"
+                + d.data.NaoRespondido + " pedidos não respondidos</p>");
+
+                tooltip.style("display", null);
+            })
+            .on("mouseout", function (d) {
+                tooltip.style("display", "none");
             });
 
         // Legendas dos Respondidos
@@ -220,6 +231,23 @@
             .attr("font-size" , "14px")
             .attr("fill" , "black")
             .attr("text-anchor", "middle");
+
+
+        // - Tooltip
+        tooltip = svg.append("foreignObject")
+        .attr("class", "chart-tooltip")
+        .attr("x", -15)
+        .attr("y", 10)
+        .attr("width", 150)
+        .attr("height", 100)
+        .style("display", "none")
+        .style("z-index", 10000);
+        tooltipContent = tooltip.append('xhtml:div')
+            .attr("class", "chart-tooltip-content");
+        tooltipTitle = tooltipContent.append('div')
+            .attr("class", 'chart-tooltip-title');
+        tooltipBody = tooltipContent.append('div')
+            .attr('class', 'chart-tooltip-body');
     }
 
     d3.json("/api/PedidosAtendimentoPorAno", draw);
@@ -422,7 +450,7 @@
             var ufsData = data
                 .map(el => el.SiglaUf)
                 .filter((value, index, self) => self.indexOf(value) === index); // Distinct
-          
+
             // Recria o Dados Consolidados
             var dataC = [];
             ufsData.forEach(function(el, i, arr) {
@@ -501,9 +529,9 @@
                         d3.select(this)
                             .transition()
                             .duration(200)
-                            .style("opacity", 1)              
+                            .style("opacity", 1)
                             .style("stroke", "#999999");
-              
+
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUf == sigla);
 

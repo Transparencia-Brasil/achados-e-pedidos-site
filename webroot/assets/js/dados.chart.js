@@ -190,7 +190,7 @@
                  return y(d[0]) - y(d[1]);
              })
             .attr("width",x.bandwidth())
-            .style("cursor", "help")
+            .style("cursor", "pointer")
             .on("mouseover", function (d) {
                 var tooltipY = d.key == "Respondidos" ? y(0.9) : y(0.5);
 
@@ -221,7 +221,7 @@
             .attr("font-size" , "14px")
             .attr("fill" , "black")
             .attr("text-anchor", "middle")
-            .style("cursor", "help")
+            .style("cursor", "pointer")
             .on("mouseover", function (d) {
                 tooltipShow(d, x(d.Ano) , y(0.8));
             })
@@ -250,7 +250,7 @@
             .attr("font-size" , "14px")
             .attr("fill" , "black")
             .attr("text-anchor", "middle")
-            .style("cursor", "help")
+            .style("cursor", "pointer")
             .on("mouseover", function (d) {
                 tooltipShow(d, x(d.Ano) , y(0.5));
             })

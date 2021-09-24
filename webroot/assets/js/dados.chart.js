@@ -53,6 +53,17 @@
     .attr('stroke', 'black')
     .text('Não Respondidos');
 
+    function tooltipShow(data, x, y) {
+        tooltip.attr("transform", "translate(" + x + ", " + y + ")")
+        tooltipTitle.html(data.Ano);
+
+        tooltipBody.html("<p class='chart-tip'>" + data.Total + " pedidos</p><p>"
+        + data.Respondido + " pedidos respondidos</p><p>"
+        + data.NaoRespondido + " pedidos não respondidos</p>");
+
+        tooltip.style("display", null);
+    }
+
     // -
     function draw(error, data) {
         if (error) throw error;
@@ -161,6 +172,10 @@
             })
             .selectAll("rect")
             .data(function(d) {
+                d.forEach(function(item, i) {
+                    item.key = d.key;
+                });
+
                 return d;
             })
             .enter()
@@ -177,14 +192,9 @@
             .attr("width",x.bandwidth())
             .style("cursor", "help")
             .on("mouseover", function (d) {
-                tooltip.attr("transform", "translate(" + x(d.data.Ano) + ", " + y(d[1]) + ")")
-                tooltipTitle.html(d.data.Ano);
+                var tooltipY = d.key == "Respondidos" ? y(0.9) : y(0.5);
 
-                tooltipBody.html("<p class='chart-tip'>" + d.data.Total + " pedidos</p><p>"
-                + d.data.Respondido + " pedidos respondidos</p><p>"
-                + d.data.NaoRespondido + " pedidos não respondidos</p>");
-
-                tooltip.style("display", null);
+                tooltipShow(d.data, x(d.data.Ano) , tooltipY);
             })
             .on("mouseout", function (d) {
                 tooltip.style("display", "none");
@@ -204,12 +214,20 @@
                 return x(d.Ano) + x.bandwidth()/2;
             })
             .attr("y", function(d){
-                return  y(0) - ((y(0) - y(d.PercRespondidos)) / 2);
+                d.dy =  y(0) - ((y(0) - y(d.PercRespondidos)) / 2);
+                return d.dy;
             })
             .attr("font-family" , "sans-serif")
             .attr("font-size" , "14px")
             .attr("fill" , "black")
-            .attr("text-anchor", "middle");
+            .attr("text-anchor", "middle")
+            .style("cursor", "help")
+            .on("mouseover", function (d) {
+                tooltipShow(d, x(d.Ano) , y(0.8));
+            })
+            .on("mouseout", function (d) {
+                tooltip.style("display", "none");
+            });;
 
         // Legendas dos Não Respondidos
         var legendaBarrasNaoResp = svg.append("g")
@@ -225,12 +243,20 @@
                 return x(d.Ano) + x.bandwidth()/2;
             })
             .attr("y", function(d){
-                return  ((y(0) - y(d.PercNaoRespondidos)) / 2);
+                d.dy2 =  ((y(0) - y(d.PercNaoRespondidos)) / 2);
+                return d.dy2;
             })
             .attr("font-family" , "sans-serif")
             .attr("font-size" , "14px")
             .attr("fill" , "black")
-            .attr("text-anchor", "middle");
+            .attr("text-anchor", "middle")
+            .style("cursor", "help")
+            .on("mouseover", function (d) {
+                tooltipShow(d, x(d.Ano) , y(0.5));
+            })
+            .on("mouseout", function (d) {
+                tooltip.style("display", "none");
+            });;
 
 
         // - Tooltip

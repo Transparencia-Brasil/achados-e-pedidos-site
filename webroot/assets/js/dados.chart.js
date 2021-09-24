@@ -2,8 +2,10 @@
 (function () {
 
     var margin = {top: 40, right: 30, bottom: 10, left: 50},
-        width = 960 - margin.left - margin.right,
-        height = 470 - margin.top - margin.bottom;
+    width = 960 - margin.left - margin.right,
+    height = 470 - margin.top - margin.bottom,
+    tooltip , tooltipBody, tooltipContent, tooltipTitle;
+
 
     var svg = d3.select("#chart-atendimento")
         .append("svg")
@@ -50,6 +52,17 @@
     .attr("x",30)
     .attr('stroke', 'black')
     .text('Não Respondidos');
+
+    function tooltipShow(data, x, y) {
+        tooltip.attr("transform", "translate(" + x + ", " + y + ")")
+        tooltipTitle.html(data.Ano);
+
+        tooltipBody.html("<p class='chart-tip'>" + data.Total + " pedidos</p><p>"
+        + data.Respondido + " pedidos respondidos</p><p>"
+        + data.NaoRespondido + " pedidos não respondidos</p>");
+
+        tooltip.style("display", null);
+    }
 
     // -
     function draw(error, data) {
@@ -159,6 +172,10 @@
             })
             .selectAll("rect")
             .data(function(d) {
+                d.forEach(function(item, i) {
+                    item.key = d.key;
+                });
+
                 return d;
             })
             .enter()
@@ -174,9 +191,13 @@
              })
             .attr("width",x.bandwidth())
             .style("cursor", "pointer")
-            .append("title") // Titulo da Barra
-            .html(function(d) {
-                return d.data.Total + " pedidos no total.";
+            .on("mouseover", function (d) {
+                var tooltipY = d.key == "Respondidos" ? y(0.9) : y(0.5);
+
+                tooltipShow(d.data, x(d.data.Ano) , tooltipY);
+            })
+            .on("mouseout", function (d) {
+                tooltip.style("display", "none");
             });
 
         // Legendas dos Respondidos
@@ -193,12 +214,20 @@
                 return x(d.Ano) + x.bandwidth()/2;
             })
             .attr("y", function(d){
-                return  y(0) - ((y(0) - y(d.PercRespondidos)) / 2);
+                d.dy =  y(0) - ((y(0) - y(d.PercRespondidos)) / 2);
+                return d.dy;
             })
             .attr("font-family" , "sans-serif")
             .attr("font-size" , "14px")
             .attr("fill" , "black")
-            .attr("text-anchor", "middle");
+            .attr("text-anchor", "middle")
+            .style("cursor", "pointer")
+            .on("mouseover", function (d) {
+                tooltipShow(d, x(d.Ano) , y(0.8));
+            })
+            .on("mouseout", function (d) {
+                tooltip.style("display", "none");
+            });;
 
         // Legendas dos Não Respondidos
         var legendaBarrasNaoResp = svg.append("g")
@@ -214,12 +243,37 @@
                 return x(d.Ano) + x.bandwidth()/2;
             })
             .attr("y", function(d){
-                return  ((y(0) - y(d.PercNaoRespondidos)) / 2);
+                d.dy2 =  ((y(0) - y(d.PercNaoRespondidos)) / 2);
+                return d.dy2;
             })
             .attr("font-family" , "sans-serif")
             .attr("font-size" , "14px")
             .attr("fill" , "black")
-            .attr("text-anchor", "middle");
+            .attr("text-anchor", "middle")
+            .style("cursor", "pointer")
+            .on("mouseover", function (d) {
+                tooltipShow(d, x(d.Ano) , y(0.5));
+            })
+            .on("mouseout", function (d) {
+                tooltip.style("display", "none");
+            });;
+
+
+        // - Tooltip
+        tooltip = svg.append("foreignObject")
+        .attr("class", "chart-tooltip")
+        .attr("x", -15)
+        .attr("y", 10)
+        .attr("width", 150)
+        .attr("height", 100)
+        .style("display", "none")
+        .style("z-index", 10000);
+        tooltipContent = tooltip.append('xhtml:div')
+            .attr("class", "chart-tooltip-content");
+        tooltipTitle = tooltipContent.append('div')
+            .attr("class", 'chart-tooltip-title');
+        tooltipBody = tooltipContent.append('div')
+            .attr('class', 'chart-tooltip-body');
     }
 
     d3.json("/api/PedidosAtendimentoPorAno", draw);
@@ -422,7 +476,7 @@
             var ufsData = data
                 .map(el => el.SiglaUf)
                 .filter((value, index, self) => self.indexOf(value) === index); // Distinct
-          
+
             // Recria o Dados Consolidados
             var dataC = [];
             ufsData.forEach(function(el, i, arr) {
@@ -501,9 +555,9 @@
                         d3.select(this)
                             .transition()
                             .duration(200)
-                            .style("opacity", 1)              
+                            .style("opacity", 1)
                             .style("stroke", "#999999");
-              
+
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUf == sigla);
 

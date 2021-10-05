@@ -67,20 +67,34 @@
     // -
     function draw(error, data) {
         if (error) throw error;
-    
-        var series = d3.nest().key(function(d) { return d.status; }).sortKeys(d3.ascending).entries(data);
-        var series2 = d3.nest().key(function(d) { return d.ano; }).sortValues(function(a, b) { return b.qtd - a.qtd; }).entries(data);
-    
-        x.domain(data.map(function(d) { return d.ano; }));
-        // y.domain([d3.min(data, function(d) { return +d.qtd }), d3.max(data, function(d) { return +d.qtd })]);
-        z.domain(series.map(function(d) { return d.key; }));
-    
-        series2 = _.map(series2, function(item) {
-            var sum = d3.sum(item.values, function(d) { return +d.qtd; });
-            item.values.forEach(function(v) {
-                v.sum = sum;
+
+        // Consolida os Anos e Unicos Registros
+        var anosDataq = data.map(el => el.Ano)
+            .filter((value, index, self) => self.indexOf(value) === index); // Distinct
+
+        var dataC = [];
+        anosDataq.forEach(function(el, i, arr) {
+            var anoNovoItem = {
+                Respondido: 0,
+                NaoRespondido: 0,
+                Total: 0,
+                PercRespondidos: 0,
+                Ano: el
+            };
+
+            // -
+            data.filter(el2 => el2.Ano == el).forEach(function(itemAno, iItemAno) {
+                var valor = parseInt(itemAno.Qtd);
+
+                if(itemAno.StatusResposta == "Respondido") {
+                    anoNovoItem.Respondido += valor;
+                } else {
+                    anoNovoItem.NaoRespondido += valor;
+                }
             });
-            return item;
+
+            // -
+            dataC[i] = anoNovoItem;
         });
 
         data = dataC;
@@ -317,276 +331,145 @@
         // -
         var tooltipB = svgB.append("foreignObject")
             .attr("class", "chart-tooltip")
-            .attr("x", 60)
-            .attr("y", 0)
+            .attr("x", 0)
+            .attr("y", heightB - 100)
             .attr("width", 150)
             .attr("height", 100)
             .style("display", "none");
-        var tooltipContent = tooltip.append('xhtml:div')
+        var tooltipContentB = tooltipB.append('xhtml:div')
             .attr("class", "chart-tooltip-content");
-        var tooltipTitle = tooltipContent.append('div')
-            .attr('class', 'chart-tooltip-title');
-        var tooltipBody = tooltipContent.append('div')
+        var tooltipTitleB = tooltipContentB.append('div')
+            .attr("class", 'chart-tooltip-title');
+        var tooltipBodyB = tooltipContentB.append('div')
             .attr('class', 'chart-tooltip-body');
-        var tooltipTips = tooltipBody.selectAll('.chart-tip')
-            .data(series2)
-            .enter()
-            .append('p')
-                .attr('class', 'chart-tip');
-    
-        var tooltipDots = focus2.selectAll('.chart-dot-hover')
-            .data(series)
-            .enter()
-            .append('circle')
-                .attr("class", "chart-dot-hover")
-                .attr("r", dot.radius*3)
-                .style("display", "none")
-                .style("opacity", 0.3);
-    
-        svg.append('rect')
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-            .attr("class", "chart-overlay")
-            .attr("width", width)
-            .attr("height", height)
-            .on("mouseover", mouseover)
-            .on("mouseout", mouseout)
-            .on("mousemove", mousemove);
-    
-        var timeScales = d3.map(data, function(d) { return x(d.ano); }).keys();
-    
-        function mouseover() {
-            focus.style("display", null);
-            tooltip.style("display", null);
-            tooltipDots.style("display", null);
-        }
-        function mouseout() {
-            focus.style("display", "none");
-            tooltip.style("display", "none");
-            tooltipDots.style("display", "none");
-        }
-        function mousemove() {
-            var xMouse = d3.mouse(this)[0];
-            var yMouse = d3.mouse(this)[1];
-            var i = d3.bisect(timeScales, xMouse, 1);
-            var di = series2[i-1];
-            focus.attr("transform", "translate(" + x(di.key) + ",0)");
-            var xTooltip = x(di.key);
-            if (xTooltip > 500) {
-                xTooltip = xTooltip - 170;
-            }
-            tooltip.attr("transform", "translate(" + xTooltip + ","+yMouse+")");
-            tooltipTitle.text(di.key);
-            tooltipDots
-                .attr("cx", x(di.key))
-                .attr("cy", function(d, j) {
-                    if (typeof(di.values[j]) !== 'undefined') {
-                        return y(+di.values[j].qtd/di.values[j].sum);
-                    } else {
-                        return height*2;
-                    }
-                })
-                .attr("fill", function(d, j) {
-                    if (typeof(di.values[j]) !== 'undefined') {
-                        return z(di.values[j].status);
-                    } else {
-                        return "#fff";
-                    }
+
+        var
+            marginC = { top: 20, right: 60, bottom: 20, left: 90 },
+            viewBoxC = { width: 450, height: 500 },
+            widthC = viewBoxC.width - marginC.left - marginC.right,
+            heightC = viewBoxC.height - marginC.top - marginC.bottom,
+            svgC = d3.select("#chart-pedidos-uf-barras").append("svg")
+            .attr("width", widthC + marginC.left + marginC.right + 230)
+            .attr("height", heightC + marginC.top + marginC.bottom + 20)
+          .append("g")
+            .attr("transform",
+                  "translate(" + marginC.left + "," + marginC.top + ")");
+
+
+        function drawBarras(data) {
+            //
+            var orderByPerc = $("#order-by-perc").is(":checked");
+            var orderByUf = $("#order-by-uf").is(":checked");
+
+            // Ordena os Dados
+            if(orderByPerc) {
+                data = data.sort(function(a,b) {
+                    return a.PercRespondidos - b.PercRespondidos;
                 });
-            tooltipTips.text(function(d, j) {
-                if (typeof(di.values[j]) !== 'undefined') {
-                    return capitalizeFirstLetter(di.values[j].status)+ ": "+di.values[j].qtd;
-                } else {
-                    return "";
-                }
-            })
-            .style("color", function(d, j) {
-                if (typeof(di.values[j]) !== 'undefined') {
-                    return z(di.values[j].status);
-                } else {
-                    return "#fff";
-                }
-            });
-        }
-    
-        function capitalizeFirstLetter(s) {
-            return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-        }
-    }
-    
-    d3.json("/api/atendimentoPedidosPorAnoETipo", draw);
-    })();
-    
-    (function(){
-    var _lodash = _.noConflict();
-    var unidadesFederativas = [{"ID": "0","Sigla": "ÓrgãosFederais","Nome": "Órgãos Federais"},{"ID": "1","Sigla": "AC","Nome": "Acre"}, {"ID": "2","Sigla": "AL","Nome": "Alagoas"}, {"ID": "3","Sigla": "AM","Nome": "Amazonas"}, {"ID": "4","Sigla": "AP","Nome": "Amapá"}, {"ID": "5","Sigla": "BA","Nome": "Bahia"}, {"ID": "6","Sigla": "CE","Nome": "Ceará"}, {"ID": "7","Sigla": "DF","Nome": "Distrito Federal"}, {"ID": "8","Sigla": "ES","Nome": "Espírito Santo"}, {"ID": "9","Sigla": "GO","Nome": "Goiás"}, {"ID": "10","Sigla": "MA","Nome": "Maranhão"}, {"ID": "11","Sigla": "MG","Nome": "Minas Gerais"}, {"ID": "12","Sigla": "MS","Nome": "Mato Grosso do Sul"}, {"ID": "13","Sigla": "MT","Nome": "Mato Grosso"}, {"ID": "14","Sigla": "PA","Nome": "Pará"}, {"ID": "15","Sigla": "PB","Nome": "Paraíba"}, {"ID": "16","Sigla": "PE","Nome": "Pernambuco"}, {"ID": "17","Sigla": "PI","Nome": "Piauí"}, {"ID": "18","Sigla": "PR","Nome": "Paraná"}, {"ID": "19","Sigla": "RJ","Nome": "Rio de Janeiro"}, {"ID": "20","Sigla": "RN","Nome": "Rio Grande do Norte"}, {"ID": "21","Sigla": "RO","Nome": "Rondônia"}, {"ID": "22","Sigla": "RR","Nome": "Roraima"}, {"ID": "23","Sigla": "RS","Nome": "Rio Grande do Sul"}, {"ID": "24","Sigla": "SC","Nome": "Santa Catarina"}, {"ID": "25","Sigla": "SE","Nome": "Sergipe"}, {"ID": "26","Sigla": "SP","Nome": "São Paulo"}, {"ID": "27","Sigla": "TO","Nome": "Tocantins"}];
-    var
-        marginB = {top: 0, right: 0, bottom: 0, left: 0},
-        viewBoxB = {width: 600, height: 460},
-        widthB = viewBoxB.width - marginB.left - marginB.right,
-        heightB = viewBoxB.height - marginB.top - marginB.bottom,
-        dotB = {minRadius: 3, maxRadius: 30},
-        svgB = d3.select("#chart-pedidos-uf-mapa").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 "+viewBoxB.width+" "+viewBoxB.height)
-            .attr("width", "100%"),
-        gB = svgB.append("g").attr("transform", "translate(" + marginB.left + "," + marginB.top + ")"),
-        projection = d3.geoAlbers()
-            .center([-44, -15])
-            .rotate([0, 0])
-            .parallels([0, 0])
-            .scale(700),
-        map = d3.geoPath().projection(projection);
-    
-    var mapScale = d3.scaleLinear().range([dotB.minRadius, dotB.maxRadius]).domain([0, 1]);
-    var
-        filter_tipo = "Respondido",
-        filter_nivel = "--",
-        filter_poder = "--",
-        order_by = "perc";
-    
-    var tooltipB = svgB.append("foreignObject")
-        .attr("class", "chart-tooltip")
-        .attr("x", 0)
-        .attr("y", heightB - 100)
-        .attr("width", 150)
-        .attr("height", 100)
-        .style("display", "none");
-    var tooltipContentB = tooltipB.append('xhtml:div')
-        .attr("class", "chart-tooltip-content");
-    var tooltipTitleB = tooltipContentB.append('div')
-        .attr("class", 'chart-tooltip-title');
-    var tooltipBodyB = tooltipContentB.append('div')
-        .attr('class', 'chart-tooltip-body');
-    
-    var
-        marginC = {top: 20, right: 60, bottom: 20, left: 90},
-        viewBoxC = {width: 400, height: 460},
-        widthC = viewBoxC.width - marginC.left - marginC.right,
-        heightC = viewBoxC.height - marginC.top - marginC.bottom,
-        dotC = {minRadius: 1, maxRadius: 35},
-        svgC = d3.select("#chart-pedidos-uf-barras").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 "+viewBoxC.width+" "+viewBoxC.height)
-            .attr("width", "100%"),
-        gC = svgC.append("g").attr("transform", "translate(" + marginC.left + "," + marginC.top + ")"),
-        xC = d3.scaleLinear().range([0, widthC]),
-        yC = d3.scaleBand().range([heightC, 0]).paddingInner(0.05);
-    
-    function drawMap(error, br) {
-        if (error) throw error;
-        var ufs = topojson.feature(br, br.objects.br);
-    
-        d3.json("/api/pedidosPorUFPoderENivel", function drawMapData(error, data) {
-            if (error) throw error;
-    
-            var seriesMap = d3.nest()
-                .key(function(d) { return d.sigla; })
-                .sortKeys(d3.descending)
-                .entries(data);
-            var seriesMapDomain = d3.nest()
-                .rollup(function(l) { return { "max": d3.max(l, function(ld) { return ld.qtd; }), "min": d3.min(l, function(ld) { return ld.qtd; }), "sum": d3.sum(l, function(ld) { return ld.qtd; }) } })
-                .entries(data);
-            var seriesSum = d3.nest()
-                .key(function(d) { return d.sigla; })
-                .rollup(function(l) { return { "sum": d3.sum(l, function(ld) { return ld.qtd; }) } })
-                .entries(data);
-    
-            // var features = _lodash.map(ufs.features, function(item) {
-            //     return _lodash.extend(item, _lodash.find(seriesMap, { key: item.id }));
-            // });
-    
-            gB.selectAll(".chart-uf")
-                .data(ufs.features)
-                .enter().append("path")
-                    .attr("class", "chart-uf")
-                    .attr("d", map);
-    
-            var mapDots = gB.selectAll(".chart-uf-dot")
-                .data(ufs.features)
-                .enter().append("circle")
-                    .attr("id", function(d) { return d.id; })
-                    .attr("class", "chart-uf-dot")
-                    .attr("r", 0)
-                    .style("opacity", 0.5)
-                    .attr("transform", function(d) { return "translate(" + map.centroid(d) + ")"; });
-    
-            var gBars = gC.append("g").attr("class", "chart-bars");
-    
-            gC.append("g")
-              .attr("class", "axis axis-x")
-              .attr("transform", "translate(0," + heightC + ")")
-              .call(d3.axisBottom(xC).ticks(2, ".1%"));
-            var yAxis = gC.append("g")
-                .attr("class", "axis axis-y")
-                .call(d3.axisLeft(yC));
-    
-            d3.select("#filter-tipo").on("change", function() {
-                filter_tipo = this.value;
-                filter();
-            });
-            d3.select("#filter-nivel").on("change", function() {
-                filter_nivel = this.value;
-                filter();
-            });
-            d3.select("#filter-poder").on("change", function() {
-                filter_poder = this.value;
-                filter();
-            });
-            d3.selectAll(".order-by").on("change", function() {
-                order_by = this.value;
-                filter();
-            });
-    
-            function setInfo(title, qtd, sum) {
-              var preposition = '';
-              if (filter_nivel === "Municipal" && (filter_poder === "Executivo" || filter_poder === "Legislativo" || filter_poder === "Tribunal de Contas")) {
-                d3.select("#chart-pedidos-uf-footer").style("display", null);
-              } else {
-                d3.select("#chart-pedidos-uf-footer").style("display", "none");
-              }
-              if (filter_nivel === "Municipal" && filter_poder == "Ministério Público") {
-                  d3.select("#chart-info-uf").style("opacity", 0);
-                  d3.select("#chart-info-all").style("display", "none");
-                  d3.select("#chart-info-error").style("display", null);
-                  d3.select("#chart-info-error").html("Não há Ministério Público<br>no nível municipal.");
-                  return;
-              }
-              if (filter_nivel === "Municipal" && filter_poder == "Judiciário") {
-                  d3.select("#chart-info-uf").style("opacity", 0);
-                  d3.select("#chart-info-all").style("display", "none");
-                  d3.select("#chart-info-error").style("display", null);
-                  d3.select("#chart-info-error").html("Não há Poder Judiciário<br>no nível municipal.");
-                  return;
-              }
-    
-              d3.select("#chart-info-uf").style("opacity", 1);
-              d3.select("#chart-info-all").style("display", null);
-              d3.select("#chart-info-error").style("display", "none");
-              d3.select("#chart-info-uf").text(title);
-              if (filter_nivel === "--") {
-                  d3.select("#chart-info-nivel-w").style("display", "none");
-                  preposition = 'No';
-              } else {
-                  d3.select("#chart-info-nivel-w").style("display", null);
-                  preposition = 'no';
-              }
-              if (filter_poder === "--") {
-                  d3.select("#chart-info-poder-w").style("display", "none");
-              } else {
-                  d3.select("#chart-info-poder-w").style("display", null);
-              }
-              d3.select("#chart-info-tipo").text(filter_tipo.toLowerCase()+"s");
-              d3.select("#chart-info-nivel").text(filter_nivel.toLowerCase());
-              d3.select("#chart-info-poder-prep").text(preposition);
-              d3.select("#chart-info-poder").text(capitalizeFirstLetter(filter_poder));
-              d3.select("#chart-info-qtd").text(qtd);
-              d3.select("#chart-info-perc").text(d3.format(".1%")(qtd/sum));
-              d3.select("#chart-pedidos-uf-info").style("display", null);
-              return;
+            } else if(orderByUf) {
+                data = data.sort(function(a,b) {
+                    return a.SiglaUf.localeCompare(b.SiglaUf, 'pt-BR', { sensitivity: 'base' });
+                });
             }
-    
-            function capitalizeFirstLetter(s) {
-                return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+
+            // Consolida os Dados por Estado
+            var ufsData = data.map(el => el.SiglaUf)
+                .filter((value, index, self) => self.indexOf(value) === index); // Distinct
+
+            // Add X axis
+            var x = d3.scaleLinear()
+            .domain([0.0, 1.0])
+            .range([ 0, widthC]);
+            svgC.append("g")
+            .attr("transform", "translate(0," + heightC + ")")
+            .call(d3.axisBottom(x).tickFormat(d3.format(".0%")))
+            .selectAll("text")
+                .attr("transform", "translate(-10,0)rotate(-45)")
+                .style("text-anchor", "end");
+
+              // Y axis
+            var y = d3.scaleBand()
+            .range([ 0, heightC ])
+            .domain(data.map(function(d) { return d.SiglaUf; }))
+            .padding(.1);
+            svgC.append("g")
+            .call(d3.axisLeft(y))
+
+
+            //Bars
+            svgC.selectAll("myRect")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", x(0) )
+            .attr("y", function(d) { return y(d.SiglaUf); })
+            .attr("width", function(d) { return x(d.PercRespondidos); })
+            .attr("height", y.bandwidth() )
+            .attr("fill", "#fe9301")
+            .style("opacity", 0.5)
+            .on("mouseover", function(d) {
+                d3.select(this).style("opacity", 1);
+                d3.select("#bartext-" + d.SiglaUf).style("opacity", 1);
+            })
+            .on("mouseout", function(d) {
+                d3.select(this).style("opacity", 0.5);
+                d3.select("#bartext-" + d.SiglaUf).style("opacity", 0);
+            });
+
+            // Texto da Quantidades de Pedidos
+            svgC.selectAll("myText")
+            .data(data)
+            .enter()
+            .append("text")
+            .attr("x", function(d) {
+                return x(d.PercRespondidos) + 5;
+            })
+            .attr("y", function(d) { return y(d.SiglaUf) + 10; })
+            .attr("width", 100)
+            .attr("height", y.bandwidth() )
+            .attr("fill", "#000")
+            .attr("id", function(d) {
+                return "bartext-" + d.SiglaUf;
+            })
+            .style("opacity", 0)
+            .style("z-index", 1000)
+            .text(function(d) {
+                return d.Respondido + " pedidos";
+            });
+        }
+
+        function drawMap(error, br) {
+            if (error) throw error;
+            var ufs = topojson.feature(br, br.objects.br);
+
+            // Filtra os Resultados
+            var nivelFederativo = $("#filter-nivel").val();
+            var esferaPoder = $("#filter-poder").val();
+
+            data = pedidosPorUFPoderENivelCache
+            .map(function(el) {
+                var el2 = Object.assign({}, el);
+
+                // - Se o Nivel federativo for Federal, Considera tudo como BR
+
+                if(nivelFederativo == "Federal")
+                {
+                    el2.SiglaUf = "BR";
+                }
+
+                return el2;
+            });;
+
+            if(nivelFederativo !== "--") {
+                data = data.filter(function(el) {
+                    return nivelFederativo == "Federal" ? true : el.NomeNivelFederativo == nivelFederativo;
+                })
+            }
+
+            if(esferaPoder !== "--") {
+                data = data.filter(function(el) {
+                    return el.NomePoder == esferaPoder;
+                });
             }
 
             // Consolida os Dados por Estado
@@ -708,168 +591,182 @@
 
         d3.json("/assets/data/br.json", drawMap);
     }
-    
-    d3.json("/assets/data/br.json", drawMap);
-    })();
-    
-    (function(){
+
+    $("#filter-nivel").change(function() {
+        doDrawMap();
+    });
+
+    $("#filter-poder").change(function() {
+        doDrawMap();
+    });
+
+    $("#order-by-perc").change(function() {
+        doDrawMap();
+    });
+
+    $("#order-by-uf").change(function() {
+        doDrawMap();
+    });
+})();
+
+(function () {
     var
-        margin = {top: 80, right: 50, bottom: 30, left: 50},
-        viewBox = {width: 860, height: 420},
+        margin = { top: 80, right: 50, bottom: 30, left: 50 },
+        viewBox = { width: 860, height: 420 },
         width = viewBox.width - margin.left - margin.right,
         height = viewBox.height - margin.top - margin.bottom,
-        dot = {radius: 3},
+        dot = { radius: 3 },
         svg = d3.select("#chart-tempo-resposta").append('svg')
             .attr("version", "1.1")
-            .attr("viewBox", "0 0 "+viewBox.width+" "+viewBox.height)
+            .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
             .attr("width", "100%"),
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    
+
     var filter_tipo = "--";
     var filter_esfera = "--";
-    
+
     var x = d3.scaleBand().rangeRound([0, width]).padding(0.01).paddingOuter(0.5),
         y = d3.scaleLinear().range([height, 0]),
         z = d3.scaleThreshold()
             .domain([6, 11, 16, 21, 26, 31, 36, 41])
             .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "mais de 40"]);
-        x.domain(z.range());
-    
-        g.append("g")
-          .attr("class", "chart-axis chart-axis--x")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x));
-    
-        var yAxis = g.append("g")
-            .attr("class", "chart-axis chart-axis--y");
-    
-        var tooltip = svg.append("foreignObject")
-            .attr("class", "chart-tooltip")
-            .attr("x", 12)
-            .attr("y", -10)
-            .attr("width", 150)
-            .attr("height", 100)
-            .style("display", "none");
-        var tooltipContent = tooltip.append('xhtml:div')
-            .attr("class", "chart-tooltip-content");
-        var tooltipTitle = tooltipContent.append('div')
-            .attr('class', 'chart-tooltip-title');
-        var tooltipBody = tooltipContent.append('div')
-            .attr('class', 'chart-tooltip-body');
-    
+    x.domain(z.range());
+
+    g.append("g")
+        .attr("class", "chart-axis chart-axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    var yAxis = g.append("g")
+        .attr("class", "chart-axis chart-axis--y");
+
+    var tooltip = svg.append("foreignObject")
+        .attr("class", "chart-tooltip")
+        .attr("x", 12)
+        .attr("y", -10)
+        .attr("width", 150)
+        .attr("height", 100)
+        .style("display", "none");
+    var tooltipContent = tooltip.append('xhtml:div')
+        .attr("class", "chart-tooltip-content");
+    var tooltipTitle = tooltipContent.append('div')
+        .attr('class', 'chart-tooltip-title');
+    var tooltipBody = tooltipContent.append('div')
+        .attr('class', 'chart-tooltip-body');
+
     function draw(error, data) {
         if (error) throw error;
-    
-        data.forEach(function(d) {
+
+        data.forEach(function (d) {
             d.DataEnvio = new Date(d.DataEnvio);
             d.DataResposta = new Date(d.DataResposta);
             d.Grupo = z(d.DiasCorridos);
         });
-    
-        d3.select("#filter-tipo-tempo").on("change", function() {
+
+        d3.select("#filter-tipo-tempo").on("change", function () {
             filter_tipo = this.value;
             filter();
         });
 
-        d3.select("#filter-tempo-esfera").on("change", function() {
+        d3.select("#filter-tempo-esfera").on("change", function () {
             filter_esfera = this.value;
             filter();
         });
-    
+
         function filter() {
-            var entries = _.filter(data, function(d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
-                entries = _.filter(entries, function(d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
+            var entries = _.filter(data, function (d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
+            entries = _.filter(entries, function (d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
             var series = d3.nest()
-                .key(function(d) { return d.Grupo; })
-                .rollup(function(leaves) { return leaves.length; })
+                .key(function (d) { return d.Grupo; })
+                .rollup(function (leaves) { return leaves.length; })
                 .entries(entries);
-            series.sort(function(a, b) { return d3.ascending(a.value, b.value); });
-    
+            series.sort(function (a, b) { return d3.ascending(a.value, b.value); });
+
             var total = d3.nest()
-                .rollup(function(leaves) { return leaves.length; })
+                .rollup(function (leaves) { return leaves.length; })
                 .entries(entries);
             console.log("total")
             console.log(total)
-            y.domain([0, Math.ceil(d3.max(series, function(d) { return d.value/total; }) * 10) / 10]);
+            y.domain([0, Math.ceil(d3.max(series, function (d) { return d.value / total; }) * 10) / 10]);
             yAxis.call(d3.axisLeft(y).tickFormat(d3.format(".1%")).ticks(4));
-    
+
             g.selectAll(".chart-bar").remove();
             var bars = g.selectAll(".chart-bar")
                 .data(series)
                 .enter().append("rect")
                 .attr("class", "chart-bar")
-                .attr("x", function(d) { return x(d.key); })
+                .attr("x", function (d) { return x(d.key); })
                 .attr("y", height)
                 .attr("width", x.bandwidth())
                 .attr("height", 0)
-                .on("mouseover", function(d) {
-                    tooltip.attr("transform", "translate("+x(d.key)+", "+(y(d.value/total)+10)+")")
+                .on("mouseover", function (d) {
+                    tooltip.attr("transform", "translate(" + x(d.key) + ", " + (y(d.value / total) + 10) + ")")
                     if (d.key == "mais de 40") {
-                        tooltipTitle.html(d.key+" dias")
+                        tooltipTitle.html(d.key + " dias")
                     } else {
-                        tooltipTitle.html("De "+d.key+" dias")
+                        tooltipTitle.html("De " + d.key + " dias")
                     }
-                    tooltipBody.html("<p class='chart-tip'>"+d.value+" pedidos</p><p>"+d3.format(".0%")(d.value/total)+" do total</p>");
+                    tooltipBody.html("<p class='chart-tip'>" + d.value + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
                     tooltip.style("display", null);
                 })
-                .on("mouseout", function(d) {
+                .on("mouseout", function (d) {
                     tooltip.style("display", "none");
                 });
             g.selectAll(".chart-bar")
                 .transition()
-                .duration(function(d, i) { return i*100; })
-                .attr("y", function(d) { return y(d.value/total); })
-                .attr("height", function(d) { return height - y(d.value/total); });
+                .duration(function (d, i) { return i * 100; })
+                .attr("y", function (d) { return y(d.value / total); })
+                .attr("height", function (d) { return height - y(d.value / total); });
         }
         filter();
     }
-    
+
     d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
-    })();
-    
-    (function(){
+})();
+
+(function () {
     var
-        margin = {top: 0, right: 0, bottom: 0, left: 0},
-        viewBox = {width: 520, height: 160},
+        margin = { top: 0, right: 0, bottom: 0, left: 0 },
+        viewBox = { width: 520, height: 160 },
         width = viewBox.width - margin.left - margin.right,
         height = viewBox.height - margin.top - margin.bottom,
-        dot = {radius: 40},
-        text = {padding: 10},
+        dot = { radius: 40 },
+        text = { padding: 10 },
         svg = d3.select("#chart-taxa-reversao").append('svg')
             .attr("version", "1.1")
-            .attr("viewBox", "0 0 "+viewBox.width+" "+viewBox.height)
+            .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
             .attr("width", "100%"),
         clip = svg.append("defs").append("clipPath").attr("id", "circles-clip-path"),
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     var
         x = d3.scaleBand().rangeRound([0, width]).paddingOuter(0.5),
-        y = d3.scaleLinear().range([0, dot.radius*2]);
+        y = d3.scaleLinear().range([0, dot.radius * 2]);
     function draw(error, data) {
         if (error) throw error;
         var nulldata = [
-            {Interacao: "4", Status: "Nenhum", Qtd: 0},
-            {Interacao: "5", Status: "Nenhum", Qtd: 0},
-            {Interacao: "6", Status: "Nenhum", Qtd: 0},
-            {Interacao: "7", Status: "Nenhum", Qtd: 0},
-            {Interacao: "8", Status: "Nenhum", Qtd: 0},
-            {Interacao: "9", Status: "Nenhum", Qtd: 0},
-            {Interacao: "10", Status: "Nenhum", Qtd: 0},
-            {Interacao: "11", Status: "Nenhum", Qtd: 0}
+            { Interacao: "4", Status: "Nenhum", Qtd: 0 },
+            { Interacao: "5", Status: "Nenhum", Qtd: 0 },
+            { Interacao: "6", Status: "Nenhum", Qtd: 0 },
+            { Interacao: "7", Status: "Nenhum", Qtd: 0 },
+            { Interacao: "8", Status: "Nenhum", Qtd: 0 },
+            { Interacao: "9", Status: "Nenhum", Qtd: 0 },
+            { Interacao: "10", Status: "Nenhum", Qtd: 0 },
+            { Interacao: "11", Status: "Nenhum", Qtd: 0 }
         ];
         data = data.concat(nulldata);
-        var dividend = _.filter(data, function(d) {
-                return d.Interacao == "5" || d.Interacao == "7" || d.Interacao == "9" || d.Interacao == "11";
-            });
-        var divisor = _.filter(data, function(d) {
+        var dividend = _.filter(data, function (d) {
+            return d.Interacao == "5" || d.Interacao == "7" || d.Interacao == "9" || d.Interacao == "11";
+        });
+        var divisor = _.filter(data, function (d) {
             return d.Interacao == "4" || d.Interacao == "6" || d.Interacao == "8" || d.Interacao == "10";
         });
         dividend = d3.nest()
-            .key(function(d) { return d.Interacao; })
-            .rollup(function(leaves) { return {"sum": d3.sum(leaves, function(l) { return +l.Qtd; }) } })
+            .key(function (d) { return d.Interacao; })
+            .rollup(function (leaves) { return { "sum": d3.sum(leaves, function (l) { return +l.Qtd; }) } })
             .entries(dividend);
         divisor = d3.nest()
-            .key(function(d) { return d.Interacao; })
-            .rollup(function(leaves) { return {"sum": d3.sum(leaves, function(l) { return +l.Qtd; }) } })
+            .key(function (d) { return d.Interacao; })
+            .rollup(function (leaves) { return { "sum": d3.sum(leaves, function (l) { return +l.Qtd; }) } })
             .entries(divisor);
         var series = [
             { instancia: "1ª instância", dividend: +dividend[0].value.sum, divisor: divisor[0].value.sum },
@@ -877,79 +774,78 @@
             { instancia: "3ª instância", dividend: +dividend[2].value.sum, divisor: divisor[2].value.sum },
             { instancia: "4ª instância", dividend: +dividend[3].value.sum, divisor: divisor[3].value.sum },
         ];
-        x.domain(series.map(function(d) { return d.instancia; }));
-    
+        x.domain(series.map(function (d) { return d.instancia; }));
+
         var paths = clip.selectAll("circle")
             .data(series)
             .enter().append("circle")
-                .attr("cx", function(d) { return x(d.instancia)+dot.radius; })
-                .attr("cy", height*0.5)
-                .attr("r", dot.radius);
-    
+            .attr("cx", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("cy", height * 0.5)
+            .attr("r", dot.radius);
+
         var gCircles = g.selectAll(".chart-circle")
             .data(series)
             .enter().append("g")
-                .attr("class", "chart-circle");
+            .attr("class", "chart-circle");
         gCircles.append("text")
-            .attr("x", function(d) { return x(d.instancia)+dot.radius; })
-            .attr("y", (height*0.5) - dot.radius - text.padding)
+            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("y", (height * 0.5) - dot.radius - text.padding)
             .attr("fill", "#000000")
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
-            .text(function(d) { return d.instancia; });
+            .text(function (d) { return d.instancia; });
         gCircles.append("text")
-            .attr("x", function(d) { return x(d.instancia)+dot.radius; })
-            .attr("y", (height*0.5) + dot.radius + text.padding)
+            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("y", (height * 0.5) + dot.radius + text.padding)
             .attr("fill", "#000000")
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "hanging")
-            .text(function(d) { return d.dividend+" pedidos"; });
+            .text(function (d) { return d.dividend + " pedidos"; });
         gCircles.append("circle")
-            .attr("cx", function(d) { return x(d.instancia)+dot.radius; })
-            .attr("cy", height*0.5)
+            .attr("cx", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("cy", height * 0.5)
             .attr("r", dot.radius)
             .attr("fill", "#edf0f5")
             .attr("stroke", "#e1e1e1")
             .attr("stroke-width", 2);
         gCircles.append("rect")
-            .attr("x", function(d) { return x(d.instancia); })
-            .attr("y", function(d) {
+            .attr("x", function (d) { return x(d.instancia); })
+            .attr("y", function (d) {
                 if (d.divisor > 0) {
-                    return (height*0.5+dot.radius)-y(d.dividend/d.divisor);
+                    return (height * 0.5 + dot.radius) - y(d.dividend / d.divisor);
                 }
             })
-            .attr("width", dot.radius*2)
-            .attr("height", function(d) {
+            .attr("width", dot.radius * 2)
+            .attr("height", function (d) {
                 if (d.divisor > 0) {
-                    return y(d.dividend/d.divisor);
+                    return y(d.dividend / d.divisor);
                 }
                 return y(0);
             })
             .attr("fill", "#FFA401")
             .attr("clip-path", "url(#circles-clip-path)");
         gCircles.append("text")
-            .attr("x", function(d) { return x(d.instancia)+dot.radius; })
-            .attr("y", function(d) {
+            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("y", function (d) {
                 if (d.divisor > 0) {
-                    if (d.dividend/d.divisor > 0.2 || d.dividend/d.divisor < 0.8) {
-                        return (height*0.5+dot.radius)-y(d.dividend/d.divisor)-(text.padding*0.4);
+                    if (d.dividend / d.divisor > 0.2 || d.dividend / d.divisor < 0.8) {
+                        return (height * 0.5 + dot.radius) - y(d.dividend / d.divisor) - (text.padding * 0.4);
                     }
                 }
-                return height*0.5;
-             })
+                return height * 0.5;
+            })
             .attr("fill", "#000000")
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "middle")
-            .text(function(d) {
+            .text(function (d) {
                 if (d.divisor > 0) {
-                    return d3.format(".1f")((d.dividend/d.divisor)*100)+"%";
+                    return d3.format(".1f")((d.dividend / d.divisor) * 100) + "%";
                 }
                 return "0%";
             });
-    
+
     }
     d3.json("/api/taxaDeReversao", draw);
-    })();
-    
+})();

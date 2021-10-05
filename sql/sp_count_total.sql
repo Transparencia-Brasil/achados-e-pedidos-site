@@ -1,4 +1,4 @@
-CREATE DEFINER=`achadosepedidos_staging`@`%` PROCEDURE `sp_count_total`()
+CREATE PROCEDURE `sp_count_total`()
 BEGIN
 
 declare SiglaUf varchar(2);

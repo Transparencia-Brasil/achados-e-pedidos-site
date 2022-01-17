@@ -116,9 +116,9 @@ $blipchat_key = Configure::read("BlipChat.Key");
                     <li><a href="<?=$this->Url->build(["controller" => "Pedidos","action" => "index", "prefix" => false]); ?>">Pedidos</a></li>
                     <li><a href="<?=$this->Url->build(["controller" => "Publicacoes","action" => "index", "prefix" => false]); ?>">Publicações</a></li>
                     <li><a href="<?=$this->Url->build(["controller" => "Dados","action" => "index", "prefix" => false])?>">Dados</a></li>
-                    <li><a href="<?=$linkChat ?>" class="menuLast">Quer ajuda?</a></li>
+                    <li><a href="#" class="menuLast toogle-chat">Quer ajuda?</a></li>
                     <li class="loginMobile"><a href="<?=$this->Url->build('/minhaconta/pedidos/novopedido'); ?>">Inserir Pedido</a></li>
-                    <li class="loginMobile"><a href="<?= $blipchat_applink ?>">Quer ajuda?</a></li>
+                    <li class="loginMobile"><a href="#" class="toogle-chat">Quer ajuda?</a></li>
                     <?php
                     if($this->FrontEnd->UsuarioLogado()){
                       ?>
@@ -176,7 +176,7 @@ $blipchat_key = Configure::read("BlipChat.Key");
                   <li><a href="<?=$this->Url->build(["controller" => "Pedidos","action" => "index", "prefix" => false])?>">Pedidos</a></li>
                   <li><a href="<?=$this->Url->build(["controller" => "Dados","action" => "index", "prefix" => false])?>">Dados</a></li>
                   <li><a href="<?=$this->Url->build(["controller" => "Cursos","action" => "index", "prefix" => false])?>">Cursos</a></li>
-                  <li><a href="<?=$linkChat ?>">Quer ajuda?</a></li>
+                  <li><a href="#" class="toogle-chat">Quer ajuda?</a></li>
                 </div>
               </ul>
             </div>
@@ -298,18 +298,21 @@ $blipchat_key = Configure::read("BlipChat.Key");
 
 
 
-    <script src="https://unpkg.com/blip-chat-widget" type="text/javascript">
-    </script>
+    <script src="https://unpkg.com/blip-chat-widget@1.6.*" type="text/javascript"></script>
     <script>
         (function () {
             window.onload = function () {
-                new BlipChat()
-                .withAppKey('<?= $blipchat_key ?>')
-                .withButton({"color":"#f9a521","icon":""})
-                .withEventHandler(BlipChat.LOAD_EVENT, function () {
-                    document.getElementById('bubble-msg').click() })
-                .withCustomCommonUrl('https://chat.blip.ai/')
-                .build();
+                var blipClient = new BlipChat();
+                blipClient.withAppKey('<?= $blipchat_key ?>')
+                blipClient.withButton({"color":"#f9a521","icon":""})
+                blipClient.withEventHandler(BlipChat.LOAD_EVENT, function () {
+                    document.getElementById('bubble-msg').click() 
+                })
+                blipClient.withCustomCommonUrl('https://chat.blip.ai/')
+                blipClient.build();
+                $(".toogle-chat").on('click', () => {
+                  blipClient.toogleChat();
+                });
             }
         })();
     </script>

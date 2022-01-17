@@ -1,8 +1,14 @@
 <?php
+use Cake\Core\Configure;
+use Phinx\Config\Config;
+
 $cakeDescription = 'Achados e Pedidos';
 $slug = isset($slug) ? $slug : isset($slug_pai) ? $slug_pai : "";
 
 $titulo = isset($title) ? " - " . $title : "";
+
+$linkChat = Configure::read("BlipChat.AppLink");
+$blipchat_key = Configure::read("BlipChat.Key");
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -33,6 +39,7 @@ $titulo = isset($title) ? " - " . $title : "";
         echo $this->Html->css('/assets/css/crop_images.css', ['rel' => 'stylesheet', 'media' => 'all']);
         echo $this->Html->css('/assets/css/adjustments.css', ['rel' => 'stylesheet', 'media' => 'all']);
         echo $this->Html->css('/assets/css/charts.css', ['rel' => 'stylesheet', 'media' => 'all']);
+        echo $this->Html->css('/assets/css/chat.css', ['rel' => 'stylesheet', 'media' => 'all']);
         echo $this->Html->script('/assets/js/jquery-3.1.1.min.js');
         ?>
         <script src="<?=BASE_URL?>assets/js/jquery.mask.min.js"></script>
@@ -109,8 +116,9 @@ $titulo = isset($title) ? " - " . $title : "";
                     <li><a href="<?=$this->Url->build(["controller" => "Pedidos","action" => "index", "prefix" => false]); ?>">Pedidos</a></li>
                     <li><a href="<?=$this->Url->build(["controller" => "Publicacoes","action" => "index", "prefix" => false]); ?>">Publicações</a></li>
                     <li><a href="<?=$this->Url->build(["controller" => "Dados","action" => "index", "prefix" => false])?>">Dados</a></li>
-                    <li><a href="<?=$this->Url->build(["controller" => "Cursos","action" => "index", "prefix" => false]); ?>" class="menuLast">Cursos</a></li>
+                    <li><a href="#" class="menuLast toogle-chat">Quer ajuda?</a></li>
                     <li class="loginMobile"><a href="<?=$this->Url->build('/minhaconta/pedidos/novopedido'); ?>">Inserir Pedido</a></li>
+                    <li class="loginMobile"><a href="#" class="toogle-chat">Quer ajuda?</a></li>
                     <?php
                     if($this->FrontEnd->UsuarioLogado()){
                       ?>
@@ -168,6 +176,7 @@ $titulo = isset($title) ? " - " . $title : "";
                   <li><a href="<?=$this->Url->build(["controller" => "Pedidos","action" => "index", "prefix" => false])?>">Pedidos</a></li>
                   <li><a href="<?=$this->Url->build(["controller" => "Dados","action" => "index", "prefix" => false])?>">Dados</a></li>
                   <li><a href="<?=$this->Url->build(["controller" => "Cursos","action" => "index", "prefix" => false])?>">Cursos</a></li>
+                  <li><a href="#" class="toogle-chat">Quer ajuda?</a></li>
                 </div>
               </ul>
             </div>
@@ -242,8 +251,13 @@ $titulo = isset($title) ? " - " . $title : "";
       </div>
     </div>
 
+    <div class="message-bubble">
+        <p>Quer ajuda com um pedido ou recurso?</p>
+        <span class="close-button" id="bubble-msg" onclick="this.parentElement.style.display='none'"></span>
+    </div>
+
     <script type="text/javascript">
-      
+
       $(document).ready(function() {
 
         <?php
@@ -280,5 +294,27 @@ $titulo = isset($title) ? " - " . $title : "";
     <script src="<?=BASE_URL?>assets/js/slick.min.js"></script>
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="<?=BASE_URL?>assets/js/functions.js"></script>
+
+
+
+
+    <script src="https://unpkg.com/blip-chat-widget@1.6.*" type="text/javascript"></script>
+    <script>
+        (function () {
+            window.onload = function () {
+                var blipClient = new BlipChat();
+                blipClient.withAppKey('<?= $blipchat_key ?>')
+                blipClient.withButton({"color":"#f9a521","icon":""})
+                blipClient.withEventHandler(BlipChat.LOAD_EVENT, function () {
+                    document.getElementById('bubble-msg').click() 
+                })
+                blipClient.withCustomCommonUrl('https://chat.blip.ai/')
+                blipClient.build();
+                $(".toogle-chat").on('click', () => {
+                  blipClient.toogleChat();
+                });
+            }
+        })();
+    </script>
   </body>
 </html>

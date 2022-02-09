@@ -304,7 +304,7 @@ $blipchat_key = Configure::read("BlipChat.Key");
             window.onload = function () {
                 var blipClient = new BlipChat();
                 blipClient.withAppKey('<?= $blipchat_key ?>')
-                blipClient.withButton({"color":"#f9a521","icon":""})
+                blipClient.withButton({"color":"#d81755","icon":""})
                 blipClient.withEventHandler(BlipChat.LOAD_EVENT, function () {
                     document.getElementById('bubble-msg').click() 
                 })

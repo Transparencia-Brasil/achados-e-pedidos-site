@@ -10,6 +10,7 @@ use App\Controller\Component\UStringComponent;
 use App\Controller\Component\UNumeroComponent;
 use App\Controller\Component\UCurlComponent;
 use Cake\Datasource\ConnectionManager;
+use Cake\Log\Log;
 
 class Pedido extends Entity{
 
@@ -651,6 +652,8 @@ class Pedido extends Entity{
 	*/
 	public function ES_InserirAtualizarPedidos($codigoPedido = null, $nomeTipoResposta = "", $codigoTipoResposta = "")
 	{
+        Log::info("[TASK] Iniciando Indexação dos Pedidos ...");
+
 		$connection = ConnectionManager::get('default');
 		$filtro = "";
 
@@ -749,17 +752,20 @@ class Pedido extends Entity{
 
 		// debug($query);
 		// die();
-		$results = $connection->execute($query)->fetchAll('assoc');
-
+        Log::info("[TASK] Pesquisando ...");
 		try{
-			if(count($results) > 0){
+    		$results = $connection->execute($query)->fetchAll('assoc');
 
+            Log::info("[TASK] Há indexar: " . count($results));
+
+			if(count($results) > 0) {
 				foreach($results as $item){
 
 					$codigoPedido = $item["pedidos_codigo"];
 					$json = json_encode($item);
 					$url = ES_URL . 'pedidos/gravar/' . $codigoPedido;
 
+                    Log::info("[TASK] Indexando: " . $codigoPedido);
 					//echo "ES URL = " . $url;
 
 					$retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");

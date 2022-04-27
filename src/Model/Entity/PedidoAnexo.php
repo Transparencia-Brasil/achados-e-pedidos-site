@@ -254,12 +254,15 @@ class PedidoAnexo extends Entity{
 				where
 					a.Ativo = 1 ' . $filtro;
 
-        $query = $query . $from;
-        $countQuery = 'Select Count(*) As Qtd '. $from;
-        $countResult = $connection->execute($countQuery)->fetchAll('assoc');
-        $CntAnexos =  $countResult[0]["Qtd"];
+        Log::info("[TASK] Indexando os Anexos...");
 
 		try{
+
+            $query = $query . $from;
+            $countQuery = 'Select Count(*) As Qtd '. $from;
+            $countResult = $connection->execute($countQuery)->fetchAll('assoc');
+            $CntAnexos =  $countResult[0]["Qtd"];
+
 			if(count($CntAnexos) > 0){
                 $qtdLotes = ceil($CntAnexos / 300);
                 Log::info("Lotes: " . $qtdLotes);

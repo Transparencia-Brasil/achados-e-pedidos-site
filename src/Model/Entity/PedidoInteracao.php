@@ -10,7 +10,7 @@ use App\Controller\Component\UStringComponent;
 use App\Controller\Component\UCurlComponent;
 use App\Controller\Component\UNumeroComponent;
 use Cake\Datasource\ConnectionManager;
-
+use Cake\Log\Log;
 class PedidoInteracao extends Entity{
 
 	public function Validar(){
@@ -31,7 +31,7 @@ class PedidoInteracao extends Entity{
 			$arrayErros["Pedido"] = "Pedido inválido. Por favor, recarregue a página.";
 			return $arrayErros;
 		}
-		
+
 		//2018-04-26 Paulo Campos - Comentado
 		// if(strlen($this->Descricao) <= 30){
 		// 	$arrayErros["Descricao"] = "Descricao inválida. Digite ao menos 30 caracteres.";
@@ -253,8 +253,11 @@ class PedidoInteracao extends Entity{
 			where
 				a.Ativo = 1 ' . $filtro;
 
-		$results = $connection->execute($query)->fetchAll('assoc');
+        Log::info("[TASK] Indexando Interações .. ");
+
 		try{
+		    $results = $connection->execute($query)->fetchAll('assoc');
+            Log::info("[TASK] Há indexar: " . count($results));
 			if(count($results) > 0){
 
 				foreach($results as $item){
@@ -262,6 +265,9 @@ class PedidoInteracao extends Entity{
 					$codigo = $item["interacoes_codigo"];
 					$json = json_encode($item);
 					$url = ES_URL . 'interacoes/gravar/' . $codigo;
+
+                    Log::info("[TASK] Indexando: " . $codigo);
+
 					$retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
 
 					if($retorno !== false)

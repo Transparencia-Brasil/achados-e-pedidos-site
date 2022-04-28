@@ -760,47 +760,48 @@ class Pedido extends Entity{
         Log::info("[TASK] Pesquisando ...");
 		try{
             $resultsCount = $connection->execute($queryCount)->fetchAll('assoc');
+            if(count($resultsCount) > 0) {
+                Log::info("[TASK] Há indexar: " . $resultsCount["cnt"]);
+                $cntPedidos = $resultsCount["cnt"];
+                $cntPedidosPerPage = 100;
+                $cntPedidosPages = $cntPedidos / $cntPedidosPerPage;
 
-            Log::info("[TASK] Há indexar: " . $resultsCount["cnt"]);
-            $cntPedidos = $resultsCount["cnt"];
-            $cntPedidosPerPage = 100;
-            $cntPedidosPages = $cntPedidos / $cntPedidosPerPage;
+                for ($iPage=0; $iPage < $cntPedidosPages ; $iPage++) {
+                    Log::info("[TASK] Página: $iPage");
+                    $pageStart = $iPage * $cntPedidosPerPage;
+                    $queryPaged = $query . " LIMIT $pageStart, $cntPedidosPerPage";
 
-            for ($iPage=0; $iPage < $cntPedidosPages ; $iPage++) {
-                Log::info("[TASK] Página: $iPage");
-                $pageStart = $iPage * $cntPedidosPerPage;
-                $queryPaged = $query . " LIMIT $pageStart, $cntPedidosPerPage";
+                    Log::info("[TASK] LIMIT $pageStart, $cntPedidosPerPage");
 
-                Log::info("[TASK] LIMIT $pageStart, $cntPedidosPerPage");
+                    $results = $connection->execute($queryPaged)->fetchAll('assoc');
+                    if(count($results) > 0) {
+                        foreach($results as $item){
 
-                $results = $connection->execute($queryPaged)->fetchAll('assoc');
-                if(count($results) > 0) {
-                    foreach($results as $item){
+                            $codigoPedido = $item["pedidos_codigo"];
+                            $json = json_encode($item);
+                            $url = ES_URL . 'pedidos/gravar/' . $codigoPedido;
 
-                        $codigoPedido = $item["pedidos_codigo"];
-                        $json = json_encode($item);
-                        $url = ES_URL . 'pedidos/gravar/' . $codigoPedido;
+                            Log::info("[TASK] Indexando: " . $codigoPedido);
+                            //echo "ES URL = " . $url;
 
-                        Log::info("[TASK] Indexando: " . $codigoPedido);
-                        //echo "ES URL = " . $url;
-
-                        $retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
-                        //echo $retorno;
-                        if($retorno !== false)
-                        {
-                            $retornoJson = json_decode($retorno);
-                            //debug($retornoJson);
-                            //die();
-                            // echo $retorno;
-                            if((isset($retornoJson->success)) and ($retornoJson->success != null)){
-                                // atualiza pra cada item no banco local
-                                $this->ES_InserirAtualizarLocalmente($codigoPedido);
+                            $retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
+                            //echo $retorno;
+                            if($retorno !== false)
+                            {
+                                $retornoJson = json_decode($retorno);
+                                //debug($retornoJson);
+                                //die();
+                                // echo $retorno;
+                                if((isset($retornoJson->success)) and ($retornoJson->success != null)){
+                                    // atualiza pra cada item no banco local
+                                    $this->ES_InserirAtualizarLocalmente($codigoPedido);
+                                }
                             }
                         }
                     }
                 }
             }
-		} catch(Exception $ex)
+		} catch(\Exception $ex)
 		{
 			// logar erro no banco
 			$url = $_SERVER['REQUEST_URI'];

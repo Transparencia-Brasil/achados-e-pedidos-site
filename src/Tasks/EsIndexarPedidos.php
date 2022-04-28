@@ -30,8 +30,8 @@ try {
     $pedidoAnexoEdicaoBU->ES_AtualizarInserirAnexos($pedido_anexo_codigo);
 
     Log::info("[TASK] Finalizando a Indexação de Pedidos ...");
-    file_put_contents($tmp . "EsIndexarPedidos.task", "OKAY");
+    file_put_contents($tmp . "/EsIndexarPedidos.task", "OKAY");
 } catch (\Throwable $th) {
     Log::error("[TASK] Erro na Indexação: " . $th->getMessage());
-    file_put_contents($tmp . "EsIndexarPedidos.task", "ERRO");
+    file_put_contents($tmp . "/EsIndexarPedidos.task", "ERRO");
 }

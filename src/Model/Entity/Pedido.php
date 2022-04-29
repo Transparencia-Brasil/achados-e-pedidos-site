@@ -759,7 +759,7 @@ class Pedido extends Entity{
 		// die();
         Log::info("[TASK] Pesquisando ...");
 		try{
-            $resultsCount = $connection->execute($queryCount)->fetchAll('assoc');
+            $resultsCount = $connection->execute($queryCount)->fetch('assoc');
             if(count($resultsCount) > 0) {
                 Log::info("[TASK] Há indexar: " . $resultsCount["cnt"]);
                 $cntPedidos = $resultsCount["cnt"];

@@ -662,11 +662,6 @@ class Pedido extends Entity{
 		else
 			$filtro = ' and b.Codigo is null ';
 
-        // 2022-04-28 Marcelo Junior - Implementado Paginação
-        $queryCount = 'Select Count(*) as cnt from pedidos a
-            left join es_pedidos b on a.Codigo = b.CodigoPedido where
-            a.Ativo = 1' . $filtro;
-
 		// 2017-01-17 Paulo Campos - Comentado. Tirei o Join de moderacao
 		// $query = 'Select
 		// 	a.Codigo pedidos_codigo,
@@ -759,10 +754,9 @@ class Pedido extends Entity{
 		// die();
         Log::info("[TASK] Pesquisando ...");
 		try{
-            $resultsCount = $connection->execute($queryCount)->fetch('assoc');
-            if(count($resultsCount) > 0) {
-                Log::info("[TASK] Há indexar: " . $resultsCount["cnt"]);
-                $cntPedidos = $resultsCount["cnt"];
+            $cntPedidos = $this->ES_TotalPedidosPendentesImportacao();
+            if($cntPedidos > 0) {
+                Log::info("[TASK] Há indexar: " . $cntPedidos);
                 $cntPedidosPerPage = 100;
                 $cntPedidosPages = $cntPedidos / $cntPedidosPerPage;
 

@@ -11,6 +11,7 @@ use App\Controller\Component\UCurlComponent;
 use App\Controller\Component\UNumeroComponent;
 use Cake\Datasource\ConnectionManager;
 use Cake\Log\Log;
+use App\Model\Entity\Pedido;
 class PedidoInteracao extends Entity{
 
 	public function Validar(){
@@ -256,36 +257,53 @@ class PedidoInteracao extends Entity{
         Log::info("[TASK] Indexando Interações .. ");
 
 		try{
-		    $results = $connection->execute($query)->fetchAll('assoc');
-            Log::info("[TASK] Há indexar: " . count($results));
-			if(count($results) > 0){
+            $pedidoBU = new Pedido();
+            $cntInteracoes = $pedidoBU->ES_TotalPedidosInteracoesPendentesImportacao();
+            if(count($cntInteracoes) > 0) {
+                Log::info("[TASK] Há indexar: " . $cntInteracoes);
+                $cntInteracoesPerPage = 100;
+                $cntInteracoesPages = $cntInteracoes / $cntInteracoesPerPage;
 
-				foreach($results as $item){
+                for ($iPage=0; $iPage < $cntInteracoesPages ; $iPage++) {
+                    Log::info("[TASK] Página: $iPage");
+                    $pageStart = $iPage * $cntInteracoesPerPage;
+                    $queryPaged = $query . " LIMIT $pageStart, $cntInteracoesPerPage";
 
-					$codigo = $item["interacoes_codigo"];
-					$json = json_encode($item);
-					$url = ES_URL . 'interacoes/gravar/' . $codigo;
+                    Log::info("[TASK] LIMIT $pageStart, $cntInteracoesPerPage");
 
-                    Log::info("[TASK] Indexando: " . $codigo);
+                    $results = $connection->execute($queryPaged)->fetchAll('assoc');
+                    Log::info("[TASK] Há indexar: " . count($results));
+                    if(count($results) > 0){
 
-					$retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
+                        foreach($results as $item){
 
-					if($retorno !== false)
-					{
-						$retornoJson = json_decode($retorno);
-						// debug ($retornoJson);
-						// die();
-						if((isset($retornoJson->success)) and ($retornoJson->success != null)){
-							$pedidoBU = new Pedido();
+                            $codigo = $item["interacoes_codigo"];
+                            $json = json_encode($item);
+                            $url = ES_URL . 'interacoes/gravar/' . $codigo;
 
-							$pedidoBU->ES_InserirAtualizarPedidos($item["pedidos_codigo"], $item["tipo_pedidos_resposta_nome_local"], $item["tipo_pedidos_resposta_codigo_local"]);
-							// atualiza pra cada item no banco local
-							$this->ES_InserirAtualizarLocalmente($codigo);
-						}
-					}
-				}
-			}
-		}catch(Exception $ex)
+                            Log::info("[TASK] Indexando: " . $codigo);
+
+                            $retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
+
+                            if($retorno !== false)
+                            {
+                                $retornoJson = json_decode($retorno);
+                                // debug ($retornoJson);
+                                // die();
+                                if((isset($retornoJson->success)) and ($retornoJson->success != null)){
+                                    $pedidoBU = new Pedido();
+
+                                    $pedidoBU->ES_InserirAtualizarPedidos($item["pedidos_codigo"], $item["tipo_pedidos_resposta_nome_local"], $item["tipo_pedidos_resposta_codigo_local"]);
+                                    // atualiza pra cada item no banco local
+                                    $this->ES_InserirAtualizarLocalmente($codigo);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+		}
+        catch(\Exception $ex)
 		{
 			// logar erro no banco
 			$url = $_SERVER['REQUEST_URI'];

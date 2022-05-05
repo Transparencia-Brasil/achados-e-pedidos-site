@@ -10,6 +10,7 @@ use App\Model\Entity\PedidoAnexo;
 use Cake\ORM\TableRegistry;
 use Cake\I18n\Time;
 use App\Controller\Component\UTaskComponent;
+use App\Tasks\TaskEnvHelper;
 class PedidosController extends AppController{
 
     public $paginate = [
@@ -121,6 +122,8 @@ class PedidosController extends AppController{
         $pedidoAnexoEdicaoBU = new PedidoAnexo();
         $estadoIndexacao = UTaskComponent::estadoTarefa("EsIndexarPedidos");
         $executandoIndexacao = UTaskComponent::estaRodando("EsIndexarPedidos");
+        $progressoMsg = "";
+        $progressoPerc = 0;
 
         if ($this->request->is(['post', 'put'])) {
             // Inicia o Processo em Plano de Fundo para a Indexação
@@ -129,6 +132,12 @@ class PedidosController extends AppController{
                 $estadoIndexacao = "NEW";
                 $executandoIndexacao = true;
             }
+        }
+
+        if($executandoIndexacao) {
+            TaskEnvHelper::getInstance()->Init("EsIndexarPedidos");
+            $progressoMsg = TaskEnvHelper::getInstance()->getMessage();
+            $progressoPerc = TaskEnvHelper::getInstance()->getPercent();
         }
 
         $TotalImportados = $pedidoBU->TotalPedidosModerados("and pedidos.CodigoTipoOrigem = 3",$moderacao = false);
@@ -147,6 +156,8 @@ class PedidosController extends AppController{
         $this->set('estadoIndexacao', $estadoIndexacao);
         $this->set('executandoIndexacao', $executandoIndexacao);
         $this->set('pedidoBU', $pedidoBU);
+        $this->set('progressoMsg', $progressoMsg);
+        $this->set('progressoPerc', $progressoPerc);
     }
 
     public function editInteracao()

@@ -28,6 +28,21 @@
 						</div>
 					</div>
 					<div class="box-content">
+						<table width="40%">
+							<tr>
+								<td><h2>Pedidos pendentes de sincronização com o Elastic Search:</h2></td>
+								<td><h2><?=$TotalPendentesES;?></h2></td>
+							</tr>
+							<tr>
+								<td><h2>Interações pendentes de sincronização com o Elastic Search:</h2></td>
+								<td><h2><?=$TotalPendentesInteracoesES;?></h2></td>
+							</tr>
+							<tr>
+								<td><h2>Anexos pendentes de sincronização com o Elastic Search:</h2></td>
+								<td><h2><?=$TotalPendentesAnexosES;?></h2></td>
+							</tr>
+						</table>
+
 <?php
 	if ($estadoIndexacao == "OKAY") {
 ?>
@@ -45,30 +60,23 @@
 ?>
 						<div class="messagesList">
 							<span class='title'>
-								<span class="label label-alert">Executando</span>
+								<span class="label label-alert"><?php echo $progressoMessage ?></span>
 							</span>
 						</div>
+
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="<?php echo $progressoPerc ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
 <?php
 	}
 ?>
-						<table width="40%">
-							<tr>
-								<td><h2>Pedidos pendentes de sincronização com o Elastic Search:</h2></td>
-								<td><h2><?=$TotalPendentesES;?></h2></td>
-							</tr>
-							<tr>
-								<td><h2>Interações pendentes de sincronização com o Elastic Search:</h2></td>
-								<td><h2><?=$TotalPendentesInteracoesES;?></h2></td>
-							</tr>
-							<tr>
-								<td><h2>Anexos pendentes de sincronização com o Elastic Search:</h2></td>
-								<td><h2><?=$TotalPendentesAnexosES;?></h2></td>
-							</tr>
-						</table>
 <?php
 	if (!$executandoIndexacao) {
 ?>
 						<?=$this->Form->create($pedidoBU, ['class' => 'form-horizontal']) ?>
+
+
+
 						<div>
 						  	<button type="submit" class="btn btn-primary">Importar pedidos para o elastic search</button>
 						</div>
@@ -84,6 +92,7 @@
 <?php
 	}
 ?>
+
 					</div>
 				</div><!--/span-->
 			</div><!--/row-->

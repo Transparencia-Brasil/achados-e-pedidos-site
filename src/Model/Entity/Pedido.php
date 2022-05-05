@@ -11,7 +11,7 @@ use App\Controller\Component\UNumeroComponent;
 use App\Controller\Component\UCurlComponent;
 use Cake\Datasource\ConnectionManager;
 use Cake\Log\Log;
-
+use App\Tasks\TaskEnvHelper;
 class Pedido extends Entity{
 
 	/*
@@ -654,6 +654,8 @@ class Pedido extends Entity{
 	{
         Log::info("[TASK] Iniciando Indexação dos Pedidos ...");
 
+        TaskEnvHelper::getInstance()->setProgress("Iniciando a Indexação dos Pedidos", 0);
+
 		$connection = ConnectionManager::get('default');
 		$filtro = "";
 
@@ -753,6 +755,7 @@ class Pedido extends Entity{
 		// debug($query);
 		// die();
         Log::info("[TASK] Pesquisando ...");
+        TaskEnvHelper::getInstance()->setProgress("Pesquisando", 1);
 		try{
             $cntPedidos = $this->ES_TotalPedidosPendentesImportacao();
             if($cntPedidos > 0) {
@@ -761,6 +764,7 @@ class Pedido extends Entity{
                 $cntPedidosPages = $cntPedidos / $cntPedidosPerPage;
 
                 for ($iPage=0; $iPage < $cntPedidosPages ; $iPage++) {
+                    TaskEnvHelper::getInstance()->setProgressFrom("Lote: $iPage", $iPage, $cntPedidosPages);
                     Log::info("[TASK] Página: $iPage");
                     $pageStart = $iPage * $cntPedidosPerPage;
                     $queryPaged = $query . " LIMIT $pageStart, $cntPedidosPerPage";
@@ -775,6 +779,7 @@ class Pedido extends Entity{
                             $json = json_encode($item);
                             $url = ES_URL . 'pedidos/gravar/' . $codigoPedido;
 
+                            TaskEnvHelper::getInstance()->setProgressFrom("Importando: $codigoPedido", $iPage, $cntPedidosPages);
                             Log::info("[TASK] Indexando: " . $codigoPedido);
                             //echo "ES URL = " . $url;
 
@@ -802,6 +807,8 @@ class Pedido extends Entity{
 			$variaveis = "Erro ao enviar pedido ao elastic search:" . (is_null($codigoPedido) ? "0" : $codigoPedido);
 			UStringComponent::registrarErro($url, $ex, $variaveis);
 		}
+
+        TaskEnvHelper::getInstance()->setProgress("Concluido", 100);
 	}
 
 

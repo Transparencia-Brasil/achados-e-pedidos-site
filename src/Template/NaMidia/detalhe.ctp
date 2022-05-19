@@ -18,10 +18,10 @@ $permaLink = $this->Url->build(BASE_URL . "na-midia/" . $midia["Slug"]);
 
 <div class="container-fluid naMidiaDetalhe">
   <div class="bgColor">
-    <div class="container ">
+    <div class="container">
       <div class="col-md-8 col-sm-12">
         <div class="row">
-            <div class="big crop-height">
+            <div class="big crop-height bgColor-mobile">
               <img class="scale" src="<?=BASE_URL?>uploads/na-midia/<?=$midia["Codigo"]?>/<?=$midia["ImagemResumo"]?>" alt="<?=$midia["Titulo"]?>">
             </div>
           <div class="publicado">

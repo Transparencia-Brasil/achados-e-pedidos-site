@@ -124,7 +124,11 @@ img.scale {
 
 @media (max-width: 460px) {
   .naMidiaDetalhe .bgColor{
-    height: 220px;
+    height: auto;
+    background-color: transparent;
+  }
+  .naMidiaDetalhe .bgColor-mobile {
+    background-color: #f9a521;
   }
   .naMidia .publicado {
     margin: 60% 0 2% 3%;

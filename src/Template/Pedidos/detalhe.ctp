@@ -50,11 +50,22 @@
                 $arrStatusPedido = $this->FrontEnd->statusPedido($pedido["CodigoStatusPedido"],$pedido["CodigoStatusPedidoInterno"]);
                 echo $arrStatusPedido["imagem"];
                 ?>
-                </div>
+                </div>                
                 <ul>
                   <li>Resposta:</li>
                   <li><?=$arrStatusPedido["texto"];?></li>
+                  <li><img src="<?=BASE_URL?>assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action"></li>
                 </ul>
+                <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden">
+                    <div class="tooltip-ajuda-inner">
+                    Esta classificação é feita com um modelo de inteligência artificial que 
+                    analisa a estrutura dos textos do pedido e da resposta para determinar se a 
+                    solicitação foi atendida de fato, ou seja, se a informação foi fornecida. 
+                    O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. 
+                    Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais                     
+                    </div>
+                    <a class="tooltip-ajuda-icon" href="<?=BASE_URL?>na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>
+                </div>
               </div>
             </div>
           </div>
@@ -157,12 +168,10 @@
           </div>
       </div>
     </div>
-    <div class="col-xs-12 col-md-4">
-       <div class="column-seguidores">
-         <img src="<?=BASE_URL?>assets/images/detalhes/s-icon-user.png" alt="" class="img-responsive">
-         <div class="count-seguidores"><?=$totalSeguidores?> seguidores</div>
-         <a href="javascript:void(0);" class="btnFollow" id="btnToggleSeguir"><?=$this->FrontEnd->interacao($pedido["Codigo"], 1)?></a>
-         <span class="error" id="erro_seguir"></span>
+    <div class="col-xs-12 col-md-4">      
+       <div class="column-footer">
+         <p>Encontrou algo errado?</p>
+         <a href="#" class="btnSolicitar" data-toggle="modal" data-target="#modalRevisao">Solicitar Revisão</a>
        </div>
        <div class="column-avaliacao bgDetalhes">
          <h3>Avaliação</h3>
@@ -171,10 +180,12 @@
            <span class="count">(<?=$totalAvaliacoes?>)</span><br/>
            <span class="error"></span>
          </div>
-       </div>
-       <div class="column-footer">
-         <p>Encontrou algo errado?</p>
-         <a href="#" class="btnSolicitar" data-toggle="modal" data-target="#modalRevisao">Solicitar Revisão</a>
+       </div>       
+       <div class="column-seguidores">
+         <img src="<?=BASE_URL?>assets/images/detalhes/s-icon-user.png" alt="" class="img-responsive">
+         <div class="count-seguidores"><?=$totalSeguidores?> seguidores</div>
+         <a href="javascript:void(0);" class="btnFollow" id="btnToggleSeguir"><?=$this->FrontEnd->interacao($pedido["Codigo"], 1)?></a>
+         <span class="error" id="erro_seguir"></span>
        </div>
     </div>
     <div class="col-md-offset-1 col-md-7">
@@ -243,3 +254,4 @@
   </div>
 </div>
 <script type="text/javascript" src="<?=BASE_URL?>assets/js/minhaconta/interacao.js" ></script>
+<script type="text/javascript" src="<?=BASE_URL?>assets/js/tooltip-ajuda.js" ></script>

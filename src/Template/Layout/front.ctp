@@ -252,7 +252,6 @@ $blipchat_key = Configure::read("BlipChat.Key");
     </div>
 
     <div class="message-bubble">
-        <p>Quer ajuda com um pedido ou recurso?</p>
         <span class="close-button" id="bubble-msg" onclick="this.parentElement.style.display='none'"></span>
     </div>
 

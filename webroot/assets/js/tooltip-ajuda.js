@@ -1,5 +1,15 @@
 $(document).ready(function() {
     InitTooltipsAjuda();
+
+    var tooltip = '';
+    $('.tooltip-ajuda-action').click(function() {
+        tooltip = $(this);
+        tooltip.tooltip('toggle');
+    })
+
+    $(document).on("click", ".close-tooltip" , function(){
+        tooltip.tooltip('hide');
+    });    
 });
 
 function InitTooltipsAjuda() {
@@ -13,7 +23,8 @@ function InitTooltipsAjuda() {
             },
             placement: 'right',
             boundary: 'window',
-            container: 'body'
+            container: 'body',
+            trigger: "manual"
         });
     });
 }

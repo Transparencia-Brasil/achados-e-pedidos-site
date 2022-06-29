@@ -558,20 +558,28 @@ function montaBoxPedido(item) {
     box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio_local) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-    box += iconStatusPedido;
-    box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome_local + '</strong></p>';
-    box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo_local) + '</p>';
-    box += '        <p><img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action"> ';
-    box += '            <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden">';
-    box += '               <div class="tooltip-ajuda-inner">';
-    box += '                Esta classificação é feita com um modelo de inteligência artificial que ';
-    box += '                analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
-    box += '                solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
-    box += '                 O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
-    box += '                 Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais                     ';
-    box += '                </div>';
-    box += '                 <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
-    box += '            </div></p>';
+    box +=          iconStatusPedido;
+    box += '        <div  style="float:left;margin-right:15px;">';
+    box += '            <ul style="list-style-type: none;padding:0px;">'
+    box += '                <li>Resposta:</li>'
+    box += '                <li> <strong>' + obj.status_pedido_nome_local + '</strong></li>'
+    box += '            </ul>'
+    box += '        </div>'
+    box += '      <div>'
+    box += '      <img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">'
+    box += '    </div>'
+    box += '    <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden text-right">';
+    box += '        <div class="text-right">';
+    box += '            <a href="#" class="close-tooltip" data-dismiss="alert" style="color:white;">&times;</a>';
+    box += '        </div>';
+    box += '        <div class="tooltip-ajuda-inner text-left" style="padding:5px;">';
+    box += '            Esta classificação é feita com um modelo de inteligência artificial que ';
+    box += '            analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
+    box += '            solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
+    box += '            O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
+    box += '            Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
+    box += '      </div>';
+    box += '</div></p>';
     box += '      </div>';
     box += '    </div>';
     box += '  </div>';
@@ -613,20 +621,28 @@ function montaBoxInteracao(item) {
     box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-    box += iconStatusPedido;
-    box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome + '</strong></p>';
-    box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo) + '</p>';
-    box += '        <p><img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action"> ';
-    box += '            <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden">';
-    box += '               <div class="tooltip-ajuda-inner">';
-    box += '                Esta classificação é feita com um modelo de inteligência artificial que ';
-    box += '                analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
-    box += '                solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
-    box += '                 O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
-    box += '                 Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais                     ';
-    box += '                </div>';
-    box += '                 <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
-    box += '            </div></p>';
+    box +=          iconStatusPedido;
+    box += '        <div  style="float:left;margin-right:15px;">';
+    box += '            <ul style="list-style-type: none;padding:0px;">'
+    box += '                <li>Resposta:</li>'
+    box += '                <li> <strong>' + obj.status_pedido_nome + '</strong></li>'
+    box += '            </ul>'
+    box += '        </div>'
+    box += '      <div>'
+    box += '      <img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">'
+    box += '    </div>'
+    box += '    <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden text-right">';
+    box += '        <div class="text-right">';
+    box += '            <a href="#" class="close-tooltip" data-dismiss="alert" style="color:white;">&times;</a>';
+    box += '        </div>';
+    box += '        <div class="tooltip-ajuda-inner text-left" style="padding:5px;">';
+    box += '            Esta classificação é feita com um modelo de inteligência artificial que ';
+    box += '            analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
+    box += '            solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
+    box += '            O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
+    box += '            Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
+    box += '      </div>';
+    box += '</div></p>';
     box += '      </div>';
     box += '    </div>';
     box += '  </div>';
@@ -668,20 +684,28 @@ function montaBoxAnexo(item) {
     box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-    box += iconStatusPedido;
-    box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome + '</strong></p>';
-    box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo) + '</p>';
-    box += '        <p><img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action"> ';
-    box += '            <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden">';
-    box += '               <div class="tooltip-ajuda-inner">';
-    box += '                Esta classificação é feita com um modelo de inteligência artificial que ';
-    box += '                analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
-    box += '                solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
-    box += '                 O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
-    box += '                 Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais                     ';
-    box += '                </div>';
-    box += '                 <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
-    box += '            </div></p>';
+    box +=          iconStatusPedido;
+    box += '        <div  style="float:left;margin-right:15px;">';
+    box += '            <ul style="list-style-type: none;padding:0px;">'
+    box += '                <li>Resposta:</li>'
+    box += '                <li> <strong>' + obj.status_pedido_nome + '</strong></li>'
+    box += '            </ul>'
+    box += '        </div>'
+    box += '      <div>'
+    box += '      <img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">'
+    box += '    </div>'
+    box += '    <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden text-right">';
+    box += '        <div class="text-right">';
+    box += '            <a href="#" class="close-tooltip" data-dismiss="alert" style="color:white;">&times;</a>';
+    box += '        </div>';
+    box += '        <div class="tooltip-ajuda-inner text-left" style="padding:5px;">';
+    box += '            Esta classificação é feita com um modelo de inteligência artificial que ';
+    box += '            analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
+    box += '            solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
+    box += '            O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
+    box += '            Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
+    box += '      </div>';
+    box += '</div></p>';
     box += '      </div>';
     box += '    </div>';
     box += '  </div>';

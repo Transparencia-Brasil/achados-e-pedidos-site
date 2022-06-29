@@ -86,17 +86,8 @@
                       </div>
                       <div class="col-md-6 col-sm-6 col-xs-12">
                         <?=$this->FrontEnd->statusPedido($pedido["CodigoStatusPedido"],$pedido["CodigoStatusPedidoInterno"])?>
-                        <img src="<?=BASE_URL?>assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action">
-                        <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden">
-                          <div class="tooltip-ajuda-inner">
-                          Esta classificação é feita com um modelo de inteligência artificial que 
-                          analisa a estrutura dos textos do pedido e da resposta para determinar se a 
-                          solicitação foi atendida de fato, ou seja, se a informação foi fornecida. 
-                          O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. 
-                          Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais                     
-                          </div>
-                          <a class="tooltip-ajuda-icon" href="<?=BASE_URL?>na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>
-                        </div>
+                        <img src="<?=BASE_URL?>assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">
+                        <?= $this->element('Pedidos/tooltip');?>  
                       </div>
                   </div>
                   <div class="col-md-4 col-sm-4 col-xs-12 highlight-box">

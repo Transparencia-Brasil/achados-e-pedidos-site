@@ -2,7 +2,7 @@ $(document).ready(function() {
     InitTooltipsAjuda();
 
     var tooltip = '';
-    $('.tooltip-ajuda-action').click(function() {
+    $(document).on("click", ".tooltip-ajuda-action" , function(){
         tooltip = $(this);
         tooltip.tooltip('toggle');
     })

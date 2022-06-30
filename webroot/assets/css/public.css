@@ -18009,6 +18009,24 @@ footer .copyright p {
         text-align: center;
     }
 }
+
+@media only screen and (min-device-width: 768px) and (max-device-width: 991px) {
+    .cards .ultimoCard {
+        clear: both;
+        margin-bottom: 0;
+        margin-top: 13%;
+    }
+    .cards .ultimoCard p {
+        min-height: 135px !important;
+        padding: 20% 0 0 3% !important;
+        font-size: 14px !important;
+        bottom: 58px !important;
+    }
+    .cards .ultimoCard h1 {
+        bottom: 140px !important;
+    }
+}
+
 @media only screen and (min-device-width: 768px) and (max-device-width: 1199px) {
     .erro,
     .erro400 {
@@ -18118,10 +18136,10 @@ footer .copyright p {
         margin-top: 13%;
     }
     .cards .ultimoCard p {
-        min-height: 195px;
+        min-height: 177px;
         padding: 23% 0 0 3%;
-        font-size: 14px;
-        bottom: 28px;
+        font-size: 16px;
+        bottom: 85px;
     }
     .cards .ultimoCard h1,
     .cards h1 {
@@ -18130,7 +18148,7 @@ footer .copyright p {
         width: 40%;
     }
     .cards .ultimoCard h1 {
-        bottom: 133px;
+        bottom: 185px;
         font-size: 14px;
     }
     .cards h1 {

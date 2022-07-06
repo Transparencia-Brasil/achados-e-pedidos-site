@@ -163,7 +163,7 @@ var scopeSearch = ['pedidos', 'interacoes', 'anexos'];
 var scopeSearchOnlyPedidos = ['pedidos'];
 
 //INICIALIZAÇÃO
-$(document).ready(function () {
+$(document).ready(function() {
 
     if (location.href.indexOf("?buscaFixa") > -1) {
         querystring = location.href.split("?");
@@ -181,8 +181,8 @@ $(document).ready(function () {
         container: 'body'
     });
 
-    var nativedatalist = !!('list' in document.createElement('input')) && 
-    !!(document.createElement('datalist') && window.HTMLDataListElement);
+    var nativedatalist = !!('list' in document.createElement('input')) &&
+        !!(document.createElement('datalist') && window.HTMLDataListElement);
 
     if (!nativedatalist) {
         // $('input[list]').each(function () {
@@ -205,15 +205,15 @@ $(document).ready(function () {
 /*
 /***********************************************************************************************************************************/
 
-btnBuscaAvancada.click(function () {
+btnBuscaAvancada.click(function() {
     search_pedidos(1);
 });
 
-btnLimpar.click(function () {
+btnLimpar.click(function() {
     limparBusca();
 });
 
-$(inputBuscaAvancada).keypress(function (e) {
+$(inputBuscaAvancada).keypress(function(e) {
     if (e.which == 13) {
         search_pedidos(1);
         e.preventDefault();
@@ -221,21 +221,21 @@ $(inputBuscaAvancada).keypress(function (e) {
     }
 });
 
-filtroCheckbox.click(function () {
+filtroCheckbox.click(function() {
     temfiltro = true;
     search_pedidos(1);
 });
 
-filtroText.change(function () {
+filtroText.change(function() {
     temfiltro = true;
     search_pedidos(1);
 });
 
-inputFiltroOrgao.click(function () {
+inputFiltroOrgao.click(function() {
     temfiltro = true;
     var show_remove_link = false;
     var counter = 1;
-    $(".enviado-para").map(function () {
+    $(".enviado-para").map(function() {
         // console.log($(thisBtn).parent.attr("id"));
         if (counter == 1) {
             if ($(this).val().trim().length > 0) {
@@ -247,7 +247,7 @@ inputFiltroOrgao.click(function () {
     search_pedidos(1);
 });
 
-inputFiltroPor.click(function () {
+inputFiltroPor.click(function() {
     temfiltro = true;
     search_pedidos(1);
 });
@@ -267,6 +267,7 @@ var parametros_visualizacao = {
     "paginacao_ate": 0,
     "palavra_chave": null,
 }
+
 function visualizacoes(_parametros) {
     var param = _parametros;
 
@@ -294,7 +295,7 @@ function visualizacoes(_parametros) {
         filtro_erro = true;
     }
 
-    $('.enviado-para').map(function () {
+    $('.enviado-para').map(function() {
         if ($(this).val().trim().length > 0) {
             filtro_erro = true;
         }
@@ -356,7 +357,7 @@ function getData(page) {
     }
 
     var enviadoPara = []
-    $('.enviado-para').map(function () {
+    $('.enviado-para').map(function() {
         if ($(this).val().trim()) {
             enviadoPara.push($(this).val().trim());
             temfiltro = true;
@@ -380,7 +381,7 @@ function getData(page) {
     if (disponibilizado_por.val() != undefined && disponibilizado_por.val().length > 0) {
         temfiltro = true;
     }
-    
+
     var data = {
         "value": fieldValue,
         "currentPage": page,
@@ -403,9 +404,9 @@ function getData(page) {
         "chkExecutivo": $('#chkExecutivo').is(':checked'),
         "chkJudiciario": $('#chkJudiciario').is(':checked'),
         "chkMinisterio": $('#chkMinisterio').is(':checked'),
-        "scope_search":setAPIScope()
+        "scope_search": setAPIScope()
     };
-    
+
     return data;
 }
 
@@ -447,49 +448,49 @@ function getData(page) {
 function search_pedidos(page) {
 
     data = getData(page);
-    
+
     //if (data.value != undefined || (data.por.length > 0 || data.enviadoPara.length > 0)) {
     //if (data.value != undefined || temfiltro === true) {
-        $.ajax(es_url + 'busca-avancada', {
-            method: "POST",
-            data: data,
-            contentType: 'application/x-www-form-urlencoded',
-            // headers: { "x-csrf-token": ns.localStorage.get('token') },
-            dataType: "json",
-            success: function (result) {
+    $.ajax(es_url + 'busca-avancada', {
+        method: "POST",
+        data: data,
+        contentType: 'application/x-www-form-urlencoded',
+        // headers: { "x-csrf-token": ns.localStorage.get('token') },
+        dataType: "json",
+        success: function(result) {
 
-                pagination(result.pagination);
+            pagination(result.pagination);
 
-                parametros_visualizacao = {
-                    "total_registros": result.hits.hits.total,
-                    "paginacao_de": result.pagination.fromResult,
-                    "paginacao_ate": result.pagination.toResult,
-                    "palavra_chave": data.value
-                }
-                visualizacoes(parametros_visualizacao)
-
-                _.each(result.hits.hits.hits, function (item) {
-                    switch (item._index) {
-                        case "pedidos":
-                            montaBoxPedido(item);
-                            break;
-                        case "interacoes":
-                            montaBoxInteracao(item);
-                            break;
-                        case "anexos":
-                            montaBoxAnexo(item);
-                            break;
-                    }
-                });
-            },
-            error: function (err) {
-
-                console.log(err);
-
+            parametros_visualizacao = {
+                "total_registros": result.hits.hits.total,
+                "paginacao_de": result.pagination.fromResult,
+                "paginacao_ate": result.pagination.toResult,
+                "palavra_chave": data.value
             }
+            visualizacoes(parametros_visualizacao)
+
+            _.each(result.hits.hits.hits, function(item) {
+                switch (item._index) {
+                    case "pedidos":
+                        montaBoxPedido(item);
+                        break;
+                    case "interacoes":
+                        montaBoxInteracao(item);
+                        break;
+                    case "anexos":
+                        montaBoxAnexo(item);
+                        break;
+                }
+            });
+        },
+        error: function(err) {
+
+            console.log(err);
+
+        }
 
 
-        });
+    });
     //}
 }
 
@@ -505,7 +506,7 @@ function pagination(pagination) {
         ulPagination.append('<li><span><a href="#" class="paginacao" id="' + pagination.first + '">«</a></span></li>');
     }
 
-    _.each(pagination.range, function (item) {
+    _.each(pagination.range, function(item) {
         if (item == pagination.current) {
             ulPagination.append('<li class="disabled active"><a href="#">' + item + '</a></li>');
         } else {
@@ -520,7 +521,7 @@ function pagination(pagination) {
     }
 
     var paginacaoClass = $(".paginacao");
-    paginacaoClass.click(function () {
+    paginacaoClass.click(function() {
         search_pedidos($(this).attr("id"));
     });
 
@@ -557,16 +558,35 @@ function montaBoxPedido(item) {
     box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio_local) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-    box += iconStatusPedido;
-    box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome_local + '</strong></p>';
-    box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo_local) + '</p>';
+    box +=          iconStatusPedido;
+    box += '        <div  style="float:left;margin-right:15px;">';
+    box += '            <ul style="list-style-type: none;padding:0px;">'
+    box += '                <li>Resposta:</li>'
+    box += '                <li> <strong>' + obj.status_pedido_nome_local + '</strong></li>'
+    box += '            </ul>'
+    box += '        </div>'
+    box += '      <div>'
+    box += '      <img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">'
+    box += '    </div>'
+    box += '    <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden text-right">';
+    box += '        <div class="text-right">';
+    box += '            <a href="#" class="close-tooltip" data-dismiss="alert" style="color:white;">&times;</a>';
+    box += '        </div>';
+    box += '        <div class="tooltip-ajuda-inner text-left" style="padding:5px;">';
+    box += '            Esta classificação é feita com um modelo de inteligência artificial que ';
+    box += '            analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
+    box += '            solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
+    box += '            O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
+    box += '            Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
+    box += '      </div>';
+    box += '</div></p>';
     box += '      </div>';
     box += '    </div>';
     box += '  </div>';
     box += '  <div class="col-md-4 col-sm-4 col-xs-12 highlight-box">';
     box += '   <p class="highlight-session bgcolor1">Pedido</p>';
     box += '    <p class="highlight-text">';
-    box +=          truncate.apply(descricao, [300, true]);
+    box += truncate.apply(descricao, [300, true]);
     box += '    </p>';
     box += '  </div>';
     box += '  <div class="col-md-4 col-sm-4 col-xs-12 bt-margin">';
@@ -578,7 +598,7 @@ function montaBoxPedido(item) {
 
 
     boxe_dos_resultados.append(box);
-
+    InitTooltipsAjuda();
 }
 
 function montaBoxInteracao(item) {
@@ -601,16 +621,35 @@ function montaBoxInteracao(item) {
     box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-    box += iconStatusPedido;
-    box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome + '</strong></p>';
-    box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo) + '</p>';
+    box +=          iconStatusPedido;
+    box += '        <div  style="float:left;margin-right:15px;">';
+    box += '            <ul style="list-style-type: none;padding:0px;">'
+    box += '                <li>Resposta:</li>'
+    box += '                <li> <strong>' + obj.status_pedido_nome + '</strong></li>'
+    box += '            </ul>'
+    box += '        </div>'
+    box += '      <div>'
+    box += '      <img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">'
+    box += '    </div>'
+    box += '    <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden text-right">';
+    box += '        <div class="text-right">';
+    box += '            <a href="#" class="close-tooltip" data-dismiss="alert" style="color:white;">&times;</a>';
+    box += '        </div>';
+    box += '        <div class="tooltip-ajuda-inner text-left" style="padding:5px;">';
+    box += '            Esta classificação é feita com um modelo de inteligência artificial que ';
+    box += '            analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
+    box += '            solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
+    box += '            O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
+    box += '            Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
+    box += '      </div>';
+    box += '</div></p>';
     box += '      </div>';
     box += '    </div>';
     box += '  </div>';
     box += '  <div class="col-md-4 col-sm-4 col-xs-12 highlight-box">';
     box += retornaTipoPedidoResposta(obj.tipo_pedidos_resposta_codigo_local);
     box += '    <p class="highlight-text">';
-    box +=          truncate.apply(descricao, [300, true]);
+    box += truncate.apply(descricao, [300, true]);
     box += '    </p>';
     box += '  </div>';
     box += '  <div class="col-md-4 col-sm-4 col-xs-12 bt-margin">';
@@ -621,7 +660,7 @@ function montaBoxInteracao(item) {
     box += '</div>';
 
     boxe_dos_resultados.append(box);
-
+    InitTooltipsAjuda();
 }
 
 function montaBoxAnexo(item) {
@@ -645,9 +684,28 @@ function montaBoxAnexo(item) {
     box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-    box += iconStatusPedido;
-    box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome + '</strong></p>';
-    box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo) + '</p>';
+    box +=          iconStatusPedido;
+    box += '        <div  style="float:left;margin-right:15px;">';
+    box += '            <ul style="list-style-type: none;padding:0px;">'
+    box += '                <li>Resposta:</li>'
+    box += '                <li> <strong>' + obj.status_pedido_nome + '</strong></li>'
+    box += '            </ul>'
+    box += '        </div>'
+    box += '      <div>'
+    box += '      <img src="' + base_url + 'assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">'
+    box += '    </div>'
+    box += '    <div id="tooltip-resposta-pedido" class="tooltip-ajuda hidden text-right">';
+    box += '        <div class="text-right">';
+    box += '            <a href="#" class="close-tooltip" data-dismiss="alert" style="color:white;">&times;</a>';
+    box += '        </div>';
+    box += '        <div class="tooltip-ajuda-inner text-left" style="padding:5px;">';
+    box += '            Esta classificação é feita com um modelo de inteligência artificial que ';
+    box += '            analisa a estrutura dos textos do pedido e da resposta para determinar se a ';
+    box += '            solicitação foi atendida de fato, ou seja, se a informação foi fornecida. ';
+    box += '            O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. ';
+    box += '            Caso encontre uma classificação incorreta, por favor nos notifique. Saiba mais <a class="tooltip-ajuda-icon" href="' + base_url + 'na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a>';
+    box += '      </div>';
+    box += '</div></p>';
     box += '      </div>';
     box += '    </div>';
     box += '  </div>';
@@ -655,7 +713,7 @@ function montaBoxAnexo(item) {
     box += retornaTipoPedidoResposta(obj.tipo_pedidos_resposta_codigo);
     box += '    <p class="highlight-session"><a href="' + base_url + "uploads/pedidos/" + obj.anexos_arquivo + '" target="_blank"><img src="' + base_url + 'assets/images/pedidos/icon-arquivo.png" style="margin-right:3px;"> arquivo anexo</a></p>';
     box += '    <p class="highlight-text">';
-    box +=          truncate.apply(descricao, [300, true]);
+    box += truncate.apply(descricao, [300, true]);
     box += '    </p>';
     box += '  </div>';
     box += '  <div class="col-md-4 col-sm-4 col-xs-12 bt-margin">';
@@ -666,7 +724,7 @@ function montaBoxAnexo(item) {
     box += '</div>';
 
     boxe_dos_resultados.append(box);
-
+    InitTooltipsAjuda();
 }
 
 function retornaIconSituacao(value) {
@@ -679,11 +737,7 @@ function retornaIconSituacao(value) {
 }
 
 function retornaStatusVerificado(status) {
-    if (status == "1") {
-        return '<p>(Status Verificado)</p>';
-    } else {
-        return '';
-    }
+    return '';
 }
 
 function retornaTipoPedidoResposta(value) {
@@ -755,7 +809,7 @@ function ajustaData(data) {
 
 function autocomplete() {
 
-    inputBuscaAvancada.keyup(function (e) {
+    inputBuscaAvancada.keyup(function(e) {
 
         if (e.which != 13 && e.which != 38 && e.which != 40) {
             var data = {
@@ -768,7 +822,7 @@ function autocomplete() {
                 contentType: 'application/x-www-form-urlencoded',
                 // headers: { "x-csrf-token": ns.localStorage.get('token') },
                 dataType: "json",
-                success: function (result) {
+                success: function(result) {
 
                     // console.log(result);
                     // $( "#fieldList" ).val();
@@ -780,18 +834,18 @@ function autocomplete() {
 
                     // });
 
-                    $("#buscaAvancada").autocomplete({ 
-                        source:result,
-                        minLength:1,
-                        delay:500,
-                        autoFocus:true,
+                    $("#buscaAvancada").autocomplete({
+                        source: result,
+                        minLength: 1,
+                        delay: 500,
+                        autoFocus: true,
                         classes: {
                             "ui-autocomplete": "highlight"
-                            }
+                        }
                     });
 
                 },
-                error: function (err) {
+                error: function(err) {
                     console.log(err);
                 }
 
@@ -814,30 +868,30 @@ function autocompleteEnviadoPara(event) {
 
     console.log("autocompleteEnviadoPara")
     var data = { "data": $(event.target).val() };
-    
+
     $.ajax(es_url + 'pedidos/searchasyoutype-enviadopara', {
         method: "POST",
         data: data,
         contentType: 'application/x-www-form-urlencoded',
         dataType: "json",
-        success: function (result) {
+        success: function(result) {
             //fieldListEnviadoPara.empty();
             //console.log(result);
             // // _.each(result, function (item) {
             // //    fieldListEnviadoPara.append("<option value='" + item + "'>");
             // // });
             // console.log($(event.target));
-            $(event.target).autocomplete({ 
-                source:result,
-                minLength:2,
-                delay:500,
-                autoFocus:true,
+            $(event.target).autocomplete({
+                source: result,
+                minLength: 2,
+                delay: 500,
+                autoFocus: true,
                 classes: {
                     "ui-autocomplete": "highlight"
-                  }
+                }
             });
         },
-        error: function (err) {
+        error: function(err) {
             console.log(err);
         }
     });
@@ -845,7 +899,7 @@ function autocompleteEnviadoPara(event) {
 
 function autocompletePor() {
 
-    disponibilizado_por.keyup(function (e) {
+    disponibilizado_por.keyup(function(e) {
         var data = { "data": disponibilizado_por.val() };
 
         $.ajax(es_url + 'pedidos/searchasyoutype-por', {
@@ -853,22 +907,22 @@ function autocompletePor() {
             data: data,
             contentType: 'application/x-www-form-urlencoded',
             dataType: "json",
-            success: function (result) {
+            success: function(result) {
                 // fieldListPor.empty();
                 // _.each(result, function (item) {
                 //     fieldListPor.append("<option value='" + item + "'>");
                 // });
-                $('#por').autocomplete({ 
-                    source:result,
-                    minLength:2,
-                    delay:500,
-                    autoFocus:true,
+                $('#por').autocomplete({
+                    source: result,
+                    minLength: 2,
+                    delay: 500,
+                    autoFocus: true,
                     classes: {
                         "ui-autocomplete": "highlight"
-                      }
+                    }
                 });
             },
-            error: function (err) {
+            error: function(err) {
                 console.log(err);
             }
         });
@@ -881,8 +935,8 @@ function limparBusca() {
     console.log($(".env-container input"));
     $(".env-container input").val('');
     inputPor.prop("value", "");
-    
-    filtroCheckbox.each(function () {
+
+    filtroCheckbox.each(function() {
         $(this).prop("checked", false);
     });
     temfiltro = false;
@@ -900,10 +954,10 @@ function setAPIScope() {
     }
 }
 
-function truncate( n, useWordBoundary ){
+function truncate(n, useWordBoundary) {
     if (this.length <= n) { return this; }
-    var subString = this.substr(0, n-1);
-    return (useWordBoundary 
-       ? subString.substr(0, subString.lastIndexOf(' ')) 
-       : subString) + "...";
+    var subString = this.substr(0, n - 1);
+    return (useWordBoundary ?
+        subString.substr(0, subString.lastIndexOf(' ')) :
+        subString) + "...";
 };

@@ -754,36 +754,48 @@ class Pedido extends Entity{
 		// die();
         Log::info("[TASK] Pesquisando ...");
 		try{
-    		$results = $connection->execute($query)->fetchAll('assoc');
+            $cntPedidos = $this->ES_TotalPedidosPendentesImportacao();
+            if($cntPedidos > 0) {
+                Log::info("[TASK] Há indexar: " . $cntPedidos);
+                $cntPedidosPerPage = 100;
+                $cntPedidosPages = $cntPedidos / $cntPedidosPerPage;
 
-            Log::info("[TASK] Há indexar: " . count($results));
+                for ($iPage=0; $iPage < $cntPedidosPages ; $iPage++) {
+                    Log::info("[TASK] Página: $iPage");
+                    $pageStart = $iPage * $cntPedidosPerPage;
+                    $queryPaged = $query . " LIMIT $pageStart, $cntPedidosPerPage";
 
-			if(count($results) > 0) {
-				foreach($results as $item){
+                    Log::info("[TASK] LIMIT $pageStart, $cntPedidosPerPage");
 
-					$codigoPedido = $item["pedidos_codigo"];
-					$json = json_encode($item);
-					$url = ES_URL . 'pedidos/gravar/' . $codigoPedido;
+                    $results = $connection->execute($queryPaged)->fetchAll('assoc');
+                    if(count($results) > 0) {
+                        foreach($results as $item){
 
-                    Log::info("[TASK] Indexando: " . $codigoPedido);
-					//echo "ES URL = " . $url;
+                            $codigoPedido = $item["pedidos_codigo"];
+                            $json = json_encode($item);
+                            $url = ES_URL . 'pedidos/gravar/' . $codigoPedido;
 
-					$retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
-					//echo $retorno;
-					if($retorno !== false)
-					{
-						$retornoJson = json_decode($retorno);
-						//debug($retornoJson);
-						//die();
-						// echo $retorno;
-						if((isset($retornoJson->success)) and ($retornoJson->success != null)){
-							// atualiza pra cada item no banco local
-							$this->ES_InserirAtualizarLocalmente($codigoPedido);
-						}
-					}
-				}
-			}
-		} catch(Exception $ex)
+                            Log::info("[TASK] Indexando: " . $codigoPedido);
+                            //echo "ES URL = " . $url;
+
+                            $retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
+                            //echo $retorno;
+                            if($retorno !== false)
+                            {
+                                $retornoJson = json_decode($retorno);
+                                //debug($retornoJson);
+                                //die();
+                                // echo $retorno;
+                                if((isset($retornoJson->success)) and ($retornoJson->success != null)){
+                                    // atualiza pra cada item no banco local
+                                    $this->ES_InserirAtualizarLocalmente($codigoPedido);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+		} catch(\Exception $ex)
 		{
 			// logar erro no banco
 			$url = $_SERVER['REQUEST_URI'];

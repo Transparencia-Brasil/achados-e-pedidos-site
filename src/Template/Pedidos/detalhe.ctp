@@ -51,10 +51,16 @@
                 echo $arrStatusPedido["imagem"];
                 ?>
                 </div>
-                <ul>
-                  <li>Resposta:</li>
-                  <li><?=$arrStatusPedido["texto"];?></li>
-                </ul>
+                <div  style="float:left;margin-right:4px;">                
+                  <ul>
+                    <li>Resposta:</li>
+                    <li><?=$arrStatusPedido["texto"];?></li>
+                  </ul>
+                </div>
+                <div>
+                  <img src="<?=BASE_URL?>assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">
+                </div>
+                <?= $this->element('Pedidos/tooltip');?>                
               </div>
             </div>
           </div>
@@ -157,12 +163,10 @@
           </div>
       </div>
     </div>
-    <div class="col-xs-12 col-md-4">
-       <div class="column-seguidores">
-         <img src="<?=BASE_URL?>assets/images/detalhes/s-icon-user.png" alt="" class="img-responsive">
-         <div class="count-seguidores"><?=$totalSeguidores?> seguidores</div>
-         <a href="javascript:void(0);" class="btnFollow" id="btnToggleSeguir"><?=$this->FrontEnd->interacao($pedido["Codigo"], 1)?></a>
-         <span class="error" id="erro_seguir"></span>
+    <div class="col-xs-12 col-md-4">      
+       <div class="column-footer">
+         <p>Encontrou algo errado?</p>
+         <a href="#" class="btnSolicitar" data-toggle="modal" data-target="#modalRevisao">Solicitar Revisão</a>
        </div>
        <div class="column-avaliacao bgDetalhes">
          <h3>Avaliação</h3>
@@ -171,10 +175,12 @@
            <span class="count">(<?=$totalAvaliacoes?>)</span><br/>
            <span class="error"></span>
          </div>
-       </div>
-       <div class="column-footer">
-         <p>Encontrou algo errado?</p>
-         <a href="#" class="btnSolicitar" data-toggle="modal" data-target="#modalRevisao">Solicitar Revisão</a>
+       </div>       
+       <div class="column-seguidores">
+         <img src="<?=BASE_URL?>assets/images/detalhes/s-icon-user.png" alt="" class="img-responsive">
+         <div class="count-seguidores"><?=$totalSeguidores?> seguidores</div>
+         <a href="javascript:void(0);" class="btnFollow" id="btnToggleSeguir"><?=$this->FrontEnd->interacao($pedido["Codigo"], 1)?></a>
+         <span class="error" id="erro_seguir"></span>
        </div>
     </div>
     <div class="col-md-offset-1 col-md-7">
@@ -243,3 +249,4 @@
   </div>
 </div>
 <script type="text/javascript" src="<?=BASE_URL?>assets/js/minhaconta/interacao.js" ></script>
+<script type="text/javascript" src="<?=BASE_URL?>assets/js/tooltip-ajuda.js" ></script>

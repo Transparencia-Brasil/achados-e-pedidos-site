@@ -1,13 +1,13 @@
-$(function () {
+$(function() {
 
-  $( "input[type=reset]" ).click(function() {
-      $("input#enviadoPara").prop("value","");
-      $("input#por").prop("value","");
-  });
+    $("input[type=reset]").click(function() {
+        $("input#enviadoPara").prop("value", "");
+        $("input#por").prop("value", "");
+    });
 
 
 
-    $(document).ready(function () {
+    $(document).ready(function() {
 
         //verifica URL. lista default de pedidos so entra na pagina de pedidos
         if (location.href.indexOf("/busca") <= -1) {
@@ -27,7 +27,7 @@ $(function () {
         $("#cabecalho-resultados").hide();
         $("#sem-resultados").hide();
 
-        $( "#btnsearch" ).click(function() {
+        $("#btnsearch").click(function() {
             if ($(this).attr('attr') == "busca_pedido") {
                 search_pedidos($('#fieldValue').val(), 1);
             } else {
@@ -35,12 +35,12 @@ $(function () {
             }
         });
 
-        $( "input[type=reset]" ).click(function() {
-            $(".filtro").find(":checkbox").each(function () {
+        $("input[type=reset]").click(function() {
+            $(".filtro").find(":checkbox").each(function() {
                 $(this).prop("checked", false);
             });
-            $("#data-de").prop("value","");
-            $("#data-ate").prop("value","");
+            $("#data-de").prop("value", "");
+            $("#data-ate").prop("value", "");
             if ($(".termo-display").text().length > 0) {
                 search_pedidos($(".termo-display").text(), 1);
             } else {
@@ -49,7 +49,7 @@ $(function () {
         });
 
         $(document).keypress(function(e) {
-            if(e.which == 13) {
+            if (e.which == 13) {
                 if ($("#btnsearch").attr('attr') == "busca_pedido") {
                     search_pedidos($('#fieldValue').val(), 1);
                 } else {
@@ -59,20 +59,20 @@ $(function () {
             }
         });
 
-       $(".filtro").find(":checkbox").click(function() {
-             if ($(".termo-display").text().length > 0) {
+        $(".filtro").find(":checkbox").click(function() {
+            if ($(".termo-display").text().length > 0) {
                 search_pedidos($(".termo-display").text(), 1);
-             } else {
+            } else {
                 listar_pedidos(1);
-             }
+            }
         });
 
-       $(".filtro").find(":text").change(function() {
-             if ($(".termo-display").text().length > 0) {
+        $(".filtro").find(":text").change(function() {
+            if ($(".termo-display").text().length > 0) {
                 search_pedidos($(".termo-display").text(), 1);
-             } else {
+            } else {
                 listar_pedidos(1);
-             }
+            }
         });
 
     });
@@ -86,24 +86,24 @@ $(function () {
         if (pagination.first == null) {
             $("#ulPagination").append('<li class="disabled"><span>«</span></li>');
         } else {
-            $("#ulPagination").append('<li><span><a href="#" class="paginacao" id="'+pagination.first+'">«</a></span></li>');
+            $("#ulPagination").append('<li><span><a href="#" class="paginacao" id="' + pagination.first + '">«</a></span></li>');
         }
 
         _.each(pagination.range, function(item) {
             if (item == pagination.current) {
-                $("#ulPagination").append('<li class="disabled active"><a href="#">'+ item +'</a></li>');
+                $("#ulPagination").append('<li class="disabled active"><a href="#">' + item + '</a></li>');
             } else {
-                $("#ulPagination").append('<li><a href="#" class="paginacao" id="'+item+'">'+ item +'</a></li>');
+                $("#ulPagination").append('<li><a href="#" class="paginacao" id="' + item + '">' + item + '</a></li>');
             }
         });
 
         if (pagination.last == null) {
             $("#ulPagination").append('<li class="disabled"><span>»</span></li>');
         } else {
-            $("#ulPagination").append('<li><span><a href="#" class="paginacao" id="'+pagination.last+'">»</a></span></li>');
+            $("#ulPagination").append('<li><span><a href="#" class="paginacao" id="' + pagination.last + '">»</a></span></li>');
         }
 
-        $( ".paginacao" ).click(function() {
+        $(".paginacao").click(function() {
             if ($(".termo-display").text().length > 0) {
                 if ($("#btnsearch").attr('attr') == "busca_pedido") {
                     search_pedidos($(".termo-display").text(), $(this).attr("id"));
@@ -117,7 +117,7 @@ $(function () {
 
     }
 
-   function listar_pedidos(page) {
+    function listar_pedidos(page) {
 
         var newData_de = undefined;
         if ($("#data-de").val().length > 0) {
@@ -132,31 +132,31 @@ $(function () {
         }
 
         var data = {
-            "currentPage"           : page,
-            "dataDe"                : newData_de,
-            "dataAte"               : newData_ate,
-            "chkEmTramitacao"       : $('#chkEmTramitacao').is(':checked'),
-            "chkFinalizada"         : $('#chkFinalizada').is(':checked'),
-            "chkPedidosRecursoSim"  : $('#chkPedidosRecursoSim').is(':checked'),
-            "chkPedidosRecursoNao"  : $('#chkPedidosRecursoNao').is(':checked'),
-            "chkAtendido"           : $('#chkAtendido').is(':checked'),
-            "chkNaoAtendido"        : $('#chkNaoAtendido').is(':checked'),
-            "chkParcAtendido"       : $('#chkParcAtendido').is(':checked'),
-            "chkFederal"            : $('#chkFederal').is(':checked'),
-            "chkEstadual"           : $('#chkEstadual').is(':checked'),
-            "chkMunicipal"          : $('#chkMunicipal').is(':checked'),
-            "chkLegislativo"        : $('#chkLegislativo').is(':checked'),
-            "chkExecutivo"          : $('#chkExecutivo').is(':checked'),
-            "chkJudiciario"         : $('#chkJudiciario').is(':checked'),
-            "chkMinisterio"         : $('#chkMinisterio').is(':checked')
+            "currentPage": page,
+            "dataDe": newData_de,
+            "dataAte": newData_ate,
+            "chkEmTramitacao": $('#chkEmTramitacao').is(':checked'),
+            "chkFinalizada": $('#chkFinalizada').is(':checked'),
+            "chkPedidosRecursoSim": $('#chkPedidosRecursoSim').is(':checked'),
+            "chkPedidosRecursoNao": $('#chkPedidosRecursoNao').is(':checked'),
+            "chkAtendido": $('#chkAtendido').is(':checked'),
+            "chkNaoAtendido": $('#chkNaoAtendido').is(':checked'),
+            "chkParcAtendido": $('#chkParcAtendido').is(':checked'),
+            "chkFederal": $('#chkFederal').is(':checked'),
+            "chkEstadual": $('#chkEstadual').is(':checked'),
+            "chkMunicipal": $('#chkMunicipal').is(':checked'),
+            "chkLegislativo": $('#chkLegislativo').is(':checked'),
+            "chkExecutivo": $('#chkExecutivo').is(':checked'),
+            "chkJudiciario": $('#chkJudiciario').is(':checked'),
+            "chkMinisterio": $('#chkMinisterio').is(':checked')
         };
 
-        $.ajax(es_url+'pedidos/listar', {
+        $.ajax(es_url + 'pedidos/listar', {
             method: "POST",
             data: data,
             contentType: 'application/x-www-form-urlencoded',
             dataType: "json",
-            success: function (result) {
+            success: function(result) {
                 pagination(result.pagination);
 
                 if (result.hits.hits.total > 0) {
@@ -169,12 +169,12 @@ $(function () {
                     $("#boxes-resultados").hide();
                     return;
                 }
-                $(".hits-total-display").text( result.hits.hits.total );
+                $(".hits-total-display").text(result.hits.hits.total);
 
-                $(".paginacao-de").text( result.pagination.fromResult );
-                $(".paginacao-ate").text( result.pagination.toResult );
+                $(".paginacao-de").text(result.pagination.fromResult);
+                $(".paginacao-ate").text(result.pagination.toResult);
 
-                $( "#fieldValue" ).val('');
+                $("#fieldValue").val('');
                 $("#boxes-resultados").empty();
 
                 _.each(result.hits.hits.hits, function(item) {
@@ -182,7 +182,7 @@ $(function () {
                 });
 
             },
-            error: function (err) {
+            error: function(err) {
                 console.log(err);
 
             }
@@ -198,10 +198,10 @@ $(function () {
             $("#cabecalho-resultados").css("display", "none");
             return;
         }
-        console.log (fieldValue + " ," + page);
+        console.log(fieldValue + " ," + page);
         var data = {
-            "value" :  fieldValue,
-            "currentPage" : page
+            "value": fieldValue,
+            "currentPage": page
         };
 
         $.ajax(es_url + 'consulta-simples', {
@@ -210,7 +210,7 @@ $(function () {
             contentType: 'application/x-www-form-urlencoded',
             // headers: { "x-csrf-token": ns.localStorage.get('token') },
             dataType: "json",
-            success: function (result) {
+            success: function(result) {
 
                 pagination(result.pagination);
 
@@ -223,13 +223,13 @@ $(function () {
                 }
 
 
-                $(".termo-display").text( fieldValue );
-                $(".hits-total-display").text( result.hits.hits.total );
+                $(".termo-display").text(fieldValue);
+                $(".hits-total-display").text(result.hits.hits.total);
 
-                $(".paginacao-de").text( result.pagination.fromResult );
-                $(".paginacao-ate").text( result.pagination.toResult );
+                $(".paginacao-de").text(result.pagination.fromResult);
+                $(".paginacao-ate").text(result.pagination.toResult);
 
-                $( "#fieldValue" ).val('');
+                $("#fieldValue").val('');
                 $("#boxes-resultados").empty();
                 $("#cabecalho-resultados").css("display", "none");
 
@@ -250,7 +250,7 @@ $(function () {
                 });
 
             },
-            error: function (err) {
+            error: function(err) {
                 console.log(err);
 
             }
@@ -282,24 +282,24 @@ $(function () {
         }
 
         var data = {
-            "value"                 : fieldValue,
-            "currentPage"           : page,
-            "dataDe"                : newData_de,
-            "dataAte"               : newData_ate,
-            "chkEmTramitacao"       : $('#chkEmTramitacao').is(':checked'),
-            "chkFinalizada"         : $('#chkFinalizada').is(':checked'),
-            "chkPedidosRecursoSim"  : $('#chkPedidosRecursoSim').is(':checked'),
-            "chkPedidosRecursoNao"  : $('#chkPedidosRecursoNao').is(':checked'),
-            "chkAtendido"           : $('#chkAtendido').is(':checked'),
-            "chkNaoAtendido"        : $('#chkNaoAtendido').is(':checked'),
-            "chkParcAtendido"       : $('#chkParcAtendido').is(':checked'),
-            "chkFederal"            : $('#chkFederal').is(':checked'),
-            "chkEstadual"           : $('#chkEstadual').is(':checked'),
-            "chkMunicipal"          : $('#chkMunicipal').is(':checked'),
-            "chkLegislativo"        : $('#chkLegislativo').is(':checked'),
-            "chkExecutivo"          : $('#chkExecutivo').is(':checked'),
-            "chkJudiciario"         : $('#chkJudiciario').is(':checked'),
-            "chkMinisterio"         : $('#chkMinisterio').is(':checked')
+            "value": fieldValue,
+            "currentPage": page,
+            "dataDe": newData_de,
+            "dataAte": newData_ate,
+            "chkEmTramitacao": $('#chkEmTramitacao').is(':checked'),
+            "chkFinalizada": $('#chkFinalizada').is(':checked'),
+            "chkPedidosRecursoSim": $('#chkPedidosRecursoSim').is(':checked'),
+            "chkPedidosRecursoNao": $('#chkPedidosRecursoNao').is(':checked'),
+            "chkAtendido": $('#chkAtendido').is(':checked'),
+            "chkNaoAtendido": $('#chkNaoAtendido').is(':checked'),
+            "chkParcAtendido": $('#chkParcAtendido').is(':checked'),
+            "chkFederal": $('#chkFederal').is(':checked'),
+            "chkEstadual": $('#chkEstadual').is(':checked'),
+            "chkMunicipal": $('#chkMunicipal').is(':checked'),
+            "chkLegislativo": $('#chkLegislativo').is(':checked'),
+            "chkExecutivo": $('#chkExecutivo').is(':checked'),
+            "chkJudiciario": $('#chkJudiciario').is(':checked'),
+            "chkMinisterio": $('#chkMinisterio').is(':checked')
         };
         //console.log(data);
         $.ajax(es_url + 'consultar', {
@@ -308,7 +308,7 @@ $(function () {
             contentType: 'application/x-www-form-urlencoded',
             // headers: { "x-csrf-token": ns.localStorage.get('token') },
             dataType: "json",
-            success: function (result) {
+            success: function(result) {
 
                 pagination(result.pagination);
 
@@ -317,23 +317,23 @@ $(function () {
                     $("#sem-resultados").hide();
                     $("#sem-resultados").hide();
                     $("#primeira-tela").hide();
-                 } else {
-                     $("#boxes-resultados").empty();
-                     $("#cabecalho-resultados").hide();
-                     $("#sem-resultados").show();
-                     $("termo-display-noresult").text( fieldValue )
-                     $("#primeira-tela").hide();
-                     //return;
-                 }
+                } else {
+                    $("#boxes-resultados").empty();
+                    $("#cabecalho-resultados").hide();
+                    $("#sem-resultados").show();
+                    $("termo-display-noresult").text(fieldValue)
+                    $("#primeira-tela").hide();
+                    //return;
+                }
 
-                $(".termo-display").text( fieldValue );
+                $(".termo-display").text(fieldValue);
                 //console.log(result);
-                $(".hits-total-display").text( result.hits.hits.total );
+                $(".hits-total-display").text(result.hits.hits.total);
 
-                $(".paginacao-de").text( result.pagination.fromResult );
-                $(".paginacao-ate").text( result.pagination.toResult );
+                $(".paginacao-de").text(result.pagination.fromResult);
+                $(".paginacao-ate").text(result.pagination.toResult);
 
-                $( "#fieldValue" ).val('');
+                $("#fieldValue").val('');
                 $("#boxes-resultados").empty();
 
                 _.each(result.hits.hits.hits, function(item) {
@@ -353,7 +353,7 @@ $(function () {
                 });
 
             },
-            error: function (err) {
+            error: function(err) {
 
                 console.log(err);
 
@@ -365,11 +365,11 @@ $(function () {
     }
 
     function retornaIconSituacao(value) {
-        switch(value) {
+        switch (value) {
             case "1":
-                return '<img src="'+base_url+'assets/images/pedidos/icon-em-tramitacao.png">';
+                return '<img src="' + base_url + 'assets/images/pedidos/icon-em-tramitacao.png">';
             default:
-                return '<img src="'+base_url+'assets/images/pedidos/icon-finalizado.png">';
+                return '<img src="' + base_url + 'assets/images/pedidos/icon-finalizado.png">';
         }
     }
 
@@ -379,7 +379,7 @@ $(function () {
 
         //console.log(value + " , " + value_interno)
 
-        switch(value) {
+        switch (value) {
             case "1":
                 icon = 'icon-atendido';
                 break
@@ -400,7 +400,7 @@ $(function () {
             icon += '-verificado';
         }
         //console.log('<img src="assets/images/pedidos/' + icon + '.png">');
-        return '<img src="'+base_url+'assets/images/pedidos/' + icon + '.png">';
+        return '<img src="' + base_url + 'assets/images/pedidos/' + icon + '.png">';
     }
 
     function ajustaData(data) {
@@ -415,7 +415,7 @@ $(function () {
         var obj = item._source;
         console.log(obj);
         var iconSituacao = retornaIconSituacao(obj.tipo_pedido_situacao_codigo_local);
-        var iconStatusPedido =  retornaIconStatusPedido(obj.status_pedido_codigo_local, obj.status_pedido_interno_codigo_local);
+        var iconStatusPedido = retornaIconStatusPedido(obj.status_pedido_codigo_local, obj.status_pedido_interno_codigo_local);
         var titulo = obj.pedidos_titulo_local;
         var descricao = obj.pedidos_titulo_local;
 
@@ -431,30 +431,30 @@ $(function () {
         var box = '<div class="col-md-12 col-sm-12 col-xs-12 box">';
         box += '  <div class="col-md-8 col-sm-8 col-xs-12">';
         box += '    <h4 style="margin-bottom:5%">' + titulo + '</h4>';
-        box += '    <div class="enviado">Pedido enviado para: <a href="agentes/'+obj.agentes_slug_local+'">' + obj.agentes_nome_local +'</a></div>';
-        box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/'+obj.usuarios_slug_local+'">' + obj.usuarios_nome_local + '</a></div>';
+        box += '    <div class="enviado">Pedido enviado para: <a href="agentes/' + obj.agentes_slug_local + '">' + obj.agentes_nome_local + '</a></div>';
+        box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/' + obj.usuarios_slug_local + '">' + obj.usuarios_nome_local + '</a></div>';
         box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio_local) + '</div>';
         box += '    <div class="situacao">';
         box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-        box +=         iconSituacao;
+        box += iconSituacao;
         box += '        <p>Situação:<br> <strong>' + obj.tipo_pedido_situacao_nome_local + '</strong></p>';
         box += '      </div>';
         box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-        box +=          iconStatusPedido;
+        box += iconStatusPedido;
         box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome_local + '</strong></p>';
-        box += '        <p>'+retornaStatusVerificado(obj.status_pedido_interno_codigo_local)+'</p>';
+        box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo_local) + '</p>';
         box += '      </div>';
         box += '    </div>';
         box += '  </div>';
         box += '  <div class="col-md-4 col-sm-4 col-xs-12 highlight-box">';
         box += '   <p class="highlight-session bgcolor1">Pedido</p>';
         box += '    <p class="highlight-text">';
-        box +=         descricao;
+        box += descricao;
         box += '    </p>';
         box += '  </div>';
         box += '  <div class="col-md-4 col-sm-4 col-xs-12 bt-margin">';
         box += '    <div class="btnVerMais pull-right">';
-        box += '      <a href="'+base_url+'pedidos/'+obj.pedidos_slug_local+'">Ver <div class="seta seta-direita"></div></a>';
+        box += '      <a href="' + base_url + 'pedidos/' + obj.pedidos_slug_local + '">Ver <div class="seta seta-direita"></div></a>';
         box += '    </div>';
         box += '  </div>';
         box += '</div>';
@@ -478,15 +478,11 @@ $(function () {
     }
 
     function retornaStatusVerificado(status) {
-        if (status == "1") {
-            return '<p>(Status Verificado)</p>';
-        } else {
-            return '';
-        }
+        return '';
     }
 
     function retornaTipoPedidoResposta(value) {
-        switch(value) {
+        switch (value) {
             case "1":
                 return '<p class="highlight-session bgcolor1">Resposta do órgão público</p>';
             case "2":
@@ -518,7 +514,7 @@ $(function () {
 
         var obj = item._source;
         var iconSituacao = retornaIconSituacao(obj.tipo_pedido_situacao_codigo);
-        var iconStatusPedido =  retornaIconStatusPedido(obj.status_pedido_codigo, obj.status_pedido_interno_codigo);
+        var iconStatusPedido = retornaIconStatusPedido(obj.status_pedido_codigo, obj.status_pedido_interno_codigo);
         var titulo = obj.pedidos_titulo;
         var descricao = obj.interacoes_descricao_local;
 
@@ -529,30 +525,30 @@ $(function () {
         var box = '<div class="col-md-12 col-sm-12 col-xs-12 box">';
         box += '  <div class="col-md-8 col-sm-8 col-xs-12">';
         box += '    <h4 style="margin-bottom:5%">' + titulo + '</h4>';
-        box += '    <div class="enviado">Pedido enviado para: <a href="agentes/'+obj.agentes_slug+'">' + obj.agentes_nome + '</a></div>';
-        box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/'+obj.usuarios_slug+'">' + obj.usuarios_nome + '</a></div>';
+        box += '    <div class="enviado">Pedido enviado para: <a href="agentes/' + obj.agentes_slug + '">' + obj.agentes_nome + '</a></div>';
+        box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/' + obj.usuarios_slug + '">' + obj.usuarios_nome + '</a></div>';
         box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
         box += '    <div class="situacao">';
         box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-        box +=         iconSituacao;
+        box += iconSituacao;
         box += '        <p>Situação:<br> <strong>' + obj.tipo_pedido_situacao_nome + '</strong></p>';
         box += '      </div>';
         box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-        box +=          iconStatusPedido;
+        box += iconStatusPedido;
         box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome + '</strong></p>';
-        box += '        <p>'+retornaStatusVerificado(obj.status_pedido_interno_codigo)+'</p>';
+        box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo) + '</p>';
         box += '      </div>';
         box += '    </div>';
         box += '  </div>';
         box += '  <div class="col-md-4 col-sm-4 col-xs-12 highlight-box">';
-        box +=      retornaTipoPedidoResposta(obj.tipo_pedidos_resposta_codigo_local);
+        box += retornaTipoPedidoResposta(obj.tipo_pedidos_resposta_codigo_local);
         box += '    <p class="highlight-text">';
-        box +=         descricao;
+        box += descricao;
         box += '    </p>';
         box += '  </div>';
         box += '  <div class="col-md-4 col-sm-4 col-xs-12 bt-margin">';
         box += '    <div class="btnVerMais pull-right">';
-        box += '      <a href="'+base_url+'pedidos/'+obj.pedidos_slug+'">Ver <div class="seta seta-direita"></div></a>';
+        box += '      <a href="' + base_url + 'pedidos/' + obj.pedidos_slug + '">Ver <div class="seta seta-direita"></div></a>';
         box += '    </div>';
         box += '  </div>';
         box += '</div>';
@@ -580,7 +576,7 @@ $(function () {
 
         var obj = item._source;
         var iconSituacao = retornaIconSituacao(obj.tipo_pedido_situacao_codigo);
-        var iconStatusPedido =  retornaIconStatusPedido(obj.status_pedido_codigo, obj.status_pedido_interno_codigo);
+        var iconStatusPedido = retornaIconStatusPedido(obj.status_pedido_codigo, obj.status_pedido_interno_codigo);
         var titulo = obj.pedidos_titulo;
         var descricao = obj.anexos_conteudo_arquivo;
 
@@ -592,31 +588,31 @@ $(function () {
         var box = '<div class="col-md-12 col-sm-12 col-xs-12 box">';
         box += '  <div class="col-md-8 col-sm-8 col-xs-12">';
         box += '    <h4 style="margin-bottom:5%">' + titulo + '</h4>';
-        box += '    <div class="enviado">Pedido enviado para: <a href="agentes/'+obj.agentes_slug+'">' + obj.agentes_nome + '</a></div>';
-        box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/'+obj.usuarios_slug+'">' + obj.usuarios_nome + '</a></div>';
+        box += '    <div class="enviado">Pedido enviado para: <a href="agentes/' + obj.agentes_slug + '">' + obj.agentes_nome + '</a></div>';
+        box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/' + obj.usuarios_slug + '">' + obj.usuarios_nome + '</a></div>';
         box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
         box += '    <div class="situacao">';
         box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-        box +=         iconSituacao;
+        box += iconSituacao;
         box += '        <p>Situação:<br> <strong>' + obj.tipo_pedido_situacao_nome + '</strong></p>';
         box += '      </div>';
         box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
-        box +=          iconStatusPedido;
+        box += iconStatusPedido;
         box += '        <p>Resposta:<br> <strong>' + obj.status_pedido_nome + '</strong></p>';
-        box += '        <p>'+retornaStatusVerificado(obj.status_pedido_interno_codigo)+'</p>';
+        box += '        <p>' + retornaStatusVerificado(obj.status_pedido_interno_codigo) + '</p>';
         box += '      </div>';
         box += '    </div>';
         box += '  </div>';
         box += '  <div class="col-md-4 col-sm-4 col-xs-12 highlight-box">';
-        box +=      retornaTipoPedidoResposta(obj.tipo_pedidos_resposta_codigo);
-        box += '    <p class="highlight-session"><a href="'+base_url + "uploads/pedidos/" + obj.anexos_arquivo + '" target="_blank"><img src="'+base_url+'assets/images/pedidos/icon-arquivo.png" style="margin-right:3px;"> arquivo anexo</a></p>';
+        box += retornaTipoPedidoResposta(obj.tipo_pedidos_resposta_codigo);
+        box += '    <p class="highlight-session"><a href="' + base_url + "uploads/pedidos/" + obj.anexos_arquivo + '" target="_blank"><img src="' + base_url + 'assets/images/pedidos/icon-arquivo.png" style="margin-right:3px;"> arquivo anexo</a></p>';
         box += '    <p class="highlight-text">';
-        box +=         descricao;
+        box += descricao;
         box += '    </p>';
         box += '  </div>';
         box += '  <div class="col-md-4 col-sm-4 col-xs-12 bt-margin">';
         box += '    <div class="btnVerMais pull-right">';
-        box += '      <a href="'+base_url+'pedidos/'+obj.pedidos_slug+'">Ver <div class="seta seta-direita"></div></a>';
+        box += '      <a href="' + base_url + 'pedidos/' + obj.pedidos_slug + '">Ver <div class="seta seta-direita"></div></a>';
         box += '    </div>';
         box += '  </div>';
         box += '</div>';
@@ -641,48 +637,46 @@ $(function () {
 
     }
 
-    function slugify(text)
-    {
+    function slugify(text) {
 
-      if (text != null) {
-        return text.toString().toLowerCase()
-            .replace(/[àáâãä]/g,"a")
-            .replace(/[éê]/g,"e")
-            .replace(/[í]/g,"i")
-            .replace(/[óôõ]/g,"o")
-            .replace(/[úü]/g,"u")
-            .replace(/[ç]/g,"c")
-            .replace(/\s+/g, '-')           // Replace spaces with -
-            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-            .replace(/\-\-+/g, '-')        // Replace multiple - with single -
-            .replace(/^-+/, '')             // Trim - from start of text
-            .replace(/-+$/, '');            // Trim - from end of text
-    } else {
-        return null
+        if (text != null) {
+            return text.toString().toLowerCase()
+                .replace(/[àáâãä]/g, "a")
+                .replace(/[éê]/g, "e")
+                .replace(/[í]/g, "i")
+                .replace(/[óôõ]/g, "o")
+                .replace(/[úü]/g, "u")
+                .replace(/[ç]/g, "c")
+                .replace(/\s+/g, '-') // Replace spaces with -
+                .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+                .replace(/\-\-+/g, '-') // Replace multiple - with single -
+                .replace(/^-+/, '') // Trim - from start of text
+                .replace(/-+$/, ''); // Trim - from end of text
+        } else {
+            return null
+        }
+
     }
 
-    }
+    function slugifyUser(text) {
 
-    function slugifyUser(text)
-    {
-
-      if (text != null) {
-          var text = text.split("@");
-          return text[0].toString().toLowerCase()
-            .replace(/[àáâãä]/g,"a")
-            .replace(/[éê]/g,"e")
-            .replace(/[í]/g,"i")
-            .replace(/[óôõ]/g,"o")
-            .replace(/[úü]/g,"u")
-            .replace(/[ç]/g,"c")
-            .replace(/\s+/g, '-')           // Replace spaces with -
-            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-            .replace(/\-\-+/g, '-')        // Replace multiple - with single -
-            .replace(/^-+/, '')             // Trim - from start of text
-            .replace(/-+$/, '');            // Trim - from end of text
-    } else {
-        return null
-    }
+        if (text != null) {
+            var text = text.split("@");
+            return text[0].toString().toLowerCase()
+                .replace(/[àáâãä]/g, "a")
+                .replace(/[éê]/g, "e")
+                .replace(/[í]/g, "i")
+                .replace(/[óôõ]/g, "o")
+                .replace(/[úü]/g, "u")
+                .replace(/[ç]/g, "c")
+                .replace(/\s+/g, '-') // Replace spaces with -
+                .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+                .replace(/\-\-+/g, '-') // Replace multiple - with single -
+                .replace(/^-+/, '') // Trim - from start of text
+                .replace(/-+$/, ''); // Trim - from end of text
+        } else {
+            return null
+        }
 
 
     }
@@ -707,20 +701,20 @@ $(function () {
 
     function autocomplete() {
 
-         $( "#fieldValue" ).keyup(function(e) {
+        $("#fieldValue").keyup(function(e) {
 
-          if (e.which != 13 && e.which != 38 && e.which != 40) {
+            if (e.which != 13 && e.which != 38 && e.which != 40) {
                 var data = {
-                    "data" :  $('#fieldValue').val()
+                    "data": $('#fieldValue').val()
                 };
 
-                $.ajax(es_url+'pedidos/searchasyoutype', {
+                $.ajax(es_url + 'pedidos/searchasyoutype', {
                     method: "POST",
                     data: data,
                     contentType: 'application/x-www-form-urlencoded',
                     // headers: { "x-csrf-token": ns.localStorage.get('token') },
                     dataType: "json",
-                    success: function (result) {
+                    success: function(result) {
 
                         console.log(result);
                         // $( "#fieldList" ).val();
@@ -728,12 +722,12 @@ $(function () {
 
                         _.each(result, function(item) {
 
-                            $( "#fieldList" ).append("<option value='"+ item +"'>");
+                            $("#fieldList").append("<option value='" + item + "'>");
 
                         });
 
                     },
-                    error: function (err) {
+                    error: function(err) {
                         console.log(err);
                     }
 

@@ -132,8 +132,16 @@
                <?php
                       $arrSituacaoPedido = $this->FrontEnd->statusPedido($pedido["CodigoStatusPedido"],$pedido["CodigoStatusPedidoInterno"])
                     ?>
-                    <?=$arrSituacaoPedido["imagem"];?>
+                    <div class="span2">
+                      <?=$arrSituacaoPedido["imagem"];?>
+                    </div>
+                    <div  style="float:left;margin-right:4px;">                
                     <?=$arrSituacaoPedido["texto"];?>
+                </div>
+                <div>
+                  <img src="<?=BASE_URL?>assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">
+                </div>                    
+                <?= $this->element('Pedidos/tooltip');?>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12">
               <div class="btnVerMais pull-right">
@@ -175,3 +183,4 @@
   })
 </script>
 <script type="text/javascript" src="<?=BASE_URL?>assets/js/minhaconta/interacao.js" ></script>
+<script type="text/javascript" src="<?=BASE_URL?>assets/js/tooltip-ajuda.js" ></script>

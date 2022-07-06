@@ -149,36 +149,36 @@ class FrontEndHelper extends Helper
             {
                 case 1:
                     $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-atendido.png" class="img-responsive" alt="Atendido (Não verificado)">';
-                    $statusPedido["texto"]  = '<strong>Atendido</strong><br>(Não verificado)'; break;
+                    $statusPedido["texto"]  = '<strong>Atendido</strong>'; break;
                 case 2:
                     $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-nao-atendido.png" class="img-responsive" alt="Não Atendido (Não verificado)">';
-                    $statusPedido["texto"]  = '<strong>Não Atendido</strong><br>(Não verificado)'; break;
+                    $statusPedido["texto"]  = '<strong>Não Atendido</strong>'; break;
                 case 3:
                     $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-parcialmente-atendido.png" class="img-responsive" alt="Parcialmente Atendido (Não verificado)">';
-                    $statusPedido["texto"]  = '<strong>Parcialmente Atendido</strong><br>(Não verificado)'; break;
+                    $statusPedido["texto"]  = '<strong>Parcialmente Atendido</strong>'; break;
                 case 4:
                     $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-naoclassificado.png" class="img-responsive" alt="Não Classificado">';
-                    $statusPedido["texto"]  = '<strong>Não Classificado</strong><br>(Não verificado)'; break;
+                    $statusPedido["texto"]  = '<strong>Não Classificado</strong>'; break;
             }
         } else {
             //pega da tabela pedidos.CodigoStatusPedidoInterno
             switch($codigoStatusInterno)
             {
                 case 1:
-                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-atendido-verificado.png" class="img-responsive" alt="Atendido (Status verificado)">';
-                    $statusPedido["texto"]  = '<strong>Atendido</strong><br>(Status verificado)'; break;
+                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-atendido-verificado.png" class="img-responsive" alt="Atendido">';
+                    $statusPedido["texto"]  = '<strong>Atendido</strong><br>'; break;
                 case 2:
-                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-nao-atendido-verificado.png" class="img-responsive" alt="Não Atendido (Status verificado)">';
-                    $statusPedido["texto"] = '<strong>Não Atendido</strong><br>(Status verificado)'; break;
+                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-nao-atendido-verificado.png" class="img-responsive" alt="Não Atendido">';
+                    $statusPedido["texto"] = '<strong>Não Atendido</strong><br>'; break;
                 case 3:
-                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-parcialmente-atendido-verificado.png" class="img-responsive" alt="Parcialmente Atendido (Status verificado)">';
-                    $statusPedido["texto"]  = '<strong>Parcialmente Atendido</strong><br>(Status verificado)'; break;
+                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-parcialmente-atendido-verificado.png" class="img-responsive" alt="Parcialmente Atendido">';
+                    $statusPedido["texto"]  = '<strong>Parcialmente Atendido</strong><br>'; break;
                 case 4:
                     $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-naoclassificado.png" class="img-responsive" alt="Não Classificado">';
-                    $statusPedido["texto"]  = '<strong>Não Classificado</strong><br>(Status verificado)'; break;
+                    $statusPedido["texto"]  = '<strong>Não Classificado</strong><br>'; break;
             }
         }
-
+        
         return $statusPedido;
     }
 

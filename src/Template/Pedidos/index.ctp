@@ -434,3 +434,5 @@ function removeCampo(event) {
 
 // }
 </script>
+
+<script type="text/javascript" src="<?=BASE_URL?>assets/js/tooltip-ajuda.js" ></script>

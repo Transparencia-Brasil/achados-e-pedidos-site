@@ -230,6 +230,11 @@
                 </div>
                 <div class="col-md-4 col-sm-4 col-xs-12">
                   <?=$this->FrontEnd->statusPedido($pedido["CodigoStatusPedido"],$pedido["CodigoStatusPedidoInterno"])?>
+
+                  <ul>
+                    <img src="<?=BASE_URL?>assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">
+                  </ul>
+                  <?= $this->element('Pedidos/tooltip');?>    
                 </div>
                 <div class="col-md-4 col-sm-4 col-xs-12">
                   <div class="btnVerMais pull-right">
@@ -257,3 +262,4 @@
 </div>
 
 <script type="text/javascript" src="<?=BASE_URL?>assets/js/pedidos.js"></script>
+<script type="text/javascript" src="<?=BASE_URL?>assets/js/tooltip-ajuda.js" ></script>

@@ -77,7 +77,7 @@
                     <p class="title">
                       <?=$pedido["Titulo"]?>
                     </p>
-                    <div class="enviado">Pedido enviado para: <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></div>
+                    <div class="enviado">xPedido enviado para: <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></div>
                     <div class="por">Pedido disponibilizado por: <a href="<?=$this->Url->build($slugUsuario)?>"><?=$nomeUsuario?></a></div>
                     <div class="em">Em: <?=$pedido["DataEnvio"]?></div>
                     <div class="situacao">
@@ -86,8 +86,9 @@
                       </div>
                       <div class="col-md-6 col-sm-6 col-xs-12">
                         <?=$this->FrontEnd->statusPedido($pedido["CodigoStatusPedido"],$pedido["CodigoStatusPedidoInterno"])?>
+                        <img src="<?=BASE_URL?>assets/images/pedidos/pergunta.png" alt="" data-tooltip="tooltip-resposta-pedido" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;">
+                        <?= $this->element('Pedidos/tooltip');?>  
                       </div>
-                    </div>
                   </div>
                   <div class="col-md-4 col-sm-4 col-xs-12 highlight-box">
                     <p class="highlight-session bgcolor5">Resposta do recurso - 1º Instância</p>
@@ -237,3 +238,5 @@
       });
     });
 </script>
+
+<script type="text/javascript" src="<?=BASE_URL?>assets/js/tooltip-ajuda.js" ></script>

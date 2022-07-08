@@ -2,14 +2,25 @@ $(document).ready(function() {
     InitTooltipsAjuda();
 
     var tooltip = '';
-    $(document).on("click", ".tooltip-ajuda-action" , function(){
+    $(document).on("click", ".tooltip-ajuda-action", function() {
+        $(".tooltip-ajuda-action").tooltip('hide');
         tooltip = $(this);
         tooltip.tooltip('toggle');
     })
 
-    $(document).on("click", ".close-tooltip" , function(){
+    $(document).on("click", ".close-tooltip", function() {
         tooltip.tooltip('hide');
-    });    
+        $(this).data("tooltipstate", false);
+    });
+
+    $(document).mouseup(function(e) {
+        var container = $(".tooltip");
+
+        // if the target of the click isn't the container nor a descendant of the container
+        if (!container.is(e.target) && container.has(e.target).length === 0) {
+            container.tooltip('hide');
+        }
+    });
 });
 
 function InitTooltipsAjuda() {

@@ -35,7 +35,7 @@ $blipchat_key = Configure::read("BlipChat.Key");
         <link rel="icon" href="<?=BASE_URL?>assets/images/favicon.png" sizes="16x16">
         <?= $this->fetch('meta');
         //echo $this->Html->script('/admin/js/jquery-1.9.1.min.js');
-        echo $this->Html->css('/assets/css/public.css', ['rel' => 'stylesheet', 'media' => 'all']);
+        echo $this->Html->css('/assets/css/public.css?no-cache=312312213', ['rel' => 'stylesheet', 'media' => 'all']);
         echo $this->Html->css('/assets/css/crop_images.css', ['rel' => 'stylesheet', 'media' => 'all']);
         echo $this->Html->css('/assets/css/adjustments.css', ['rel' => 'stylesheet', 'media' => 'all']);
         echo $this->Html->css('/assets/css/charts.css', ['rel' => 'stylesheet', 'media' => 'all']);

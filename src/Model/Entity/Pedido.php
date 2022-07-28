@@ -759,9 +759,9 @@ class Pedido extends Entity{
 		try{
             $cntPedidos = $this->ES_TotalPedidosPendentesImportacao();
             if($cntPedidos > 0) {
-                Log::info("[TASK] Há indexar: " . $cntPedidos);
+                Log::info("[TASK] Total para indexar: " . $cntPedidos);
                 $cntPedidosPerPage = 100;
-                $cntPedidosPages = $cntPedidos / $cntPedidosPerPage;
+                $cntPedidosPages = ceil($cntPedidos / $cntPedidosPerPage);
 
                 for ($iPage=0; $iPage < $cntPedidosPages ; $iPage++) {
                     TaskEnvHelper::getInstance()->setProgressFrom("Lote: $iPage", $iPage, $cntPedidosPages);

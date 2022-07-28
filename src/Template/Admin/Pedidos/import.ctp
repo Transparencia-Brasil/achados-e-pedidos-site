@@ -60,13 +60,12 @@
 ?>
 						<div class="messagesList">
 							<span class='title'>
-								<span class="label label-alert"><?php echo $progressoMessage ?></span>
+								<span class="label label-alert"><?php echo $progressoMsg ?></span>
 							</span>
 						</div>
-
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="<?php echo $progressoPerc ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
+						<div class="progress progress-striped active">
+							<div class="bar" style="width:<?php echo $progressoPerc ?>%"></div>
+						</div>
 <?php
 	}
 ?>

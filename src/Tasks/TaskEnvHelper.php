@@ -17,36 +17,33 @@ class TaskEnvHelper {
         $this->load();
     }
 
-    public function setProgress($message, $percent) {
+    public function setProgress($message, $percent) {      
         if(is_null($this->currentTaskId)) {
             return;
         }
-
-        $this->currentStatusProgress["Percent"] = $percent;
-        $this->currentStatusProgress["Message"] = $message;
+        $this->currentStatusProgress->Percent = $percent;
+        $this->currentStatusProgress->Message = $message;
 
         $this->save();
     }
 
-    public function setProgressFrom($message, $from, $to) {
-        $percent = ($from / $to) * 100;
+    public function setProgressFrom($message, $from, $to) {   
+        $percent = ($from / $to) * 100;        
         $this->setProgress($message, $percent);
     }
 
-    public function getPercent() {
+    public function getPercent() {      
         if(is_null($this->currentTaskId)) {
             return 0;
         }
-
-        return $this->currentStatusProgress["Percent"];
+        return $this->currentStatusProgress->Percent;
     }
 
     public function getMessage() {
         if(is_null($this->currentTaskId)) {
             return "Desconhecido";
         }
-
-        return $this->currentStatusProgress["Message"];
+        return $this->currentStatusProgress->Message;
     }
 
     public function save() {

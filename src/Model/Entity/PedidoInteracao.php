@@ -12,6 +12,7 @@ use App\Controller\Component\UNumeroComponent;
 use Cake\Datasource\ConnectionManager;
 use Cake\Log\Log;
 use App\Model\Entity\Pedido;
+use App\Tasks\TaskEnvHelper;
 class PedidoInteracao extends Entity{
 
 	public function Validar(){
@@ -154,6 +155,8 @@ class PedidoInteracao extends Entity{
 		else
 			$filtro = ' and b.Codigo is null ';
 
+        TaskEnvHelper::getInstance()->setProgress("Iniciando a Indexação das Interações", 0);
+
 		// 2017-01-17 Paulo Campos - Comentado. Tirei o Join de moderacao
 		// $query = 'Select
 		// 		pi.Codigo interacoes_codigo,
@@ -255,7 +258,7 @@ class PedidoInteracao extends Entity{
 				a.Ativo = 1 ' . $filtro;
 
         Log::info("[TASK] Indexando Interações .. ");
-
+        TaskEnvHelper::getInstance()->setProgress("Pesquisando", 1);
 		try{
             $pedidoBU = new Pedido();
             $cntInteracoes = $pedidoBU->ES_TotalPedidosInteracoesPendentesImportacao();
@@ -265,6 +268,7 @@ class PedidoInteracao extends Entity{
                 $cntInteracoesPages = $cntInteracoes / $cntInteracoesPerPage;
 
                 for ($iPage=0; $iPage < $cntInteracoesPages ; $iPage++) {
+                    TaskEnvHelper::getInstance()->setProgressFrom("Lote: $iPage", $iPage, $cntInteracoesPages);
                     Log::info("[TASK] Página: $iPage");
                     $pageStart = $iPage * $cntInteracoesPerPage;
                     $queryPaged = $query . " LIMIT $pageStart, $cntInteracoesPerPage";
@@ -281,6 +285,7 @@ class PedidoInteracao extends Entity{
                             $json = json_encode($item);
                             $url = ES_URL . 'interacoes/gravar/' . $codigo;
 
+                            TaskEnvHelper::getInstance()->setProgressFrom("Importando: $codigo", $iPage, $cntInteracoesPages);
                             Log::info("[TASK] Indexando: " . $codigo);
 
                             $retorno = UCurlComponent::enviarDadosJson($url, $json, "PUT");
@@ -311,6 +316,7 @@ class PedidoInteracao extends Entity{
 			UStringComponent::registrarErro($url, $ex, $variaveis);
 		}
 
+        TaskEnvHelper::getInstance()->setProgress("Concluido", 100);
 	}
 
 	//2017-03-14 Paulo Campos: Criada funcao para inserir interacoes em bloco por pedido

@@ -73,6 +73,7 @@ Router::scope('/', function ($routes) {
     $routes->fallbacks('InflectedRoute');
 });
 
+Router::connect('/api/taxaDeAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'TaxaDeAtendimentoPorAno'));
 Router::connect('/api/atendimentoPedidosPorAnoETipo', array('controller' => 'Dados', 'action' => 'AtendimentoPedidosPorAnoETipo'));
 Router::connect('/api/pedidosPorUFPoderENivel', array('controller' => 'Dados', 'action' => 'PedidosPorUFPoderENivel'));
 Router::connect('/api/PedidosAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'PedidosAtendimentoPorAno'));

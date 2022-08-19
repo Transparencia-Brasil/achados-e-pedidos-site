@@ -25,17 +25,38 @@
             <h2>Pedidos<br> não respondidos</h2>
             <h3 class="qnt"><?=$sumario['totalPedidosNaoRespondidos']?></h3>
           </div>
-
           <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos respondidos"/>
             <h2>Pedidos<br> respondidos</h2>
             <h3 class="qnt"><?=$sumario['totalPedidosRespondidos']?></h3>
           </div>
+          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-atendido.png" alt="<?=$sumario['totalPedidosClassificacao']['Atendido']['label']?>" height="150px"/>
+            <h2><?=$sumario['totalPedidosClassificacao']['Atendido']['label']?></h2>
+            <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Atendido']['count']?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Atendido']['percent']?></h3>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-nao-atendido.png" alt="<?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?>"  height="150px"/>
+            <h2><?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?></h2>
+            <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Não Atendido']['count']?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Não Atendido']['percent']?></h3>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-parcialmente-atendido.png" alt="<?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?>"  height="150px"/>
+            <h2><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?></h2>
+            <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['count']?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['percent']?></h3>
+          </div>          
       </div>
       <h2 class="text-center">Taxa de resposta por ano</h2>
       <div id="my_dataviz"></div>
-      <div id="chart-atendimento"></div>
+      <div id="taxa-resposta-ano"></div>
       <p>&nbsp;</p>
+      <h2 class="text-center">Taxa de atendimento por ano</h2>
+      <div id="my_dataviz"></div>
+      <div id="taxa-atendimento-ano"></div>
+      <p>&nbsp;</p>      
       <h2 class="text-center">Pedidos respondidos - Brasil e UFs</h2>
 
       <div class="row">

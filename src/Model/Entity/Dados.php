@@ -44,9 +44,20 @@ class Dados extends Entity{
         $totalPedidosRespostas_array = $connection->execute($query)->fetchAll('assoc');
         $totalPedidosNaoRespondidos = $totalPedidosRespostas_array[0]["TotalPedidos"];
         $totalPedidosRespondidos = $totalPedidosRespostas_array[1]["TotalPedidos"];
+
+
+        $query = "select p.Ativo, count(p.Codigo) as QuantidadePedido, sp.Nome as StatusPedido from pedidos as p left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) group by sp.Nome having Ativo = 1";
+        
+        $totalPedido_array = $connection->execute($query)->fetchAll('assoc');
+        $totalCount = array_sum(array_column($totalPedido_array,'QuantidadePedido'));
+        $totalPedido_new_array = [];
+        foreach ($totalPedido_array as $pedido) {
+            $perc = round($pedido['QuantidadePedido']/$totalCount * 100,1) ;
+            $totalPedido_new_array[$pedido["StatusPedido"]] = ['label' => $pedido['StatusPedido'],'count' => $pedido['QuantidadePedido'],'percent' => $perc . '%'];
+            
+        }
         
         $pedidos = TableRegistry::get("Pedidos");
-
 
         //Tempo médios de primeira resposta (em dias)
         //  "SELECT AVG(DATEDIFF(DataResposta, DataEnvio)) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta;"
@@ -71,7 +82,8 @@ class Dados extends Entity{
         $totalPedidosComRecursosAtendidos = floatval($totalPedidosComRecursosAtendidos->totalPedidos);
 
         $results = [
-            'totalPedidos'=>$totalPedidos
+            'totalPedidosClassificacao'=>$totalPedido_new_array
+            ,'totalPedidos'=>$totalPedidos
             ,'totalPedidosRespondidos'=>$totalPedidosRespondidos
             ,'totalPedidosNaoRespondidos'=>$totalPedidosNaoRespondidos
             ,'tempoMedioPrimeiraResposta'=>$tempoMedioPrimeiraResposta
@@ -121,6 +133,13 @@ class Dados extends Entity{
     //         "qtd" : 20
     //     }, {...}
     // ]
+    
+    public function TaxaDeAtendimentoPorAno() {
+        $connection = ConnectionManager::get('default');
+        $query = "select p.Ativo,count(p.Codigo) as QuantidadePedido,year(p.DataEnvio) as AnoEnvio,sp.Nome as NomeStatusPedido from pedidos as p left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) group by sp.Nome, year(p.DataEnvio) having Ativo = 1";
+        $atendimentoPedidosPorAno_arr = $connection->execute($query)->fetchAll('assoc');
+        return json_encode($atendimentoPedidosPorAno_arr);        
+    }
 
     public function AtendimentoPedidosPorAnoETipo() {
 

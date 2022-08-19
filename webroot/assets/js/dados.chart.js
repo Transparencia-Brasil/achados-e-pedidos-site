@@ -1,4 +1,90 @@
-//Grafico classificações de atendimento por ano
+//Taxa de atendimento por ano
+(function () {
+    function draw(error, data) {
+        // Compute values.
+        const X = d3.map(data, x => x.AnoEnvio);
+        const Y = d3.map(data, y => y.QuantidadePedido);
+        const I = d3.range(X.length);
+        const defined = (d, i) => !isNaN(X[i]) && !isNaN(Y[i]);
+        const D = d3.map(data, defined);
+
+        // Normalize the y-values.
+        constbasis = Y[0];
+        Y.forEach((y, i) => Y[i] = y / basis);
+
+        // Compute default domains.
+        const xDomain = d3.extent(X);
+        const yDomain = d3.extent(Y);
+
+        // Construct scales and axes.
+        const xScale = xType(xDomain, xRange);
+        const yScale = yType(yDomain, yRange);
+        const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0);
+        const yAxis = d3.axisLeft(yScale).tickFormat((f => d => f(d - 1))(d3.format(yFormat)));
+
+        // Construct a line generator.
+        const line = d3.line()
+            .defined(i => D[i])
+            .curve(curve)
+            .x(i => xScale(X[i]))
+            .y(i => yScale(Y[i]));
+
+
+        var margin = {top: 40, right: 30, bottom: 10, left: 50},
+            width = 960 - margin.left - margin.right,
+            height = 470 - margin.top - margin.bottom,
+            tooltip , tooltipBody, tooltipContent, tooltipTitle;
+
+
+        var svg = d3.select("#taxa-atendimento-ano")
+            .append("svg")
+                .attr("width", width + margin.left + margin.right + 200)
+                .attr("height", (height + margin.top + margin.bottom) + 20)
+            .append("g")
+                .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");        
+
+        // const svg = d3.create("svg")
+        //     .attr("width", width)
+        //     .attr("height", height)
+        //     .attr("viewBox", [0, 0, width, height])
+        //     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+        svg.append("g")
+            .attr("transform", `translate(0,${yScale(1)})`)
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("transform", `translate(${marginLeft},0)`)
+            .call(yAxis)
+            .call(g => g.select(".domain").remove())
+            .call(g => g.selectAll(".tick line").clone()
+                .attr("x2", width - marginLeft - marginRight)
+                .attr("stroke-opacity", 0.1))
+            .call(g => g.append("text")
+                .attr("x", -marginLeft)
+                .attr("y", 10)
+                .attr("fill", "currentColor")
+                .attr("text-anchor", "start")
+                .text(yLabel));
+
+        svg.append("path")
+            .attr("fill", "none")
+            .attr("stroke", color)
+            .attr("stroke-width", strokeWidth)
+            .attr("stroke-linecap", strokeLinecap)
+            .attr("stroke-linejoin", strokeLinejoin)
+            .attr("stroke-opacity", strokeOpacity)
+            .attr("d", line(I));     
+
+    }
+    
+    d3.json("/api/taxaDeAtendimentoPorAno", draw);                
+    
+})
+//Fim taxa de atendimento por ano
+
+//Taxa de reposta por ano
 (function () {
 
     var margin = {top: 40, right: 30, bottom: 10, left: 50},
@@ -7,7 +93,7 @@
     tooltip , tooltipBody, tooltipContent, tooltipTitle;
 
 
-    var svg = d3.select("#chart-atendimento")
+    var svg = d3.select("#taxa-resposta-ano")
         .append("svg")
             .attr("width", width + margin.left + margin.right + 200)
             .attr("height", (height + margin.top + margin.bottom) + 20)
@@ -277,8 +363,8 @@
     }
 
     d3.json("/api/PedidosAtendimentoPorAno", draw);
-})();
-//FIM Grafico classificações de atendimento por ano
+});
+//FIM Taxa de atendimento por ano
 (function () {
     var _lodash = _.noConflict();
     var unidadesFederativas = [{"ID": "0","Sigla": "ÓrgãosFederais","Nome": "Órgãos Federais"},{"ID": "1","Sigla": "AC","Nome": "Acre"}, {"ID": "2","Sigla": "AL","Nome": "Alagoas"}, {"ID": "3","Sigla": "AM","Nome": "Amazonas"}, {"ID": "4","Sigla": "AP","Nome": "Amapá"}, {"ID": "5","Sigla": "BA","Nome": "Bahia"}, {"ID": "6","Sigla": "CE","Nome": "Ceará"}, {"ID": "7","Sigla": "DF","Nome": "Distrito Federal"}, {"ID": "8","Sigla": "ES","Nome": "Espírito Santo"}, {"ID": "9","Sigla": "GO","Nome": "Goiás"}, {"ID": "10","Sigla": "MA","Nome": "Maranhão"}, {"ID": "11","Sigla": "MG","Nome": "Minas Gerais"}, {"ID": "12","Sigla": "MS","Nome": "Mato Grosso do Sul"}, {"ID": "13","Sigla": "MT","Nome": "Mato Grosso"}, {"ID": "14","Sigla": "PA","Nome": "Pará"}, {"ID": "15","Sigla": "PB","Nome": "Paraíba"}, {"ID": "16","Sigla": "PE","Nome": "Pernambuco"}, {"ID": "17","Sigla": "PI","Nome": "Piauí"}, {"ID": "18","Sigla": "PR","Nome": "Paraná"}, {"ID": "19","Sigla": "RJ","Nome": "Rio de Janeiro"}, {"ID": "20","Sigla": "RN","Nome": "Rio Grande do Norte"}, {"ID": "21","Sigla": "RO","Nome": "Rondônia"}, {"ID": "22","Sigla": "RR","Nome": "Roraima"}, {"ID": "23","Sigla": "RS","Nome": "Rio Grande do Sul"}, {"ID": "24","Sigla": "SC","Nome": "Santa Catarina"}, {"ID": "25","Sigla": "SE","Nome": "Sergipe"}, {"ID": "26","Sigla": "SP","Nome": "São Paulo"}, {"ID": "27","Sigla": "TO","Nome": "Tocantins"}];
@@ -607,122 +693,122 @@
     $("#order-by-uf").change(function() {
         doDrawMap();
     });
-})();
+});
 
-(function () {
-    var
-        margin = { top: 80, right: 50, bottom: 30, left: 50 },
-        viewBox = { width: 860, height: 420 },
-        width = viewBox.width - margin.left - margin.right,
-        height = viewBox.height - margin.top - margin.bottom,
-        dot = { radius: 3 },
-        svg = d3.select("#chart-tempo-resposta").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
-            .attr("width", "100%"),
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+// (function () {
+//     var
+//         margin = { top: 80, right: 50, bottom: 30, left: 50 },
+//         viewBox = { width: 860, height: 420 },
+//         width = viewBox.width - margin.left - margin.right,
+//         height = viewBox.height - margin.top - margin.bottom,
+//         dot = { radius: 3 },
+//         svg = d3.select("#chart-tempo-resposta").append('svg')
+//             .attr("version", "1.1")
+//             .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
+//             .attr("width", "100%"),
+//         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var filter_tipo = "--";
-    var filter_esfera = "--";
+//     var filter_tipo = "--";
+//     var filter_esfera = "--";
 
-    var x = d3.scaleBand().rangeRound([0, width]).padding(0.01).paddingOuter(0.5),
-        y = d3.scaleLinear().range([height, 0]),
-        z = d3.scaleThreshold()
-            .domain([6, 11, 16, 21, 26, 31, 36, 41])
-            .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "mais de 40"]);
-    x.domain(z.range());
+//     var x = d3.scaleBand().rangeRound([0, width]).padding(0.01).paddingOuter(0.5),
+//         y = d3.scaleLinear().range([height, 0]),
+//         z = d3.scaleThreshold()
+//             .domain([6, 11, 16, 21, 26, 31, 36, 41])
+//             .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "mais de 40"]);
+//     x.domain(z.range());
 
-    g.append("g")
-        .attr("class", "chart-axis chart-axis--x")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
+//     g.append("g")
+//         .attr("class", "chart-axis chart-axis--x")
+//         .attr("transform", "translate(0," + height + ")")
+//         .call(d3.axisBottom(x));
 
-    var yAxis = g.append("g")
-        .attr("class", "chart-axis chart-axis--y");
+//     var yAxis = g.append("g")
+//         .attr("class", "chart-axis chart-axis--y");
 
-    var tooltip = svg.append("foreignObject")
-        .attr("class", "chart-tooltip")
-        .attr("x", 12)
-        .attr("y", -10)
-        .attr("width", 150)
-        .attr("height", 100)
-        .style("display", "none");
-    var tooltipContent = tooltip.append('xhtml:div')
-        .attr("class", "chart-tooltip-content");
-    var tooltipTitle = tooltipContent.append('div')
-        .attr('class', 'chart-tooltip-title');
-    var tooltipBody = tooltipContent.append('div')
-        .attr('class', 'chart-tooltip-body');
+//     var tooltip = svg.append("foreignObject")
+//         .attr("class", "chart-tooltip")
+//         .attr("x", 12)
+//         .attr("y", -10)
+//         .attr("width", 150)
+//         .attr("height", 100)
+//         .style("display", "none");
+//     var tooltipContent = tooltip.append('xhtml:div')
+//         .attr("class", "chart-tooltip-content");
+//     var tooltipTitle = tooltipContent.append('div')
+//         .attr('class', 'chart-tooltip-title');
+//     var tooltipBody = tooltipContent.append('div')
+//         .attr('class', 'chart-tooltip-body');
 
-    function draw(error, data) {
-        if (error) throw error;
+//     function draw(error, data) {
+//         if (error) throw error;
 
-        data.forEach(function (d) {
-            d.DataEnvio = new Date(d.DataEnvio);
-            d.DataResposta = new Date(d.DataResposta);
-            d.Grupo = z(d.DiasCorridos);
-        });
+//         data.forEach(function (d) {
+//             d.DataEnvio = new Date(d.DataEnvio);
+//             d.DataResposta = new Date(d.DataResposta);
+//             d.Grupo = z(d.DiasCorridos);
+//         });
 
-        d3.select("#filter-tipo-tempo").on("change", function () {
-            filter_tipo = this.value;
-            filter();
-        });
+//         d3.select("#filter-tipo-tempo").on("change", function () {
+//             filter_tipo = this.value;
+//             filter();
+//         });
 
-        d3.select("#filter-tempo-esfera").on("change", function () {
-            filter_esfera = this.value;
-            filter();
-        });
+//         d3.select("#filter-tempo-esfera").on("change", function () {
+//             filter_esfera = this.value;
+//             filter();
+//         });
 
-        function filter() {
-            var entries = _.filter(data, function (d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
-            entries = _.filter(entries, function (d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
-            var series = d3.nest()
-                .key(function (d) { return d.Grupo; })
-                .rollup(function (leaves) { return leaves.length; })
-                .entries(entries);
-            series.sort(function (a, b) { return d3.ascending(a.value, b.value); });
+//         function filter() {
+//             var entries = _.filter(data, function (d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
+//             entries = _.filter(entries, function (d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
+//             var series = d3.nest()
+//                 .key(function (d) { return d.Grupo; })
+//                 .rollup(function (leaves) { return leaves.length; })
+//                 .entries(entries);
+//             series.sort(function (a, b) { return d3.ascending(a.value, b.value); });
 
-            var total = d3.nest()
-                .rollup(function (leaves) { return leaves.length; })
-                .entries(entries);
-            console.log("total")
-            console.log(total)
-            y.domain([0, Math.ceil(d3.max(series, function (d) { return d.value / total; }) * 10) / 10]);
-            yAxis.call(d3.axisLeft(y).tickFormat(d3.format(".1%")).ticks(4));
+//             var total = d3.nest()
+//                 .rollup(function (leaves) { return leaves.length; })
+//                 .entries(entries);
+//             console.log("total")
+//             console.log(total)
+//             y.domain([0, Math.ceil(d3.max(series, function (d) { return d.value / total; }) * 10) / 10]);
+//             yAxis.call(d3.axisLeft(y).tickFormat(d3.format(".1%")).ticks(4));
 
-            g.selectAll(".chart-bar").remove();
-            var bars = g.selectAll(".chart-bar")
-                .data(series)
-                .enter().append("rect")
-                .attr("class", "chart-bar")
-                .attr("x", function (d) { return x(d.key); })
-                .attr("y", height)
-                .attr("width", x.bandwidth())
-                .attr("height", 0)
-                .on("mouseover", function (d) {
-                    tooltip.attr("transform", "translate(" + x(d.key) + ", " + (y(d.value / total) + 10) + ")")
-                    if (d.key == "mais de 40") {
-                        tooltipTitle.html(d.key + " dias")
-                    } else {
-                        tooltipTitle.html("De " + d.key + " dias")
-                    }
-                    tooltipBody.html("<p class='chart-tip'>" + d.value + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
-                    tooltip.style("display", null);
-                })
-                .on("mouseout", function (d) {
-                    tooltip.style("display", "none");
-                });
-            g.selectAll(".chart-bar")
-                .transition()
-                .duration(function (d, i) { return i * 100; })
-                .attr("y", function (d) { return y(d.value / total); })
-                .attr("height", function (d) { return height - y(d.value / total); });
-        }
-        filter();
-    }
+//             g.selectAll(".chart-bar").remove();
+//             var bars = g.selectAll(".chart-bar")
+//                 .data(series)
+//                 .enter().append("rect")
+//                 .attr("class", "chart-bar")
+//                 .attr("x", function (d) { return x(d.key); })
+//                 .attr("y", height)
+//                 .attr("width", x.bandwidth())
+//                 .attr("height", 0)
+//                 .on("mouseover", function (d) {
+//                     tooltip.attr("transform", "translate(" + x(d.key) + ", " + (y(d.value / total) + 10) + ")")
+//                     if (d.key == "mais de 40") {
+//                         tooltipTitle.html(d.key + " dias")
+//                     } else {
+//                         tooltipTitle.html("De " + d.key + " dias")
+//                     }
+//                     tooltipBody.html("<p class='chart-tip'>" + d.value + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
+//                     tooltip.style("display", null);
+//                 })
+//                 .on("mouseout", function (d) {
+//                     tooltip.style("display", "none");
+//                 });
+//             g.selectAll(".chart-bar")
+//                 .transition()
+//                 .duration(function (d, i) { return i * 100; })
+//                 .attr("y", function (d) { return y(d.value / total); })
+//                 .attr("height", function (d) { return height - y(d.value / total); });
+//         }
+//         filter();
+//     }
 
-    d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
-})();
+//     d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
+// });
 
 (function () {
     var

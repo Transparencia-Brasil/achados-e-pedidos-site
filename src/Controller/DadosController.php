@@ -21,6 +21,13 @@ class DadosController extends AppController
         $this->set("sumario", $result);
     }
 
+    public function TaxaDeAtendimentoPorAno() {
+        $record = new Dados();
+        $result = $record->TaxaDeAtendimentoPorAno();
+        echo($result);
+        $this->autoRender = false;        
+    }
+
     public function AtendimentoPedidosPorAnoETipo() {
         $record = new Dados();
         $result = $record->AtendimentoPedidosPorAnoETipo();

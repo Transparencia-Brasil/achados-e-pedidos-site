@@ -4,6 +4,7 @@ namespace App\Controller;
 use Cake\ORM\TableRegistry;
 use App\Model\Entity\Dados;
 
+ini_set('memory_limit', '-1');
 class DadosController extends AppController
 {
     public function initialize()

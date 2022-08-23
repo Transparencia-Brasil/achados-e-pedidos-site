@@ -15,24 +15,27 @@
           <h1>DADOS</h1>
           <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="--">
           <p>Veja a taxa de resposta dos pedidos de acesso à informação cadastrados no Achados e Pedidos.<br>Pedidos respondidos são aqueles que receberam algum tipo de resposta do órgão público (sem considerar recursos)<br>Pedidos não respondidos são aqueles que não receberam resposta do órgão público (mesmo depois de uma reclamação pela omissão ter sido apresentada)<br>Os dados não indicam se a resposta foi satisfatória ou adequada.</p>
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
-            <h2>Pedidos<br> na base</h2>
-            <h3 class="qnt"><?=$sumario['totalPedidos']?></h3>
+       
+
+          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
+            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos respondidos"/>
+            <h2>Pedidos<br> respondidos</h2>
+            <h3 class="qnt"><?=$sumario['totalPedidosRespondidos']?></h3>
           </div>
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
+          
+          <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-nao-atendidos.jpg" alt="Pedidos não respondidos"/>
             <h2>Pedidos<br> não respondidos</h2>
             <h3 class="qnt"><?=$sumario['totalPedidosNaoRespondidos']?></h3>
           </div>
 
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos respondidos"/>
-            <h2>Pedidos<br> respondidos</h2>
-            <h3 class="qnt"><?=$sumario['totalPedidosRespondidos']?></h3>
+          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
+            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
+            <h2>Pedidos<br> parcialmente atendidos</h2>
+            <h3 class="qnt"><?=$sumario['totalPedidosParcial']?></h3>
           </div>
       </div>
-      <h2 class="text-center">Taxa de resposta por ano</h2>
+      <h2 class="text-center">Classificação de atendimento por ano</h2>
       <div id="my_dataviz"></div>
       <div id="chart-atendimento"></div>
       <p>&nbsp;</p>

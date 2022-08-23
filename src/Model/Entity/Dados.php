@@ -29,22 +29,36 @@ class Dados extends Entity{
     //     Total de pedidos com recurso
     //     Total de pedidos com recurso e que foram atendidos
     public function Sumario() {
-
-
         $connection = ConnectionManager::get('default');
         
-        //Total de pedidos na base de dados
-        $query = "SELECT count(*) as total FROM v_pedidos_ativos_groups";
-        
-        $totalPedido_array = $connection->execute($query)->fetchAll('assoc');
-        $totalPedidos = $totalPedido_array[0]["total"];
+         //Total de pedidos não-respondidos e respondidos e parcials
+        $query = "select p.Ativo,  count(p.Codigo) as QuantidadePedido,  sp.Nome as StatusPedido
+                from pedidos as p
+                left join status_pedido as sp
+                on (p.CodigoStatusPedido = sp.Codigo)
+                group by sp.Nome
+                having Ativo = 1;";
 
-        //Total de pedidos não-respondidos e respondidos
-        $query = "SELECT * FROM v_pedidos_count_sresposta ORDER BY StatusResposta ASC";
         $totalPedidosRespostas_array = $connection->execute($query)->fetchAll('assoc');
-        $totalPedidosNaoRespondidos = $totalPedidosRespostas_array[0]["TotalPedidos"];
-        $totalPedidosRespondidos = $totalPedidosRespostas_array[1]["TotalPedidos"];
-        
+        $totalPedidosNaoRespondidos  = 0;
+        $totalPedidosRespondidos = 0;
+        $totalParcialRespondidos = 0;
+        $totalPedidos = 0;
+
+        foreach ($totalPedidosRespostas_array as $item) {
+            if(strcmp($item["StatusPedido"] , "Não Atendido") == 0) {
+                $totalPedidosNaoRespondidos  =$item["QuantidadePedido"];
+            }
+            else if(strcmp($item["StatusPedido"] , "Atendido") == 0) {
+                $totalPedidosRespondidos  =$item["QuantidadePedido"];
+            }
+            else if(strcmp($item["StatusPedido"] , "Parcialmente Atendido") == 0) {
+                $totalParcialRespondidos  =$item["QuantidadePedido"];
+            }
+
+            $totalPedidos += $item["QuantidadePedido"];
+        }
+
         $pedidos = TableRegistry::get("Pedidos");
 
 
@@ -72,6 +86,7 @@ class Dados extends Entity{
 
         $results = [
             'totalPedidos'=>$totalPedidos
+            ,'totalPedidosParcial' => $totalParcialRespondidos
             ,'totalPedidosRespondidos'=>$totalPedidosRespondidos
             ,'totalPedidosNaoRespondidos'=>$totalPedidosNaoRespondidos
             ,'tempoMedioPrimeiraResposta'=>$tempoMedioPrimeiraResposta
@@ -139,6 +154,15 @@ class Dados extends Entity{
         
         $query = "SELECT Count(CodigoPedido) as Qtd, year(DataEnvio) As Ano, StatusResposta FROM v_pedidos_ativos_status_resposta Group By Ano, StatusResposta";
 
+
+        $pedidos = $connection->execute($query)->fetchAll('assoc');
+        return json_encode($pedidos);
+    }
+
+    public function PedidosAtendimentoPorAno_V2() {
+        $connection = ConnectionManager::get('default');
+        
+        $query = "CALL `sp_calc_taxa_atendimento_ano`()";
 
         $pedidos = $connection->execute($query)->fetchAll('assoc');
         return json_encode($pedidos);

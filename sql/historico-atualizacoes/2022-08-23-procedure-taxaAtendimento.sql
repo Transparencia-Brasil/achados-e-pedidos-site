@@ -1,4 +1,5 @@
-CREATE DEFINER=`tblai`@`%` PROCEDURE `sp_calc_taxa_atendimento_ano`()
+DELIMITER $$
+CREATE DEFINER=`achadosepedidos`@`%` PROCEDURE `sp_calc_taxa_atendimento_ano`()
 BEGIN
     DECLARE cTotalPedidos INT;
     DECLARE cTotalStatusPedidos INT;
@@ -37,4 +38,5 @@ BEGIN
     
     Drop temporary table taxaAtendimentoAno;
 
-END
+END$$
+DELIMITER ;

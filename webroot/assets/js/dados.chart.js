@@ -57,7 +57,7 @@
     svg.select(".legendLinear")
         .append('rect')
         .attr("x", 0)
-        .attr("y", 64)
+        .attr("y", 84)
         .attr("width", 24)
         .attr("height", 24)
         .attr('stroke', 'black')

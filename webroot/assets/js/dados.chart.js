@@ -1,151 +1,83 @@
-//Taxa de atendimento por ano
-(function () {
-    function draw(error, data) {
-        // Compute values.
-        const X = d3.map(data, x => x.AnoEnvio);
-        const Y = d3.map(data, y => y.QuantidadePedido);
-        const I = d3.range(X.length);
-        const defined = (d, i) => !isNaN(X[i]) && !isNaN(Y[i]);
-        const D = d3.map(data, defined);
+//Grafico classificações de atendimento por ano
+(function() {
 
-        // Normalize the y-values.
-        constbasis = Y[0];
-        Y.forEach((y, i) => Y[i] = y / basis);
+    var margin = { top: 40, right: 30, bottom: 10, left: 50 },
+        width = 960 - margin.left - margin.right,
+        height = 470 - margin.top - margin.bottom,
+        tooltip, tooltipBody, tooltipContent, tooltipTitle;
 
-        // Compute default domains.
-        const xDomain = d3.extent(X);
-        const yDomain = d3.extent(Y);
-
-        // Construct scales and axes.
-        const xScale = xType(xDomain, xRange);
-        const yScale = yType(yDomain, yRange);
-        const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0);
-        const yAxis = d3.axisLeft(yScale).tickFormat((f => d => f(d - 1))(d3.format(yFormat)));
-
-        // Construct a line generator.
-        const line = d3.line()
-            .defined(i => D[i])
-            .curve(curve)
-            .x(i => xScale(X[i]))
-            .y(i => yScale(Y[i]));
-
-
-        var margin = {top: 40, right: 30, bottom: 10, left: 50},
-            width = 960 - margin.left - margin.right,
-            height = 470 - margin.top - margin.bottom,
-            tooltip , tooltipBody, tooltipContent, tooltipTitle;
-
-
-        var svg = d3.select("#taxa-atendimento-ano")
-            .append("svg")
-                .attr("width", width + margin.left + margin.right + 200)
-                .attr("height", (height + margin.top + margin.bottom) + 20)
-            .append("g")
-                .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");        
-
-        // const svg = d3.create("svg")
-        //     .attr("width", width)
-        //     .attr("height", height)
-        //     .attr("viewBox", [0, 0, width, height])
-        //     .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
-
-        svg.append("g")
-            .attr("transform", `translate(0,${yScale(1)})`)
-            .call(xAxis);
-
-        svg.append("g")
-            .attr("transform", `translate(${marginLeft},0)`)
-            .call(yAxis)
-            .call(g => g.select(".domain").remove())
-            .call(g => g.selectAll(".tick line").clone()
-                .attr("x2", width - marginLeft - marginRight)
-                .attr("stroke-opacity", 0.1))
-            .call(g => g.append("text")
-                .attr("x", -marginLeft)
-                .attr("y", 10)
-                .attr("fill", "currentColor")
-                .attr("text-anchor", "start")
-                .text(yLabel));
-
-        svg.append("path")
-            .attr("fill", "none")
-            .attr("stroke", color)
-            .attr("stroke-width", strokeWidth)
-            .attr("stroke-linecap", strokeLinecap)
-            .attr("stroke-linejoin", strokeLinejoin)
-            .attr("stroke-opacity", strokeOpacity)
-            .attr("d", line(I));     
-
-    }
-    
-    d3.json("/api/taxaDeAtendimentoPorAno", draw);                
-    
-})
-//Fim taxa de atendimento por ano
-
-//Taxa de reposta por ano
-(function () {
-
-    var margin = {top: 40, right: 30, bottom: 10, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 470 - margin.top - margin.bottom,
-    tooltip , tooltipBody, tooltipContent, tooltipTitle;
-
+    var lineStroke = 4;
 
     var svg = d3.select("#taxa-resposta-ano")
         .append("svg")
-            .attr("width", width + margin.left + margin.right + 200)
-            .attr("height", (height + margin.top + margin.bottom) + 20)
+        .attr("width", width + margin.left + margin.right + 200)
+        .attr("height", (height + margin.top + margin.bottom) + 20)
         .append("g")
-            .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 
     // -
-    var subgroups = ["Respondidos","NaoRespondidos"];
+    var subgroups = ["Respondidos", "NaoRespondidos"];
 
     // - Legenda
     svg.append("g")
-    .attr("class", "legendLinear")
-    .attr("transform", "translate(900,145)");
+        .attr("class", "legendLinear")
+        .attr("transform", "translate(900,145)");
 
     svg.select(".legendLinear")
-    .append('rect')
-    .attr("width",24)
-    .attr("height",24)
-    .attr('stroke', 'black')
-    .attr('fill', '#e45d88');
+        .append('rect')
+        .attr("width", 24)
+        .attr("height", 24)
+        .attr('stroke', 'black')
+        .attr('fill', '#fbc064');
 
     svg.select(".legendLinear")
-    .append('text')
-    .attr("y",20)
-    .attr("x",30)
-    .attr('stroke', 'black')
-    .text('Respondidos');
+        .append('text')
+        .attr("y", 20)
+        .attr("x", 30)
+        .attr('stroke', 'black')
+        .text('Atendidos');
 
     svg.select(".legendLinear")
-    .append('rect')
-    .attr("x",0)
-    .attr("y",44)
-    .attr("width",24)
-    .attr("height",24)
-    .attr('stroke', 'black')
-    .attr('fill', '#fbc064');
+        .append('rect')
+        .attr("x", 0)
+        .attr("y", 44)
+        .attr("width", 24)
+        .attr("height", 24)
+        .attr('stroke', 'black')
+        .attr('fill', '#e45d88');
 
     svg.select(".legendLinear")
-    .append('text')
-    .attr("y",64)
-    .attr("x",30)
-    .attr('stroke', 'black')
-    .text('Não Respondidos');
+        .append('text')
+        .attr("y", 64)
+        .attr("x", 30)
+        .attr('stroke', 'black')
+        .text('Não Atendidos');
+
+    svg.select(".legendLinear")
+        .append('rect')
+        .attr("x", 0)
+        .attr("y", 84)
+        .attr("width", 24)
+        .attr("height", 24)
+        .attr('stroke', 'black')
+        .attr('fill', '#87570b');
+
+    svg.select(".legendLinear")
+        .append('text')
+        .attr("y", 104)
+        .attr("x", 30)
+        .attr('stroke', 'black')
+        .text('Parcialmente Atendidos');
+
 
     function tooltipShow(data, x, y) {
         tooltip.attr("transform", "translate(" + x + ", " + y + ")")
         tooltipTitle.html(data.Ano);
 
-        tooltipBody.html("<p class='chart-tip'>" + data.Total + " pedidos</p><p>"
-        + data.Respondido + " pedidos respondidos</p><p>"
-        + data.NaoRespondido + " pedidos não respondidos</p>");
+        tooltipBody.html("<p class='chart-tip'>" + data.Total + " pedidos</p><p>" +
+            data.Respondido + " pedidos respondidos</p><p>" +
+            data.NaoRespondido + " pedidos não respondidos</p>");
 
         tooltip.style("display", null);
     }
@@ -155,219 +87,78 @@
         if (error) throw error;
 
         // Consolida os Anos e Unicos Registros
-        var anosDataq = data.map(el => el.Ano)
-            .filter((value, index, self) => self.indexOf(value) === index); // Distinct
+        var anosDataq = data.map(el => el.AnoEnvio)
+            .filter((value, index, self) => self.indexOf(value) === index);
 
-        var dataC = [];
-        anosDataq.forEach(function(el, i, arr) {
-            var anoNovoItem = {
-                Respondido: 0,
-                NaoRespondido: 0,
-                Total: 0,
-                PercRespondidos: 0,
-                Ano: el
-            };
-
-            // -
-            data.filter(el2 => el2.Ano == el).forEach(function(itemAno, iItemAno) {
-                var valor = parseInt(itemAno.Qtd);
-
-                if(itemAno.StatusResposta == "Respondido") {
-                    anoNovoItem.Respondido += valor;
-                } else {
-                    anoNovoItem.NaoRespondido += valor;
-                }
-            });
-
-            // -
-            dataC[i] = anoNovoItem;
-        });
-
-        data = dataC;
-
-        // Calcula a Porcentagem
-        data.forEach(function(el, i, arr) {
-            var respondidos = el.Respondido;
-            var naoRespondidos = el.NaoRespondido;
-
-            // - Calcula Porcentagem
-            el.Total = naoRespondidos +  respondidos;
-            if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
-            else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
-            else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
-
-            el.PercNaoRespondidos = 1.00 - el.PercRespondidos;
-        });
-
-         // Add X axis
-      var x = d3.scaleBand()
-        .domain(anosDataq)
-        .range([0, width])
-        .padding([0.2])
+        var x = d3.scaleBand()
+            .domain(anosDataq)
+            .range([0, width])
+            .padding([0.2])
         svg.append("g")
-        .attr("class","xaxis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).tickSizeOuter(0));
+            .attr("class", "xaxis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).tickSizeOuter(0));
 
         // Add Y axis
         var y = d3.scaleLinear()
-        .domain([0.0,1.0])
-        .range([ height, 0 ]);
-
-        var y_axis = d3.axisLeft().scale(y)
-            .tickValues([0, .25, .5, .75, 1])
-            .tickFormat(d3.format(".0%"));
+            .domain([0, 100])
+            .range([height, 0]);
+        var y_axis = d3.axisLeft(y);
 
         svg.append("g")
-        .attr("class","yaxis")
-        .call(y_axis);
-
-        var color = d3.scaleOrdinal()
-            .domain(subgroups)
-            .range(['#e45d88','#fbc064']);
+            .attr("class", "yaxis")
+            .call(y_axis);
 
         svg.select(".yaxis")
             .selectAll("text")
-            .style("font-size","15px");
+            .style("font-size", "15px");
 
-        svg.select(".xaxis")
-            .selectAll("text")
-            .style("font-size","16px");
+        // Add the "Atendido" line
+        var dataAtendido = data.filter((value, index, self) => value.StatusNome == 'Atendido');
 
+        svg.append("path")
+            .datum(dataAtendido)
+            .attr("fill", "none")
+            .attr("stroke", "#fbc064")
+            .attr("stroke-width", lineStroke)
+            .attr("d", d3.line()
+                .x(function(d) { return x(d.AnoEnvio) })
+                .y(function(d) { return y(d.PercStatus) })
+            )
 
-        //stack the data? --> stack per subgroup
-        var stackedData = d3.stack()
-                .keys(subgroups)
-                .value(function(obj, key) {
-                    if(key == "Respondidos") {
-                        return obj.PercRespondidos;
-                    }
-                    else if(key == "NaoRespondidos") {
-                        return obj.PercNaoRespondidos;
-                    }
-                })
-                (data)
+        // Add the "Não Atendido" line
+        var dataNaoAtendido = data.filter((value, index, self) => value.StatusNome == 'Não Atendido');
 
-        // Barra do Gráfico
-        svg.append("g")
-        .selectAll("g")
-        .data(stackedData)
-        .enter().append("g")
-            .attr("fill", function(d) {
-                 return color(d.key);
-            })
-            .selectAll("rect")
-            .data(function(d) {
-                d.forEach(function(item, i) {
-                    item.key = d.key;
-                });
+        svg.append("path")
+            .datum(dataNaoAtendido)
+            .attr("fill", "none")
+            .attr("stroke", "#e45d88")
+            .attr("stroke-width", lineStroke)
+            .attr("d", d3.line()
+                .x(function(d) { return x(d.AnoEnvio) })
+                .y(function(d) { return y(d.PercStatus) })
+            )
 
-                return d;
-            })
-            .enter()
-            .append("rect") // Cria a Barra
-            .attr("x", function(d) {
-                return x(d.data.Ano);
-            })
-            .attr("y", function(d) {
-                return y(d[1]);
-             })
-            .attr("height", function(d) {
-                 return y(d[0]) - y(d[1]);
-             })
-            .attr("width",x.bandwidth())
-            .style("cursor", "pointer")
-            .on("mouseover", function (d) {
-                var tooltipY = d.key == "Respondidos" ? y(0.9) : y(0.5);
+        // Add the "Parcial Atendido" line
+        var dataParcialAtendido = data.filter((value, index, self) => value.StatusNome == 'Parcialmente Atendido');
 
-                tooltipShow(d.data, x(d.data.Ano) , tooltipY);
-            })
-            .on("mouseout", function (d) {
-                tooltip.style("display", "none");
-            });
-
-        // Legendas dos Respondidos
-        var legendaBarrasResp = svg.append("g")
-        .selectAll("g")
-        .data(data)
-        .enter().append("g");
-
-        legendaBarrasResp.append("text")
-            .text(function(d) {
-                return (d.PercRespondidos * 100).toFixed(0) + "%";
-            })
-            .attr("x", function(d){
-                return x(d.Ano) + x.bandwidth()/2;
-            })
-            .attr("y", function(d){
-                d.dy =  y(0) - ((y(0) - y(d.PercRespondidos)) / 2);
-                return d.dy;
-            })
-            .attr("font-family" , "sans-serif")
-            .attr("font-size" , "14px")
-            .attr("fill" , "black")
-            .attr("text-anchor", "middle")
-            .style("cursor", "pointer")
-            .on("mouseover", function (d) {
-                tooltipShow(d, x(d.Ano) , y(0.8));
-            })
-            .on("mouseout", function (d) {
-                tooltip.style("display", "none");
-            });;
-
-        // Legendas dos Não Respondidos
-        var legendaBarrasNaoResp = svg.append("g")
-        .selectAll("g")
-        .data(data)
-        .enter().append("g");
-
-        legendaBarrasNaoResp.append("text")
-            .text(function(d) {
-                return (d.PercNaoRespondidos * 100).toFixed(0) + "%";
-            })
-            .attr("x", function(d){
-                return x(d.Ano) + x.bandwidth()/2;
-            })
-            .attr("y", function(d){
-                d.dy2 =  ((y(0) - y(d.PercNaoRespondidos)) / 2);
-                return d.dy2;
-            })
-            .attr("font-family" , "sans-serif")
-            .attr("font-size" , "14px")
-            .attr("fill" , "black")
-            .attr("text-anchor", "middle")
-            .style("cursor", "pointer")
-            .on("mouseover", function (d) {
-                tooltipShow(d, x(d.Ano) , y(0.5));
-            })
-            .on("mouseout", function (d) {
-                tooltip.style("display", "none");
-            });;
-
-
-        // - Tooltip
-        tooltip = svg.append("foreignObject")
-        .attr("class", "chart-tooltip")
-        .attr("x", -15)
-        .attr("y", 10)
-        .attr("width", 150)
-        .attr("height", 100)
-        .style("display", "none")
-        .style("z-index", 10000);
-        tooltipContent = tooltip.append('xhtml:div')
-            .attr("class", "chart-tooltip-content");
-        tooltipTitle = tooltipContent.append('div')
-            .attr("class", 'chart-tooltip-title');
-        tooltipBody = tooltipContent.append('div')
-            .attr('class', 'chart-tooltip-body');
+        svg.append("path")
+            .datum(dataParcialAtendido)
+            .attr("fill", "none")
+            .attr("stroke", "#87570b")
+            .attr("stroke-width", lineStroke)
+            .attr("d", d3.line()
+                .x(function(d) { return x(d.AnoEnvio) })
+                .y(function(d) { return y(d.PercStatus) })
+            )
     }
 
-    d3.json("/api/PedidosAtendimentoPorAno", draw);
-});
-//FIM Taxa de atendimento por ano
-(function () {
+    d3.json("/api/v2/PedidosAtendimentoPorAno", draw);
+})();
+//FIM Grafico classificações de atendimento por ano
+(function() {
     var _lodash = _.noConflict();
-    var unidadesFederativas = [{"ID": "0","Sigla": "ÓrgãosFederais","Nome": "Órgãos Federais"},{"ID": "1","Sigla": "AC","Nome": "Acre"}, {"ID": "2","Sigla": "AL","Nome": "Alagoas"}, {"ID": "3","Sigla": "AM","Nome": "Amazonas"}, {"ID": "4","Sigla": "AP","Nome": "Amapá"}, {"ID": "5","Sigla": "BA","Nome": "Bahia"}, {"ID": "6","Sigla": "CE","Nome": "Ceará"}, {"ID": "7","Sigla": "DF","Nome": "Distrito Federal"}, {"ID": "8","Sigla": "ES","Nome": "Espírito Santo"}, {"ID": "9","Sigla": "GO","Nome": "Goiás"}, {"ID": "10","Sigla": "MA","Nome": "Maranhão"}, {"ID": "11","Sigla": "MG","Nome": "Minas Gerais"}, {"ID": "12","Sigla": "MS","Nome": "Mato Grosso do Sul"}, {"ID": "13","Sigla": "MT","Nome": "Mato Grosso"}, {"ID": "14","Sigla": "PA","Nome": "Pará"}, {"ID": "15","Sigla": "PB","Nome": "Paraíba"}, {"ID": "16","Sigla": "PE","Nome": "Pernambuco"}, {"ID": "17","Sigla": "PI","Nome": "Piauí"}, {"ID": "18","Sigla": "PR","Nome": "Paraná"}, {"ID": "19","Sigla": "RJ","Nome": "Rio de Janeiro"}, {"ID": "20","Sigla": "RN","Nome": "Rio Grande do Norte"}, {"ID": "21","Sigla": "RO","Nome": "Rondônia"}, {"ID": "22","Sigla": "RR","Nome": "Roraima"}, {"ID": "23","Sigla": "RS","Nome": "Rio Grande do Sul"}, {"ID": "24","Sigla": "SC","Nome": "Santa Catarina"}, {"ID": "25","Sigla": "SE","Nome": "Sergipe"}, {"ID": "26","Sigla": "SP","Nome": "São Paulo"}, {"ID": "27","Sigla": "TO","Nome": "Tocantins"}];
+    var unidadesFederativas = [{ "ID": "0", "Sigla": "ÓrgãosFederais", "Nome": "Órgãos Federais" }, { "ID": "1", "Sigla": "AC", "Nome": "Acre" }, { "ID": "2", "Sigla": "AL", "Nome": "Alagoas" }, { "ID": "3", "Sigla": "AM", "Nome": "Amazonas" }, { "ID": "4", "Sigla": "AP", "Nome": "Amapá" }, { "ID": "5", "Sigla": "BA", "Nome": "Bahia" }, { "ID": "6", "Sigla": "CE", "Nome": "Ceará" }, { "ID": "7", "Sigla": "DF", "Nome": "Distrito Federal" }, { "ID": "8", "Sigla": "ES", "Nome": "Espírito Santo" }, { "ID": "9", "Sigla": "GO", "Nome": "Goiás" }, { "ID": "10", "Sigla": "MA", "Nome": "Maranhão" }, { "ID": "11", "Sigla": "MG", "Nome": "Minas Gerais" }, { "ID": "12", "Sigla": "MS", "Nome": "Mato Grosso do Sul" }, { "ID": "13", "Sigla": "MT", "Nome": "Mato Grosso" }, { "ID": "14", "Sigla": "PA", "Nome": "Pará" }, { "ID": "15", "Sigla": "PB", "Nome": "Paraíba" }, { "ID": "16", "Sigla": "PE", "Nome": "Pernambuco" }, { "ID": "17", "Sigla": "PI", "Nome": "Piauí" }, { "ID": "18", "Sigla": "PR", "Nome": "Paraná" }, { "ID": "19", "Sigla": "RJ", "Nome": "Rio de Janeiro" }, { "ID": "20", "Sigla": "RN", "Nome": "Rio Grande do Norte" }, { "ID": "21", "Sigla": "RO", "Nome": "Rondônia" }, { "ID": "22", "Sigla": "RR", "Nome": "Roraima" }, { "ID": "23", "Sigla": "RS", "Nome": "Rio Grande do Sul" }, { "ID": "24", "Sigla": "SC", "Nome": "Santa Catarina" }, { "ID": "25", "Sigla": "SE", "Nome": "Sergipe" }, { "ID": "26", "Sigla": "SP", "Nome": "São Paulo" }, { "ID": "27", "Sigla": "TO", "Nome": "Tocantins" }];
     var pedidosPorUFPoderENivelCache = [];
 
     d3.json("/api/pedidosPorUFPoderENivel", function drawMapData(error, data) {
@@ -381,36 +172,36 @@
         $("#chart-pedidos-uf-mapa").empty();
         $("#chart-pedidos-uf-barras").empty();
         var
-            totais = { Respondidos : 0, NaoRespondidos : 0, Total: 0},
+            totais = { Respondidos: 0, NaoRespondidos: 0, Total: 0 },
             marginB = { top: 0, right: 0, bottom: 0, left: 0 },
             viewBoxB = { width: 600, height: 460 },
             widthB = viewBoxB.width - marginB.left - marginB.right,
             heightB = viewBoxB.height - marginB.top - marginB.bottom,
             dotB = { minRadius: 3, maxRadius: 30 },
             svgB = d3.select("#chart-pedidos-uf-mapa").append('svg')
-                .attr("version", "1.1")
-                .attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
-                .attr("width", "100%"),
+            .attr("version", "1.1")
+            .attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
+            .attr("width", "100%"),
             gB = svgB.append("g").attr("transform", "translate(" + marginB.left + "," + marginB.top + ")"),
             projection = d3.geoAlbers()
-                .center([-44, -15])
-                .rotate([0, 0])
-                .parallels([0, 0])
-                .scale(700),
+            .center([-44, -15])
+            .rotate([0, 0])
+            .parallels([0, 0])
+            .scale(700),
             map = d3.geoPath().projection(projection);
 
         // Range de Cores
-        var color_range = ["#969696","#940131","#cd134f","#ec7340","#fab94f","#f6e197"];
+        var color_range = ["#969696", "#940131", "#cd134f", "#ec7340", "#fab94f", "#f6e197"];
         var colorScale = d3.scaleLinear()
-        .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
-        .range(color_range);
+            .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
+            .range(color_range);
 
         var legend = d3.legendColor()
             .scale(colorScale)
-            .cells([1.0,0.80, 0.60, 0.40, 0.20,0.0])
+            .cells([1.0, 0.80, 0.60, 0.40, 0.20, 0.0])
             .labelFormat(d3.format(".0%"))
             .title("% Respondidos");
-            svgB.append("g")
+        svgB.append("g")
             .attr("transform", "translate(60,20)")
             .call(legend);
 
@@ -437,9 +228,9 @@
             svgC = d3.select("#chart-pedidos-uf-barras").append("svg")
             .attr("width", widthC + marginC.left + marginC.right + 230)
             .attr("height", heightC + marginC.top + marginC.bottom + 20)
-          .append("g")
+            .append("g")
             .attr("transform",
-                  "translate(" + marginC.left + "," + marginC.top + ")");
+                "translate(" + marginC.left + "," + marginC.top + ")");
 
 
         function drawBarras(data) {
@@ -448,12 +239,12 @@
             var orderByUf = $("#order-by-uf").is(":checked");
 
             // Ordena os Dados
-            if(orderByPerc) {
-                data = data.sort(function(a,b) {
+            if (orderByPerc) {
+                data = data.sort(function(a, b) {
                     return a.PercRespondidos - b.PercRespondidos;
                 });
-            } else if(orderByUf) {
-                data = data.sort(function(a,b) {
+            } else if (orderByUf) {
+                data = data.sort(function(a, b) {
                     return a.SiglaUf.localeCompare(b.SiglaUf, 'pt-BR', { sensitivity: 'base' });
                 });
             }
@@ -464,64 +255,64 @@
 
             // Add X axis
             var x = d3.scaleLinear()
-            .domain([0.0, 1.0])
-            .range([ 0, widthC]);
+                .domain([0.0, 1.0])
+                .range([0, widthC]);
             svgC.append("g")
-            .attr("transform", "translate(0," + heightC + ")")
-            .call(d3.axisBottom(x).tickFormat(d3.format(".0%")))
-            .selectAll("text")
+                .attr("transform", "translate(0," + heightC + ")")
+                .call(d3.axisBottom(x).tickFormat(d3.format(".0%")))
+                .selectAll("text")
                 .attr("transform", "translate(-10,0)rotate(-45)")
                 .style("text-anchor", "end");
 
-              // Y axis
+            // Y axis
             var y = d3.scaleBand()
-            .range([ 0, heightC ])
-            .domain(data.map(function(d) { return d.SiglaUf; }))
-            .padding(.1);
+                .range([0, heightC])
+                .domain(data.map(function(d) { return d.SiglaUf; }))
+                .padding(.1);
             svgC.append("g")
-            .call(d3.axisLeft(y))
+                .call(d3.axisLeft(y))
 
 
             //Bars
             svgC.selectAll("myRect")
-            .data(data)
-            .enter()
-            .append("rect")
-            .attr("x", x(0) )
-            .attr("y", function(d) { return y(d.SiglaUf); })
-            .attr("width", function(d) { return x(d.PercRespondidos); })
-            .attr("height", y.bandwidth() )
-            .attr("fill", "#fe9301")
-            .style("opacity", 0.5)
-            .on("mouseover", function(d) {
-                d3.select(this).style("opacity", 1);
-                d3.select("#bartext-" + d.SiglaUf).style("opacity", 1);
-            })
-            .on("mouseout", function(d) {
-                d3.select(this).style("opacity", 0.5);
-                d3.select("#bartext-" + d.SiglaUf).style("opacity", 0);
-            });
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("x", x(0))
+                .attr("y", function(d) { return y(d.SiglaUf); })
+                .attr("width", function(d) { return x(d.PercRespondidos); })
+                .attr("height", y.bandwidth())
+                .attr("fill", "#fe9301")
+                .style("opacity", 0.5)
+                .on("mouseover", function(d) {
+                    d3.select(this).style("opacity", 1);
+                    d3.select("#bartext-" + d.SiglaUf).style("opacity", 1);
+                })
+                .on("mouseout", function(d) {
+                    d3.select(this).style("opacity", 0.5);
+                    d3.select("#bartext-" + d.SiglaUf).style("opacity", 0);
+                });
 
             // Texto da Quantidades de Pedidos
             svgC.selectAll("myText")
-            .data(data)
-            .enter()
-            .append("text")
-            .attr("x", function(d) {
-                return x(d.PercRespondidos) + 5;
-            })
-            .attr("y", function(d) { return y(d.SiglaUf) + 10; })
-            .attr("width", 100)
-            .attr("height", y.bandwidth() )
-            .attr("fill", "#000")
-            .attr("id", function(d) {
-                return "bartext-" + d.SiglaUf;
-            })
-            .style("opacity", 0)
-            .style("z-index", 1000)
-            .text(function(d) {
-                return d.Respondido + " pedidos";
-            });
+                .data(data)
+                .enter()
+                .append("text")
+                .attr("x", function(d) {
+                    return x(d.PercRespondidos) + 5;
+                })
+                .attr("y", function(d) { return y(d.SiglaUf) + 10; })
+                .attr("width", 100)
+                .attr("height", y.bandwidth())
+                .attr("fill", "#000")
+                .attr("id", function(d) {
+                    return "bartext-" + d.SiglaUf;
+                })
+                .style("opacity", 0)
+                .style("z-index", 1000)
+                .text(function(d) {
+                    return d.Respondido + " pedidos";
+                });
         }
 
         function drawMap(error, br) {
@@ -533,26 +324,25 @@
             var esferaPoder = $("#filter-poder").val();
 
             data = pedidosPorUFPoderENivelCache
-            .map(function(el) {
-                var el2 = Object.assign({}, el);
+                .map(function(el) {
+                    var el2 = Object.assign({}, el);
 
-                // - Se o Nivel federativo for Federal, Considera tudo como BR
+                    // - Se o Nivel federativo for Federal, Considera tudo como BR
 
-                if(nivelFederativo == "Federal")
-                {
-                    el2.SiglaUf = "BR";
-                }
+                    if (nivelFederativo == "Federal") {
+                        el2.SiglaUf = "BR";
+                    }
 
-                return el2;
-            });;
+                    return el2;
+                });;
 
-            if(nivelFederativo !== "--") {
+            if (nivelFederativo !== "--") {
                 data = data.filter(function(el) {
                     return nivelFederativo == "Federal" ? true : el.NomeNivelFederativo == nivelFederativo;
                 })
             }
 
-            if(esferaPoder !== "--") {
+            if (esferaPoder !== "--") {
                 data = data.filter(function(el) {
                     return el.NomePoder == esferaPoder;
                 });
@@ -580,8 +370,8 @@
                     var naoRespondidos = itemUf.NaoRespondido;
 
                     // -
-                    if(respondidos == null) { respondidos = 0 } else { respondidos = parseInt(respondidos) };
-                    if(naoRespondidos == null) { naoRespondidos = 0 } else { naoRespondidos = parseInt(naoRespondidos) };
+                    if (respondidos == null) { respondidos = 0 } else { respondidos = parseInt(respondidos) };
+                    if (naoRespondidos == null) { naoRespondidos = 0 } else { naoRespondidos = parseInt(naoRespondidos) };
 
                     ufNovoItem.Respondido += respondidos;
                     ufNovoItem.NaoRespondido += naoRespondidos;
@@ -599,10 +389,8 @@
                 var naoRespondidos = el.NaoRespondido;
 
                 // - Calcula Porcentagem
-                el.Total = naoRespondidos +  respondidos;
-                if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
-                else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
-                else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
+                el.Total = naoRespondidos + respondidos;
+                if (respondidos > 0) { el.PercRespondidos = ((respondidos / el.Total)); } else if (respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; } else if (respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
 
                 // - Totais Gerais
                 totais.Respondidos = totais.Respondidos + respondidos;
@@ -611,58 +399,56 @@
             });
 
             // Perc. Total Geral
-            if(  totais.Respondidos > 0) {  totais.PercRespondidos = (( totais.Respondidos/totais.Total)); }
-            else if(totais.Respondidos == 0 &&  totais.NaoRespondidos > 0) { totais.PercRespondidos = 0; }
-            else if(totais.Respondidos == 0 &&  totais.NaoRespondidos == 0) { totais.PercRespondidos = 1; }
+            if (totais.Respondidos > 0) { totais.PercRespondidos = ((totais.Respondidos / totais.Total)); } else if (totais.Respondidos == 0 && totais.NaoRespondidos > 0) { totais.PercRespondidos = 0; } else if (totais.Respondidos == 0 && totais.NaoRespondidos == 0) { totais.PercRespondidos = 1; }
             setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
 
             // Altera a Cor dos Estados de Acordo com a Porcentagem
             gB.selectAll(".chart-uf")
-                    .data(ufs.features)
-                    .enter().append("path")
-                    .attr("class", "chart-uf")
-                    .attr("d", map)
-                    .attr("fill", function (d) {
-                        var sigla = d.id;
-                        var procura = data.filter(el => el.SiglaUf == sigla);
-                        return procura.length == 0 ? colorScale(0) : colorScale(procura[0].PercRespondidos);
-                    })
-                    // Efeito Hover
-                    .style("opacity", .85)
-                    .style("stroke", "transparent")
-                    //  Legenda Geral do Filtro
-                    .on("mouseover", function(d) {
-                        d3.selectAll(".chart-uf")
-                            .transition()
-                            .duration(200)
-                            .style("opacity", .85)
-                            .style("stroke", "transparent");
+                .data(ufs.features)
+                .enter().append("path")
+                .attr("class", "chart-uf")
+                .attr("d", map)
+                .attr("fill", function(d) {
+                    var sigla = d.id;
+                    var procura = data.filter(el => el.SiglaUf == sigla);
+                    return procura.length == 0 ? colorScale(0) : colorScale(procura[0].PercRespondidos);
+                })
+                // Efeito Hover
+                .style("opacity", .85)
+                .style("stroke", "transparent")
+                //  Legenda Geral do Filtro
+                .on("mouseover", function(d) {
+                    d3.selectAll(".chart-uf")
+                        .transition()
+                        .duration(200)
+                        .style("opacity", .85)
+                        .style("stroke", "transparent");
 
-                        d3.select(this)
-                            .transition()
-                            .duration(200)
-                            .style("opacity", 1)
-                            .style("stroke", "#999999");
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .style("opacity", 1)
+                        .style("stroke", "#999999");
 
-                        var sigla = d.id;
-                        var procura = data.filter(el => el.SiglaUf == sigla);
+                    var sigla = d.id;
+                    var procura = data.filter(el => el.SiglaUf == sigla);
 
-                        setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla}).Nome,
-                                procura[0].PercRespondidos, procura[0].Respondido);
-                    })
-                    .on("mouseout", function(d) {
-                        d3.selectAll(".chart-uf")
+                    setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla }).Nome,
+                        procura[0].PercRespondidos, procura[0].Respondido);
+                })
+                .on("mouseout", function(d) {
+                    d3.selectAll(".chart-uf")
                         .transition()
                         .duration(200)
                         .style("opacity", .85);
 
-                        d3.select(this)
-                            .transition()
-                            .duration(200)
-                            .style("stroke", "transparent");
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .style("stroke", "transparent");
 
-                        setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
-                    });
+                    setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
+                });
 
             drawBarras(data);
             $("#chart-pedidos-uf-info").fadeIn();
@@ -693,124 +479,124 @@
     $("#order-by-uf").change(function() {
         doDrawMap();
     });
-});
+})();
 
-// (function () {
-//     var
-//         margin = { top: 80, right: 50, bottom: 30, left: 50 },
-//         viewBox = { width: 860, height: 420 },
-//         width = viewBox.width - margin.left - margin.right,
-//         height = viewBox.height - margin.top - margin.bottom,
-//         dot = { radius: 3 },
-//         svg = d3.select("#chart-tempo-resposta").append('svg')
-//             .attr("version", "1.1")
-//             .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
-//             .attr("width", "100%"),
-//         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+(function() {
+    var
+        margin = { top: 80, right: 50, bottom: 30, left: 50 },
+        viewBox = { width: 860, height: 420 },
+        width = viewBox.width - margin.left - margin.right,
+        height = viewBox.height - margin.top - margin.bottom,
+        dot = { radius: 3 },
+        svg = d3.select("#chart-tempo-resposta").append('svg')
+        .attr("version", "1.1")
+        .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
+        .attr("width", "100%"),
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-//     var filter_tipo = "--";
-//     var filter_esfera = "--";
+    var filter_tipo = "--";
+    var filter_esfera = "--";
 
-//     var x = d3.scaleBand().rangeRound([0, width]).padding(0.01).paddingOuter(0.5),
-//         y = d3.scaleLinear().range([height, 0]),
-//         z = d3.scaleThreshold()
-//             .domain([6, 11, 16, 21, 26, 31, 36, 41])
-//             .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "mais de 40"]);
-//     x.domain(z.range());
+    var x = d3.scaleBand().rangeRound([0, width]).padding(0.01).paddingOuter(0.5),
+        y = d3.scaleLinear().range([height, 0]),
+        z = d3.scaleThreshold()
+        .domain([6, 11, 16, 21, 26, 31, 36, 41])
+        .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "mais de 40"]);
+    x.domain(z.range());
 
-//     g.append("g")
-//         .attr("class", "chart-axis chart-axis--x")
-//         .attr("transform", "translate(0," + height + ")")
-//         .call(d3.axisBottom(x));
+    g.append("g")
+        .attr("class", "chart-axis chart-axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
 
-//     var yAxis = g.append("g")
-//         .attr("class", "chart-axis chart-axis--y");
+    var yAxis = g.append("g")
+        .attr("class", "chart-axis chart-axis--y");
 
-//     var tooltip = svg.append("foreignObject")
-//         .attr("class", "chart-tooltip")
-//         .attr("x", 12)
-//         .attr("y", -10)
-//         .attr("width", 150)
-//         .attr("height", 100)
-//         .style("display", "none");
-//     var tooltipContent = tooltip.append('xhtml:div')
-//         .attr("class", "chart-tooltip-content");
-//     var tooltipTitle = tooltipContent.append('div')
-//         .attr('class', 'chart-tooltip-title');
-//     var tooltipBody = tooltipContent.append('div')
-//         .attr('class', 'chart-tooltip-body');
+    var tooltip = svg.append("foreignObject")
+        .attr("class", "chart-tooltip")
+        .attr("x", 12)
+        .attr("y", -10)
+        .attr("width", 150)
+        .attr("height", 100)
+        .style("display", "none");
+    var tooltipContent = tooltip.append('xhtml:div')
+        .attr("class", "chart-tooltip-content");
+    var tooltipTitle = tooltipContent.append('div')
+        .attr('class', 'chart-tooltip-title');
+    var tooltipBody = tooltipContent.append('div')
+        .attr('class', 'chart-tooltip-body');
 
-//     function draw(error, data) {
-//         if (error) throw error;
+    function draw(error, data) {
+        if (error) throw error;
 
-//         data.forEach(function (d) {
-//             d.DataEnvio = new Date(d.DataEnvio);
-//             d.DataResposta = new Date(d.DataResposta);
-//             d.Grupo = z(d.DiasCorridos);
-//         });
+        data.forEach(function(d) {
+            d.DataEnvio = new Date(d.DataEnvio);
+            d.DataResposta = new Date(d.DataResposta);
+            d.Grupo = z(d.DiasCorridos);
+        });
 
-//         d3.select("#filter-tipo-tempo").on("change", function () {
-//             filter_tipo = this.value;
-//             filter();
-//         });
+        d3.select("#filter-tipo-tempo").on("change", function() {
+            filter_tipo = this.value;
+            filter();
+        });
 
-//         d3.select("#filter-tempo-esfera").on("change", function () {
-//             filter_esfera = this.value;
-//             filter();
-//         });
+        d3.select("#filter-tempo-esfera").on("change", function() {
+            filter_esfera = this.value;
+            filter();
+        });
 
-//         function filter() {
-//             var entries = _.filter(data, function (d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
-//             entries = _.filter(entries, function (d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
-//             var series = d3.nest()
-//                 .key(function (d) { return d.Grupo; })
-//                 .rollup(function (leaves) { return leaves.length; })
-//                 .entries(entries);
-//             series.sort(function (a, b) { return d3.ascending(a.value, b.value); });
+        function filter() {
+            var entries = _.filter(data, function(d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
+            entries = _.filter(entries, function(d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
+            var series = d3.nest()
+                .key(function(d) { return d.Grupo; })
+                .rollup(function(leaves) { return leaves.length; })
+                .entries(entries);
+            series.sort(function(a, b) { return d3.ascending(a.value, b.value); });
 
-//             var total = d3.nest()
-//                 .rollup(function (leaves) { return leaves.length; })
-//                 .entries(entries);
-//             console.log("total")
-//             console.log(total)
-//             y.domain([0, Math.ceil(d3.max(series, function (d) { return d.value / total; }) * 10) / 10]);
-//             yAxis.call(d3.axisLeft(y).tickFormat(d3.format(".1%")).ticks(4));
+            var total = d3.nest()
+                .rollup(function(leaves) { return leaves.length; })
+                .entries(entries);
+            console.log("total")
+            console.log(total)
+            y.domain([0, Math.ceil(d3.max(series, function(d) { return d.value / total; }) * 10) / 10]);
+            yAxis.call(d3.axisLeft(y).tickFormat(d3.format(".1%")).ticks(4));
 
-//             g.selectAll(".chart-bar").remove();
-//             var bars = g.selectAll(".chart-bar")
-//                 .data(series)
-//                 .enter().append("rect")
-//                 .attr("class", "chart-bar")
-//                 .attr("x", function (d) { return x(d.key); })
-//                 .attr("y", height)
-//                 .attr("width", x.bandwidth())
-//                 .attr("height", 0)
-//                 .on("mouseover", function (d) {
-//                     tooltip.attr("transform", "translate(" + x(d.key) + ", " + (y(d.value / total) + 10) + ")")
-//                     if (d.key == "mais de 40") {
-//                         tooltipTitle.html(d.key + " dias")
-//                     } else {
-//                         tooltipTitle.html("De " + d.key + " dias")
-//                     }
-//                     tooltipBody.html("<p class='chart-tip'>" + d.value + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
-//                     tooltip.style("display", null);
-//                 })
-//                 .on("mouseout", function (d) {
-//                     tooltip.style("display", "none");
-//                 });
-//             g.selectAll(".chart-bar")
-//                 .transition()
-//                 .duration(function (d, i) { return i * 100; })
-//                 .attr("y", function (d) { return y(d.value / total); })
-//                 .attr("height", function (d) { return height - y(d.value / total); });
-//         }
-//         filter();
-//     }
+            g.selectAll(".chart-bar").remove();
+            var bars = g.selectAll(".chart-bar")
+                .data(series)
+                .enter().append("rect")
+                .attr("class", "chart-bar")
+                .attr("x", function(d) { return x(d.key); })
+                .attr("y", height)
+                .attr("width", x.bandwidth())
+                .attr("height", 0)
+                .on("mouseover", function(d) {
+                    tooltip.attr("transform", "translate(" + x(d.key) + ", " + (y(d.value / total) + 10) + ")")
+                    if (d.key == "mais de 40") {
+                        tooltipTitle.html(d.key + " dias")
+                    } else {
+                        tooltipTitle.html("De " + d.key + " dias")
+                    }
+                    tooltipBody.html("<p class='chart-tip'>" + d.value + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
+                    tooltip.style("display", null);
+                })
+                .on("mouseout", function(d) {
+                    tooltip.style("display", "none");
+                });
+            g.selectAll(".chart-bar")
+                .transition()
+                .duration(function(d, i) { return i * 100; })
+                .attr("y", function(d) { return y(d.value / total); })
+                .attr("height", function(d) { return height - y(d.value / total); });
+        }
+        filter();
+    }
 
-//     d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
-// });
+    d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
+})();
 
-(function () {
+(function() {
     var
         margin = { top: 0, right: 0, bottom: 0, left: 0 },
         viewBox = { width: 520, height: 160 },
@@ -819,14 +605,15 @@
         dot = { radius: 40 },
         text = { padding: 10 },
         svg = d3.select("#chart-taxa-reversao").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
-            .attr("width", "100%"),
+        .attr("version", "1.1")
+        .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
+        .attr("width", "100%"),
         clip = svg.append("defs").append("clipPath").attr("id", "circles-clip-path"),
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     var
         x = d3.scaleBand().rangeRound([0, width]).paddingOuter(0.5),
         y = d3.scaleLinear().range([0, dot.radius * 2]);
+
     function draw(error, data) {
         if (error) throw error;
         var nulldata = [
@@ -840,19 +627,19 @@
             { Interacao: "11", Status: "Nenhum", Qtd: 0 }
         ];
         data = data.concat(nulldata);
-        var dividend = _.filter(data, function (d) {
+        var dividend = _.filter(data, function(d) {
             return d.Interacao == "5" || d.Interacao == "7" || d.Interacao == "9" || d.Interacao == "11";
         });
-        var divisor = _.filter(data, function (d) {
+        var divisor = _.filter(data, function(d) {
             return d.Interacao == "4" || d.Interacao == "6" || d.Interacao == "8" || d.Interacao == "10";
         });
         dividend = d3.nest()
-            .key(function (d) { return d.Interacao; })
-            .rollup(function (leaves) { return { "sum": d3.sum(leaves, function (l) { return +l.Qtd; }) } })
+            .key(function(d) { return d.Interacao; })
+            .rollup(function(leaves) { return { "sum": d3.sum(leaves, function(l) { return +l.Qtd; }) } })
             .entries(dividend);
         divisor = d3.nest()
-            .key(function (d) { return d.Interacao; })
-            .rollup(function (leaves) { return { "sum": d3.sum(leaves, function (l) { return +l.Qtd; }) } })
+            .key(function(d) { return d.Interacao; })
+            .rollup(function(leaves) { return { "sum": d3.sum(leaves, function(l) { return +l.Qtd; }) } })
             .entries(divisor);
         var series = [
             { instancia: "1ª instância", dividend: +dividend[0].value.sum, divisor: divisor[0].value.sum },
@@ -860,12 +647,12 @@
             { instancia: "3ª instância", dividend: +dividend[2].value.sum, divisor: divisor[2].value.sum },
             { instancia: "4ª instância", dividend: +dividend[3].value.sum, divisor: divisor[3].value.sum },
         ];
-        x.domain(series.map(function (d) { return d.instancia; }));
+        x.domain(series.map(function(d) { return d.instancia; }));
 
         var paths = clip.selectAll("circle")
             .data(series)
             .enter().append("circle")
-            .attr("cx", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("cx", function(d) { return x(d.instancia) + dot.radius; })
             .attr("cy", height * 0.5)
             .attr("r", dot.radius);
 
@@ -874,36 +661,36 @@
             .enter().append("g")
             .attr("class", "chart-circle");
         gCircles.append("text")
-            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("x", function(d) { return x(d.instancia) + dot.radius; })
             .attr("y", (height * 0.5) - dot.radius - text.padding)
             .attr("fill", "#000000")
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
-            .text(function (d) { return d.instancia; });
+            .text(function(d) { return d.instancia; });
         gCircles.append("text")
-            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("x", function(d) { return x(d.instancia) + dot.radius; })
             .attr("y", (height * 0.5) + dot.radius + text.padding)
             .attr("fill", "#000000")
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "hanging")
-            .text(function (d) { return d.dividend + " pedidos"; });
+            .text(function(d) { return d.dividend + " pedidos"; });
         gCircles.append("circle")
-            .attr("cx", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("cx", function(d) { return x(d.instancia) + dot.radius; })
             .attr("cy", height * 0.5)
             .attr("r", dot.radius)
             .attr("fill", "#edf0f5")
             .attr("stroke", "#e1e1e1")
             .attr("stroke-width", 2);
         gCircles.append("rect")
-            .attr("x", function (d) { return x(d.instancia); })
-            .attr("y", function (d) {
+            .attr("x", function(d) { return x(d.instancia); })
+            .attr("y", function(d) {
                 if (d.divisor > 0) {
                     return (height * 0.5 + dot.radius) - y(d.dividend / d.divisor);
                 }
             })
             .attr("width", dot.radius * 2)
-            .attr("height", function (d) {
+            .attr("height", function(d) {
                 if (d.divisor > 0) {
                     return y(d.dividend / d.divisor);
                 }
@@ -912,8 +699,8 @@
             .attr("fill", "#FFA401")
             .attr("clip-path", "url(#circles-clip-path)");
         gCircles.append("text")
-            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
-            .attr("y", function (d) {
+            .attr("x", function(d) { return x(d.instancia) + dot.radius; })
+            .attr("y", function(d) {
                 if (d.divisor > 0) {
                     if (d.dividend / d.divisor > 0.2 || d.dividend / d.divisor < 0.8) {
                         return (height * 0.5 + dot.radius) - y(d.dividend / d.divisor) - (text.padding * 0.4);
@@ -925,7 +712,7 @@
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "middle")
-            .text(function (d) {
+            .text(function(d) {
                 if (d.divisor > 0) {
                     return d3.format(".1f")((d.dividend / d.divisor) * 100) + "%";
                 }

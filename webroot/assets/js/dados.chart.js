@@ -103,7 +103,8 @@
         var y = d3.scaleLinear()
             .domain([0, 100])
             .range([height, 0]);
-        var y_axis = d3.axisLeft(y);
+
+        var y_axis = d3.axisLeft(y).tickFormat(d => d + "%");
 
         svg.append("g")
             .attr("class", "yaxis")

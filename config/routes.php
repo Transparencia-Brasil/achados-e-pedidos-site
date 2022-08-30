@@ -80,6 +80,7 @@ Router::connect('/api/v2/PedidosAtendimentoPorAno', array('controller' => 'Dados
 // -
 Router::connect('/api/atendimentoPedidosPorAnoETipo', array('controller' => 'Dados', 'action' => 'AtendimentoPedidosPorAnoETipo'));
 Router::connect('/api/pedidosPorUFPoderENivel', array('controller' => 'Dados', 'action' => 'PedidosPorUFPoderENivel'));
+Router::connect('/api/pedidosPorUFPoderENivelEStatus', array('controller' => 'Dados', 'action' => 'PedidosPorUFPoderENivelEStatus'));
 Router::connect('/api/PedidosAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'PedidosAtendimentoPorAno'));
 Router::connect('/api/sumario', array('controller' => 'Dados', 'action' => 'Sumario'));
 Router::connect('/api/pedidosTempoMedioDeTramitacao', array('controller' => 'Dados', 'action' => 'PedidosTempoMedioDeTramitacao'));

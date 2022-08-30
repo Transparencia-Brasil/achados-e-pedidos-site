@@ -78,6 +78,17 @@
                   </select>
               </div>
           </div>
+          <div class="col-xs-4">
+              <div class="form-group">
+                  <label for="filter-status">Status de Atendimento do Pedido</label>
+                  <select id="filter-status" class="form-control" name="filter-status">
+                      <option value="--">--</option>
+                      <option value="Atendido">Atendido</option>
+                      <option value="Não Atendido">Não Atendido</option>
+                      <option value="Parcialmente Atendido">Parcialmente Atendido</option>
+                  </select>
+              </div>
+          </div>
       </div>
       <div class="row">
           <div class="col-xs-4 col-xs-offset-8">

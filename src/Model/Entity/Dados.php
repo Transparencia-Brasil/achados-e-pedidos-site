@@ -216,7 +216,6 @@ class Dados extends Entity{
                     on (m.NomeNivelFederativo = v2.NomeNivelFederativo and m.NomePoder = v2.NomePoder and v2.SiglaUf = m.SiglaUf)
                     where m.SiglaUF is not null";
 
-
         // {StatusResposta: "Não respondido", SiglaUF: "AC", TotalPedidos: "2", TotalPedidosPoder: "103513"}
 
         // {"Não respondido":111, "Respondido":111, SiglaUF: "AC", TotalPedidos: "2"}
@@ -226,6 +225,74 @@ class Dados extends Entity{
         // print_r($query);
         // die();
         return json_encode($pedidos);
+    }
+
+    public function PedidosPorUFPoderENivelEStatus() {
+        $connection = ConnectionManager::get('default');
+        
+        $connection->execute("call sp_count_total()")->execute();
+
+        //Total de pedidos na base de dados
+        $query = "select p.Ativo,
+            sp.Nome as NomeStatusPedido,
+            count(p.Codigo) as QuantidadePedido,
+            pd.Nome as NomePoder,
+            nf.Nome as NomeNivelFederativo,
+            uf.Sigla as SiglaUF
+        from pedidos p
+            left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo)
+            left join agentes as a on (p.CodigoAgente = a.Codigo)
+            left join tipo_poder as pd on (a.CodigoPoder = pd.Codigo)
+            left join tipo_nivel_federativo as nf on (a.CodigoNivelFederativo = nf.Codigo)
+            left join uf as uf on (a.CodigoUF = uf.Codigo)
+            group by sp.Nome, pd.Nome, nf.Nome, uf.Sigla
+            having Ativo = 1";
+
+        $pedidos = $connection->execute($query)->fetchAll('assoc');
+
+
+        // Calcula os Não Respondidos e Respondidos
+        $resultado = array();
+        foreach ($pedidos as $pedido) {
+            $statusPedido = $pedido['NomeStatusPedido'];
+            $esferaPoder = $pedido['NomePoder'];
+            $nivelFederativo = $pedido['NomeNivelFederativo'];
+            $siglaUf=  $pedido['SiglaUF'];
+      
+            $naoRespondido = $statusPedido == 'Não Atendido' ? $pedido["QuantidadePedido"] : 0;
+            $respondido = $statusPedido == 'Atendido' ? $pedido["QuantidadePedido"] : 0;
+
+            foreach ($pedidos as $pedido2) {
+                if($pedido['NomePoder'] == $pedido2['NomePoder']
+                    &&  $pedido['NomeNivelFederativo'] == $pedido2['NomeNivelFederativo']
+                    &&  $pedido['SiglaUF'] == $pedido2['SiglaUF']) {
+
+                    if($pedido2["NomeStatusPedido"] == 'Atendido' &&  $statusPedido == 'Não Atendido') {
+                        $respondido = $pedido2["QuantidadePedido"];
+                        break;
+                    }
+                    else if($pedido2["NomeStatusPedido"] == 'Não Atendido' &&  $statusPedido == 'Atendido') {
+                        $naoRespondido = $pedido2["QuantidadePedido"];
+                        break;
+                    }
+                    else if($pedido2["NomeStatusPedido"] == 'Não Atendido' &&  $statusPedido == 'Parcialmente Atendido') {
+                        $naoRespondido = $pedido2["QuantidadePedido"];
+                        break;
+                    }
+                }
+            }       
+   
+            array_push($resultado, [
+                "SiglaUf" => $siglaUf,
+                "NomeNivelFederativo" => $nivelFederativo,
+                "NomePoder" => $esferaPoder,
+                "Respondido" => $respondido,
+                "NaoRespondido" => $naoRespondido,
+                "StatusNome" =>  $statusPedido
+            ]);
+        }
+
+        return json_encode($resultado);
     }
 
     // public function PedidosPorUFPoderENivel() {

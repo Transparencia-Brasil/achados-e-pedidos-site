@@ -10,7 +10,7 @@ file_put_contents( $tmp . "/EsIndexarPedidos.pid", getmypid());
 
 require dirname(__DIR__) . '/../config/bootstrap.php';
 
-
+use App\Controller\Component\UCurlComponent;
 use App\Model\Entity\PedidoAnexo;
 use App\Model\Entity\Pedido;
 use App\Model\Entity\PedidoInteracao;
@@ -36,6 +36,9 @@ try {
     TaskEnvHelper::getInstance()->setProgress("Anexos", 1);
     $pedido_anexo_codigo = null; //insere novo anexo no ES
     $pedidoAnexoEdicaoBU->ES_AtualizarInserirAnexos($pedido_anexo_codigo);
+
+    // Realiza o Force Merge
+    UCurlComponent::get(ES_URL . "/utils/forceMerge");
 
     Log::info("[TASK] Finalizando a Indexação de Pedidos ...");
     file_put_contents($tmp . "/EsIndexarPedidos.task", "OKAY");

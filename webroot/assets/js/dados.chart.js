@@ -193,7 +193,7 @@
             map = d3.geoPath().projection(projection);
 
         // Range de Cores
-        var color_range = ["#969696", "#940131", "#cd134f", "#ec7340", "#fab94f", "#f6e197"];
+        var color_range = ["#969696","#f6e197","#fab94f","#ec7340","#cd134f","#940131"];
         var colorScale = d3.scaleLinear()
             .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
             .range(color_range);
@@ -202,7 +202,7 @@
             .scale(colorScale)
             .cells([1.0, 0.80, 0.60, 0.40, 0.20, 0.0])
             .labelFormat(d3.format(".0%"))
-            .title("% Respondidos");
+            .title("% Atentidos");
         svgB.append("g")
             .attr("transform", "translate(60,20)")
             .call(legend);

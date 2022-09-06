@@ -11,7 +11,7 @@ BEGIN
 	DECLARE search CURSOR FOR select  year(p.DataEnvio) as AnoEnvio, sp.Nome as NomeStatusPedido
 		from pedidos as p
 		left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo)
-		Where p.Ativo = 1
+		Where p.Ativo = 1 AND sp.Nome <> 'Nao Classificado'
 		group by sp.Nome, year(p.DataEnvio);       
 	DECLARE
 		CONTINUE HANDLER FOR NOT FOUND

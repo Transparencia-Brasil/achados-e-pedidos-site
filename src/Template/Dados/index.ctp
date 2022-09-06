@@ -37,11 +37,7 @@
       <h2 class="text-center">Classificação de atendimento por ano</h2>
       <div id="my_dataviz"></div>
       <div id="taxa-resposta-ano"></div>
-      <p>&nbsp;</p>
-      <h2 class="text-center">Taxa de atendimento por ano</h2>
-      <div id="my_dataviz"></div>
-      <div id="taxa-atendimento-ano"></div>
-      <p>&nbsp;</p>      
+      <p>&nbsp;</p>     
       <h2 class="text-center">Pedidos respondidos - Brasil e UFs</h2>
 
       <div class="row">
@@ -196,7 +192,7 @@
         "https://d3js.org/d3-geo-projection.v2.min.js",
         "<?=BASE_URL?>assets/js/topojson/3.0.2/topojson.min.js",
         "<?=BASE_URL?>assets/js/lodash.js/4.17.4/lodash.min.js",
-        "<?=BASE_URL?>assets/js/dados.chart.js"];
+        "<?=BASE_URL?>assets/js/dados.chart.js?version=1"];
     function loadScriptInOrder() {
         if (order == scriptMap.length) return;
         var

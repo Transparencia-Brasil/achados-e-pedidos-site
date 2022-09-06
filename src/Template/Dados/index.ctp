@@ -38,8 +38,8 @@
       <div id="my_dataviz"></div>
       <div id="taxa-resposta-ano"></div>
       <p>&nbsp;</p>     
-      <h2 class="text-center">Pedidos respondidos - Brasil e UFs</h2>
-
+      <h2 class="text-center">Atendimento a pedidos</h2>
+      <p>&nbsp;</p>     
       <div class="row">
           <!--<div class="col-xs-4">
               <div class="form-group">

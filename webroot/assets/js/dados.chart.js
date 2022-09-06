@@ -108,7 +108,8 @@
 
         svg.append("g")
             .attr("class", "yaxis")
-            .call(y_axis);
+            .call(y_axis)
+            .style("font-size", "15px");
 
         svg.select(".yaxis")
             .selectAll("text")

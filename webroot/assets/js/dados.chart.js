@@ -97,7 +97,8 @@
         svg.append("g")
             .attr("class", "xaxis")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x).tickSizeOuter(0));
+            .call(d3.axisBottom(x).tickSizeOuter(0))
+            .style("font-size", "15px");
 
         // Add Y axis
         var y = d3.scaleLinear()
@@ -109,7 +110,6 @@
         svg.append("g")
             .attr("class", "yaxis")
             .call(y_axis)
-            .style("font-size", "15px");
 
         svg.select(".yaxis")
             .selectAll("text")

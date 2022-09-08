@@ -246,7 +246,7 @@ class Dados extends Entity{
             left join tipo_nivel_federativo as nf on (a.CodigoNivelFederativo = nf.Codigo)
             left join uf as uf on (a.CodigoUF = uf.Codigo)
             group by sp.Nome, pd.Nome, nf.Nome, uf.Sigla
-            having Ativo = 1";
+            having Ativo = 1 AND NomeStatusPedido <> 'Não Classificado'";
 
         $pedidos = $connection->execute($query)->fetchAll('assoc');
 
@@ -259,8 +259,9 @@ class Dados extends Entity{
             $nivelFederativo = $pedido['NomeNivelFederativo'];
             $siglaUf=  $pedido['SiglaUF'];
       
-            $naoRespondido = $statusPedido == 'Não Atendido' ? $pedido["QuantidadePedido"] : 0;
-            $respondido = $statusPedido == 'Atendido' ? $pedido["QuantidadePedido"] : 0;
+            $naoAtendido = $statusPedido == 'Não Atendido' ? $pedido["QuantidadePedido"] : 0;
+            $parcialmenteAtendido = $statusPedido == 'Parcialmente Atendido' ? $pedido["QuantidadePedido"] : 0;
+            $atendido = $statusPedido == 'Atendido' ? $pedido["QuantidadePedido"] : 0;
 
             foreach ($pedidos as $pedido2) {
                 if($pedido['NomePoder'] == $pedido2['NomePoder']
@@ -268,15 +269,15 @@ class Dados extends Entity{
                     &&  $pedido['SiglaUF'] == $pedido2['SiglaUF']) {
 
                     if($pedido2["NomeStatusPedido"] == 'Atendido' &&  $statusPedido == 'Não Atendido') {
-                        $respondido = $pedido2["QuantidadePedido"];
+                        $atendido = $pedido2["QuantidadePedido"];
                         break;
                     }
                     else if($pedido2["NomeStatusPedido"] == 'Não Atendido' &&  $statusPedido == 'Atendido') {
-                        $naoRespondido = $pedido2["QuantidadePedido"];
+                        $naoAtendido = $pedido2["QuantidadePedido"];
                         break;
                     }
                     else if($pedido2["NomeStatusPedido"] == 'Não Atendido' &&  $statusPedido == 'Parcialmente Atendido') {
-                        $naoRespondido = $pedido2["QuantidadePedido"];
+                        $parcialmenteAtendido = $pedido2["QuantidadePedido"];
                         break;
                     }
                 }
@@ -286,8 +287,9 @@ class Dados extends Entity{
                 "SiglaUf" => $siglaUf,
                 "NomeNivelFederativo" => $nivelFederativo,
                 "NomePoder" => $esferaPoder,
-                "Respondido" => $respondido,
-                "NaoRespondido" => $naoRespondido,
+                "Atendido" => $atendido,
+                "NaoAtendido" => $naoAtendido,
+                "ParcialmenteAtendido" => $parcialmenteAtendido,
                 "StatusNome" =>  $statusPedido
             ]);
         }

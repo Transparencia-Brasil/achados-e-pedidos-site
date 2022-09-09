@@ -790,9 +790,9 @@ function retornaIconStatusPedido(value, value_interno) {
             icon = 'icon-naoclassificado';
     }
 
-    if (value_interno == "1" && icon != 'icon-naoclassificado') {
-        icon += '-verificado';
-    }
+    // if (value_interno == "1" && icon != 'icon-naoclassificado') {
+    //     icon += '-verificado';
+    // }
     return '<img src="' + base_url + 'assets/images/pedidos/' + icon + '.png">';
 }
 

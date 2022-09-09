@@ -16,19 +16,19 @@
           <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="--">
           <p>Veja a taxa de atendimento dos pedidos de acesso à informação cadastrados no Achados e Pedidos. A classificação é feita com um modelo de inteligência artificial que analisa a estrutura dos textos do pedido e da resposta para determinar se a solicitação foi atendida de fato, ou seja, se a informação foi fornecida. O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. Saiba mais <a href="https://achadosepedidos.org.br/na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a></p>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
-            <img src="<?=BASE_URL?>assets/images/pedidos/icon-atendido.png" alt="<?=$sumario['totalPedidosClassificacao']['Atendido']['label']?>" height="150px"/>
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-atendidos.jpeg" alt="<?=$sumario['totalPedidosClassificacao']['Atendido']['label']?>" height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Atendido']['label']?></h2>
             <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Atendido']['count']?></h3>
             <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Atendido']['percent']?></h3>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
-            <img src="<?=BASE_URL?>assets/images/pedidos/icon-nao-atendido.png" alt="<?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?>"  height="150px"/>
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-nao-atendidos.jpeg" alt="<?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?>"  height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?></h2>
             <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Não Atendido']['count']?></h3>
             <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Não Atendido']['percent']?></h3>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
-            <img src="<?=BASE_URL?>assets/images/pedidos/icon-parcialmente-atendido.png" alt="<?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?>"  height="150px"/>
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-atendidos-parcialmente.png" alt="<?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?>"  height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?></h2>
             <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['count']?></h3>
             <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['percent']?></h3>

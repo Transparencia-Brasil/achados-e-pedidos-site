@@ -396,9 +396,9 @@ $(function() {
                 icon = 'icon-naoclassificado';
         }
 
-        if (value_interno == "1" && icon != 'icon-naoclassificado') {
-            icon += '-verificado';
-        }
+        // if (value_interno == "1" && icon != 'icon-naoclassificado') {
+        //     icon += '-verificado';
+        // }
         //console.log('<img src="assets/images/pedidos/' + icon + '.png">');
         return '<img src="' + base_url + 'assets/images/pedidos/' + icon + '.png">';
     }

@@ -41,15 +41,6 @@
       <h2 class="text-center">Atendimento a pedidos</h2>
       <p>&nbsp;</p>     
       <div class="row">
-          <!--<div class="col-xs-4">
-              <div class="form-group">
-                  <label for="filter-tipo" class="form-inline-label">Classificação do pedido</label>
-                  <select id="filter-tipo" class="form-control" name="filter-tipo">
-                      <option value="Respondido">Respondido</option>
-                      <option value="Não respondido">Não Respondido</option>
-                  </select>
-              </div>
-          </div>-->
           <div class="col-xs-4">
               <div class="form-group">
                   <label for="filter-nivel">Nível federativo</label>
@@ -191,7 +182,7 @@
         "https://d3js.org/d3-geo-projection.v2.min.js",
         "<?=BASE_URL?>assets/js/topojson/3.0.2/topojson.min.js",
         "<?=BASE_URL?>assets/js/lodash.js/4.17.4/lodash.min.js",
-        "<?=BASE_URL?>assets/js/dados.chart.js?version=3"];
+        "<?=BASE_URL?>assets/js/dados.chart.js?version=4"];
     function loadScriptInOrder() {
         if (order == scriptMap.length) return;
         var

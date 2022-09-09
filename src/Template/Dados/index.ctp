@@ -78,8 +78,7 @@
               <div class="form-group">
                   <label for="filter-status">Status de Atendimento do Pedido</label>
                   <select id="filter-status" class="form-control" name="filter-status">
-                      <option value="--">--</option>
-                      <option value="Atendido">Atendido</option>
+                      <option value="Atendido" selected="selected">Atendido</option>
                       <option value="Não Atendido">Não Atendido</option>
                       <option value="Parcialmente Atendido">Parcialmente Atendido</option>
                   </select>
@@ -111,7 +110,7 @@
                     <span id="chart-info-poder" class="chart-info-text"></span>,</span> -->
                     <span id="chart-info-qtd" class="chart-info-text"></span> pedidos<br>
                     foram <span id="chart-info-tipo" class="chart-info-text">respondidos</span>, <br>
-                    <span id="chart-info-perc" class="chart-info-text"></span>% do total de pedidos<br>correspondentes para este filtro.
+                    <span id="chart-info-perc" class="chart-info-text"></span> do total de pedidos<br>correspondentes para este filtro.
                 </div>
               </div>
           </div>

@@ -250,79 +250,14 @@ class Dados extends Entity{
 
         $pedidos = $connection->execute($query)->fetchAll('assoc');
 
-
-        // Calcula os Não Respondidos e Respondidos
-        $resultado = array();
-        foreach ($pedidos as $pedido) {
-            $statusPedido = $pedido['NomeStatusPedido'];
-            $esferaPoder = $pedido['NomePoder'];
-            $nivelFederativo = $pedido['NomeNivelFederativo'];
-            $siglaUf=  $pedido['SiglaUF'];
-      
-            $naoAtendido = $statusPedido == 'Não Atendido' ? $pedido["QuantidadePedido"] : 0;
-            $parcialmenteAtendido = $statusPedido == 'Parcialmente Atendido' ? $pedido["QuantidadePedido"] : 0;
-            $atendido = $statusPedido == 'Atendido' ? $pedido["QuantidadePedido"] : 0;
-
-            foreach ($pedidos as $pedido2) {
-                if($pedido['NomePoder'] == $pedido2['NomePoder']
-                    &&  $pedido['NomeNivelFederativo'] == $pedido2['NomeNivelFederativo']
-                    &&  $pedido['SiglaUF'] == $pedido2['SiglaUF']) {
-
-                    if($pedido2["NomeStatusPedido"] == 'Atendido' &&  $statusPedido == 'Não Atendido') {
-                        $atendido = $pedido2["QuantidadePedido"];
-                        break;
-                    }
-                    else if($pedido2["NomeStatusPedido"] == 'Não Atendido' &&  $statusPedido == 'Atendido') {
-                        $naoAtendido = $pedido2["QuantidadePedido"];
-                        break;
-                    }
-                    else if($pedido2["NomeStatusPedido"] == 'Não Atendido' &&  $statusPedido == 'Parcialmente Atendido') {
-                        $parcialmenteAtendido = $pedido2["QuantidadePedido"];
-                        break;
-                    }
-                }
-            }       
-   
-            array_push($resultado, [
-                "SiglaUf" => $siglaUf,
-                "NomeNivelFederativo" => $nivelFederativo,
-                "NomePoder" => $esferaPoder,
-                "Atendido" => $atendido,
-                "NaoAtendido" => $naoAtendido,
-                "ParcialmenteAtendido" => $parcialmenteAtendido,
-                "StatusNome" =>  $statusPedido
-            ]);
-        }
-
-        return json_encode($resultado);
+        return json_encode($pedidos);
     }
-
-    // public function PedidosPorUFPoderENivel() {
-    //     $pedidos = TableRegistry::get("Pedidos");
-    //     $query = $pedidos->find();
-    //     $query->select(['uf' => 'Uf.Nome','sigla' => 'IF(Uf.Sigla IS NULL, "ÓrgãosFederais", Uf.Sigla)','nivel' => 'TipoNivelFederativo.Nome','poder' => 'TipoPoder.Nome','status' => 'StatusPedido.Nome','qtd' => $query->func()->count('Pedidos.Codigo')]);
-    //     $query->matching('agentes', function ($q) {
-    //         return $q->contain(['Uf'])->matching('TipoNivelFederativo')->matching('TipoPoder');
-    //     });
-    //     $query->matching('StatusPedido');
-    //     $query->hydrate(false)->where(['Pedidos.Ativo = 1'])->group(['Uf.Codigo','TipoNivelFederativo.Codigo','TipoPoder.Codigo','StatusPedido.Codigo']);
-    //     // print_r($query);
-    //     // die();
-    //     return json_encode($query);
-    // }
 
     public function PedidosTempoMedioDeTramitacao() {
 
         $connection = ConnectionManager::get('default');
         $query = "SELECT * FROM v_pedidos_count_dias_resposta";
         return  json_encode($connection->execute($query)->fetchAll('assoc'));
-
-
-        // $pedidos = TableRegistry::get("Pedidos");
-        // $query = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta = 1 AND Pedidos.Ativo = 1']);
-        // $pedidosTempoMedioDeTramitacao = $query->select(['Codigo' => 'Pedidos.Codigo','Status' => 'StatusPedido.Nome','DataEnvio' => 'Pedidos.DataEnvio','DataResposta' => 'PedidosInteracoes.DataResposta'])->contain(['PedidosInteracoes'])->matching('StatusPedido')->all();
-
-        // return json_encode($pedidosTempoMedioDeTramitacao);
     }
 
 

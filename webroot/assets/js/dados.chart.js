@@ -163,6 +163,14 @@
     var unidadesFederativas = [{ "ID": "0", "Sigla": "ÓrgãosFederais", "Nome": "Órgãos Federais" }, { "ID": "1", "Sigla": "AC", "Nome": "Acre" }, { "ID": "2", "Sigla": "AL", "Nome": "Alagoas" }, { "ID": "3", "Sigla": "AM", "Nome": "Amazonas" }, { "ID": "4", "Sigla": "AP", "Nome": "Amapá" }, { "ID": "5", "Sigla": "BA", "Nome": "Bahia" }, { "ID": "6", "Sigla": "CE", "Nome": "Ceará" }, { "ID": "7", "Sigla": "DF", "Nome": "Distrito Federal" }, { "ID": "8", "Sigla": "ES", "Nome": "Espírito Santo" }, { "ID": "9", "Sigla": "GO", "Nome": "Goiás" }, { "ID": "10", "Sigla": "MA", "Nome": "Maranhão" }, { "ID": "11", "Sigla": "MG", "Nome": "Minas Gerais" }, { "ID": "12", "Sigla": "MS", "Nome": "Mato Grosso do Sul" }, { "ID": "13", "Sigla": "MT", "Nome": "Mato Grosso" }, { "ID": "14", "Sigla": "PA", "Nome": "Pará" }, { "ID": "15", "Sigla": "PB", "Nome": "Paraíba" }, { "ID": "16", "Sigla": "PE", "Nome": "Pernambuco" }, { "ID": "17", "Sigla": "PI", "Nome": "Piauí" }, { "ID": "18", "Sigla": "PR", "Nome": "Paraná" }, { "ID": "19", "Sigla": "RJ", "Nome": "Rio de Janeiro" }, { "ID": "20", "Sigla": "RN", "Nome": "Rio Grande do Norte" }, { "ID": "21", "Sigla": "RO", "Nome": "Rondônia" }, { "ID": "22", "Sigla": "RR", "Nome": "Roraima" }, { "ID": "23", "Sigla": "RS", "Nome": "Rio Grande do Sul" }, { "ID": "24", "Sigla": "SC", "Nome": "Santa Catarina" }, { "ID": "25", "Sigla": "SE", "Nome": "Sergipe" }, { "ID": "26", "Sigla": "SP", "Nome": "São Paulo" }, { "ID": "27", "Sigla": "TO", "Nome": "Tocantins" }];
     var pedidosPorUFPoderENivelCache = [];
 
+
+    var namesPlural = []
+    namesPlural["Atendido"] = "atendidos"
+    namesPlural["Não Atendido"] = "não atendidos"
+    namesPlural["Parcialmente Atendido"] = "parcialmente atendidos"
+
+    var statusAtendido =  $('#filter-status').val(); //default filter selected
+
     d3.json("/api/pedidosPorUFPoderENivelEStatus", function drawMapData(error, data) {
         if (error) throw error;
 
@@ -174,12 +182,9 @@
         $("#chart-pedidos-uf-mapa").empty();
         $("#chart-pedidos-uf-barras").empty();
         var
-            totais = { Respondidos: 0, NaoRespondidos: 0, Total: 0 },
             marginB = { top: 0, right: 0, bottom: 0, left: 0 },
             viewBoxB = { width: 600, height: 460 },
-            widthB = viewBoxB.width - marginB.left - marginB.right,
             heightB = viewBoxB.height - marginB.top - marginB.bottom,
-            dotB = { minRadius: 3, maxRadius: 30 },
             svgB = d3.select("#chart-pedidos-uf-mapa").append('svg')
             .attr("version", "1.1")
             .attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
@@ -197,12 +202,13 @@
         var colorScale = d3.scaleLinear()
             .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
             .range(color_range);
-
+        
+        statusAtendido =  $('#filter-status').val()
         var legend = d3.legendColor()
             .scale(colorScale)
             .cells([1.0, 0.80, 0.60, 0.40, 0.20, 0.0])
             .labelFormat(d3.format(".0%"))
-            .title("% Atentidos");
+            .title("% " + statusAtendido);
         svgB.append("g")
             .attr("transform", "translate(60,20)")
             .call(legend);
@@ -215,12 +221,6 @@
             .attr("width", 150)
             .attr("height", 100)
             .style("display", "none");
-        var tooltipContentB = tooltipB.append('xhtml:div')
-            .attr("class", "chart-tooltip-content");
-        var tooltipTitleB = tooltipContentB.append('div')
-            .attr("class", 'chart-tooltip-title');
-        var tooltipBodyB = tooltipContentB.append('div')
-            .attr('class', 'chart-tooltip-body');
 
         var
             marginC = { top: 20, right: 60, bottom: 20, left: 90 },
@@ -235,26 +235,45 @@
                 "translate(" + marginC.left + "," + marginC.top + ")");
 
 
-        function drawBarras(data) {
+        function drawBarras(data,_totalQtdeByUF) {
             //
             var orderByPerc = $("#order-by-perc").is(":checked");
             var orderByUf = $("#order-by-uf").is(":checked");
 
+           var groupBy = _lodash(data).groupBy('SiglaUF').value();   
+           var totalQtdeByUFConsolidate = _lodash.map(groupBy, (obj, key) => {
+                var getTotalObj = _totalQtdeByUF.filter(el => el.SiglaUF == key)
+                if (key != 'null') {
+                    var totalQtde = _lodash.sumBy(getTotalObj,item => 
+                        {
+                            return parseInt(item.QuantidadePedido)
+                        })                
+                    return {
+                            'SiglaUF': key,
+                            'QuantidadePedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido)),
+                            'ProrcentagemPedido':_lodash.sumBy(obj, item => parseInt(item.QuantidadePedido))/totalQtde
+                        }
+                }
+
+           })
+           //remove undefined values
+           totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
             // Ordena os Dados
             if (orderByPerc) {
-                data = data.sort(function(a, b) {
-                    return a.PercRespondidos - b.PercRespondidos;
+                console.log('orderByPerc')
+                totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
+                    return (parseFloat(a.ProrcentagemPedido) * 100).toFixed(0) - (parseFloat(b.ProrcentagemPedido) * 100).toFixed(0)
+                    //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
                 });
             } else if (orderByUf) {
-                data = data.sort(function(a, b) {
-                    return a.SiglaUf.localeCompare(b.SiglaUf, 'pt-BR', { sensitivity: 'base' });
+                console.log('orderByUf')
+                totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
+                    return a.SiglaUF.localeCompare(b.SiglaUF, 'pt-BR', { sensitivity: 'base' });
                 });
             }
 
-            // Consolida os Dados por Estado
-            var ufsData = data.map(el => el.SiglaUf)
-                .filter((value, index, self) => self.indexOf(value) === index); // Distinct
-
+            console.log("totalQtdeByUFConsolidate")
+            console.log(totalQtdeByUFConsolidate)
             // Add X axis
             var x = d3.scaleLinear()
                 .domain([0.0, 1.0])
@@ -269,7 +288,7 @@
             // Y axis
             var y = d3.scaleBand()
                 .range([0, heightC])
-                .domain(data.map(function(d) { return d.SiglaUf; }))
+                .domain(totalQtdeByUFConsolidate.map(function(d) { return d.SiglaUF; }))
                 .padding(.1);
             svgC.append("g")
                 .call(d3.axisLeft(y))
@@ -277,54 +296,55 @@
 
             //Bars
             svgC.selectAll("myRect")
-                .data(data)
+                .data(totalQtdeByUFConsolidate)
                 .enter()
                 .append("rect")
                 .attr("x", x(0))
-                .attr("y", function(d) { return y(d.SiglaUf); })
-                .attr("width", function(d) { return x(d.PercRespondidos); })
+                .attr("y", function(d) { return y(d.SiglaUF); })
+                .attr("width", function(d) { 
+                    return x(d.ProrcentagemPedido);
+                })
                 .attr("height", y.bandwidth())
                 .attr("fill", "#fe9301")
                 .style("opacity", 0.5)
                 .on("mouseover", function(d) {
                     d3.select(this).style("opacity", 1);
-                    d3.select("#bartext-" + d.SiglaUf).style("opacity", 1);
+                    d3.select("#bartext-" + d.SiglaUF).style("opacity", 1);
                 })
                 .on("mouseout", function(d) {
                     d3.select(this).style("opacity", 0.5);
-                    d3.select("#bartext-" + d.SiglaUf).style("opacity", 0);
+                    d3.select("#bartext-" + d.SiglaUF).style("opacity", 0);
                 });
 
             // Texto da Quantidades de Pedidos
             svgC.selectAll("myText")
-                .data(data)
+                .data(totalQtdeByUFConsolidate)
                 .enter()
                 .append("text")
                 .attr("x", function(d) {
-                    return x(d.PercRespondidos) + 5;
+                    return x(d.ProrcentagemPedido) + 5;
                 })
-                .attr("y", function(d) { return y(d.SiglaUf) + 10; })
+                .attr("y", function(d) { return y(d.SiglaUF) + 10; })
                 .attr("width", 100)
                 .attr("height", y.bandwidth())
                 .attr("fill", "#000")
                 .attr("id", function(d) {
-                    return "bartext-" + d.SiglaUf;
+                    return "bartext-" + d.SiglaUF;
                 })
                 .style("opacity", 0)
                 .style("z-index", 1000)
                 .text(function(d) {
-                    return d.Respondido + " pedidos";
+                    return d.QuantidadePedido + " pedidos";
                 });
         }
 
         function drawMap(error, br) {
             if (error) throw error;
             var ufs = topojson.feature(br, br.objects.br);
-
             // Filtra os Resultados
             var nivelFederativo = $("#filter-nivel").val();
             var esferaPoder = $("#filter-poder").val();
-            var statusAtendido = $('#filter-status').val();
+            statusAtendido = $('#filter-status').val();
 
             data = pedidosPorUFPoderENivelCache
                 .map(function(el) {
@@ -351,67 +371,27 @@
                 });
             }
 
-            if (statusAtendido !== "--") {
-                data = data.filter(function(el) {
-                    return el.StatusNome == statusAtendido;
-                });
-            }
+           var groupBy = _lodash(data).groupBy('SiglaUF').value();   
+           var totalQtdeByUF = _lodash.map(groupBy, (obj, key) => {
+            return {
+                    'SiglaUF': key,
+                    'QuantidadePedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido)) 
+                }
 
-            // Consolida os Dados por Estado
-            var ufsData = data
-                .map(el => el.SiglaUf)
-                .filter((value, index, self) => self.indexOf(value) === index); // Distinct
+           })
 
-            // Recria o Dados Consolidados
-            var dataC = [];
-            ufsData.forEach(function(el, i, arr) {
-                var ufNovoItem = {
-                    Respondido: 0,
-                    NaoRespondido: 0,
-                    Total: 0,
-                    PercRespondidos: 0,
-                    SiglaUf: el
-                };
+           var totalQtdeByBrasil = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido)) 
 
-                // -
-                data.filter(el2 => el2.SiglaUf == el).forEach(function(itemUf, iItemUf) {
-                    var respondidos = itemUf.Respondido;
-                    var naoRespondidos = itemUf.NaoRespondido;
-
-                    // -
-                    if (respondidos == null) { respondidos = 0 } else { respondidos = parseInt(respondidos) };
-                    if (naoRespondidos == null) { naoRespondidos = 0 } else { naoRespondidos = parseInt(naoRespondidos) };
-
-                    ufNovoItem.Respondido += respondidos;
-                    ufNovoItem.NaoRespondido += naoRespondidos;
-                });
-
-                // -
-                dataC[i] = ufNovoItem;
+            data = data.filter(function(el) {
+                return el.NomeStatusPedido == statusAtendido;
             });
-
-            data = dataC;
-
-            // Calcula a Porcentagem
-            data.forEach(function(el, i, arr) {
-                var respondidos = el.Respondido;
-                var naoRespondidos = el.NaoRespondido;
-
-                // - Calcula Porcentagem
-                el.Total = naoRespondidos + respondidos;
-                if (respondidos > 0) { el.PercRespondidos = ((respondidos / el.Total)); } else if (respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; } else if (respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
-
-                // - Totais Gerais
-                totais.Respondidos = totais.Respondidos + respondidos;
-                totais.NaoRespondidos = totais.NaoRespondidos + naoRespondidos;
-                totais.Total = totais.Total + el.Total;
-            });
-
-            // Perc. Total Geral
-            if (totais.Respondidos > 0) { totais.PercRespondidos = ((totais.Respondidos / totais.Total)); } else if (totais.Respondidos == 0 && totais.NaoRespondidos > 0) { totais.PercRespondidos = 0; } else if (totais.Respondidos == 0 && totais.NaoRespondidos == 0) { totais.PercRespondidos = 1; }
-            setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
+            
+            var totalQtdeByBrasilAndStatus = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido)) 
+            var percentBrasil = totalQtdeByBrasilAndStatus/totalQtdeByBrasil
+            setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
 
             // Altera a Cor dos Estados de Acordo com a Porcentagem
+            //COMENTADO PAULO
             gB.selectAll(".chart-uf")
                 .data(ufs.features)
                 .enter().append("path")
@@ -419,13 +399,22 @@
                 .attr("d", map)
                 .attr("fill", function(d) {
                     var sigla = d.id;
-                    var procura = data.filter(el => el.SiglaUf == sigla);
-                    return procura.length == 0 ? colorScale(0) : colorScale(procura[0].PercRespondidos);
+                    var procura = data.filter(el => el.SiglaUF == sigla);
+                    var totalQtde = _lodash.sumBy(procura,item => 
+                        {
+                            return parseInt(item.QuantidadePedido)
+                        })
+                    var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
+                    var percent = 0
+                    if (getTotalObj.length > 0) {
+                        percent = totalQtde/getTotalObj[0].QuantidadePedido
+                    }
+                    return procura.length == 0 ? colorScale(0) : colorScale(percent);
                 })
                 // Efeito Hover
                 .style("opacity", .85)
                 .style("stroke", "transparent")
-                //  Legenda Geral do Filtro
+                 //Legenda Geral do Filtro
                 .on("mouseover", function(d) {
                     d3.selectAll(".chart-uf")
                         .transition()
@@ -440,10 +429,19 @@
                         .style("stroke", "#999999");
 
                     var sigla = d.id;
-                    var procura = data.filter(el => el.SiglaUf == sigla);
+                    var procura = data.filter(el => el.SiglaUF == sigla);
+                    var totalQtde = _lodash.sumBy(procura,item => 
+                        {
+                            return parseInt(item.QuantidadePedido)
+                        })
+                    var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
+                    var percent = 0
+                    if (getTotalObj.length > 0) {
+                        percent = totalQtde/getTotalObj[0].QuantidadePedido
+                    }
 
                     setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla }).Nome,
-                        procura[0].PercRespondidos, procura[0].Respondido);
+                    percent, totalQtde);
                 })
                 .on("mouseout", function(d) {
                     d3.selectAll(".chart-uf")
@@ -456,18 +454,20 @@
                         .duration(200)
                         .style("stroke", "transparent");
 
-                    setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
+                    setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
                 });
 
-            drawBarras(data);
+            drawBarras(data,totalQtdeByUF);
             $("#chart-pedidos-uf-info").fadeIn();
         }
 
 
         function setMapInfo(title, perc, total) {
+            var statusAtendidoPlural = namesPlural[statusAtendido]
             $("#chart-info-uf").html(title);
             $("#chart-info-qtd").html(total);
-            $("#chart-info-perc").html((perc * 100).toFixed(1));
+            $("#chart-info-tipo").html(statusAtendidoPlural)
+            $("#chart-info-perc").html((perc * 100).toFixed(1) + "%");
         }
 
         d3.json("/assets/data/br.json", drawMap);
@@ -570,8 +570,6 @@
             var total = d3.nest()
                 .rollup(function(leaves) { return leaves.length; })
                 .entries(entries);
-            console.log("total")
-            console.log(total)
             y.domain([0, Math.ceil(d3.max(series, function(d) { return d.value / total; }) * 10) / 10]);
             yAxis.call(d3.axisLeft(y).tickFormat(d3.format(".1%")).ticks(4));
 

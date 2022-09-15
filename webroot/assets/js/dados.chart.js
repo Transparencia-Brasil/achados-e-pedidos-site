@@ -260,20 +260,15 @@
            totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
             // Ordena os Dados
             if (orderByPerc) {
-                console.log('orderByPerc')
                 totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
                     return (parseFloat(a.ProrcentagemPedido) * 100).toFixed(0) - (parseFloat(b.ProrcentagemPedido) * 100).toFixed(0)
                     //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
                 });
             } else if (orderByUf) {
-                console.log('orderByUf')
                 totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
                     return a.SiglaUF.localeCompare(b.SiglaUF, 'pt-BR', { sensitivity: 'base' });
                 });
             }
-
-            console.log("totalQtdeByUFConsolidate")
-            console.log(totalQtdeByUFConsolidate)
             // Add X axis
             var x = d3.scaleLinear()
                 .domain([0.0, 1.0])

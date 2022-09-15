@@ -387,73 +387,85 @@
 
             // Altera a Cor dos Estados de Acordo com a Porcentagem
             //COMENTADO PAULO
-            gB.selectAll(".chart-uf")
-                .data(ufs.features)
-                .enter().append("path")
-                .attr("class", "chart-uf")
-                .attr("d", map)
-                .attr("fill", function(d) {
-                    var sigla = d.id;
-                    var procura = data.filter(el => el.SiglaUF == sigla);
-                    var totalQtde = _lodash.sumBy(procura,item => 
-                        {
-                            return parseInt(item.QuantidadePedido)
-                        })
-                    var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
-                    var percent = 0
-                    if (getTotalObj.length > 0) {
-                        percent = totalQtde/getTotalObj[0].QuantidadePedido
-                    }
-                    return procura.length == 0 ? colorScale(0) : colorScale(percent);
-                })
-                // Efeito Hover
-                .style("opacity", .85)
-                .style("stroke", "transparent")
-                 //Legenda Geral do Filtro
-                .on("mouseover", function(d) {
-                    d3.selectAll(".chart-uf")
-                        .transition()
-                        .duration(200)
-                        .style("opacity", .85)
-                        .style("stroke", "transparent");
+            if (nivelFederativo == "Federal") {
+                gB.selectAll(".chart-uf")
+                    .data(ufs.features)
+                    .enter().append("path")
+                    .attr("class", "chart-uf")
+                    .attr("d", map)
+                    .attr("fill", "#edf0f5")
+                    .attr("stroke", "#e1e1e1")
+                drawBarras(data,totalQtdeByUF);
+                $("#chart-pedidos-uf-info").fadeIn();
+            } else {
+                gB.selectAll(".chart-uf")
+                    .data(ufs.features)
+                    .enter().append("path")
+                    .attr("class", "chart-uf")
+                    .attr("d", map)
+                    .attr("fill", function(d) {
+                        var sigla = d.id;
+                        var procura = data.filter(el => el.SiglaUF == sigla);
+                        var totalQtde = _lodash.sumBy(procura,item => 
+                            {
+                                return parseInt(item.QuantidadePedido)
+                            })
+                        var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
+                        var percent = 0
+                        if (getTotalObj.length > 0) {
+                            percent = totalQtde/getTotalObj[0].QuantidadePedido
+                        }
+                        return procura.length == 0 ? colorScale(0) : colorScale(percent);
+                    })
+                    // Efeito Hover
+                    .style("opacity", .85)
+                    .style("stroke", "transparent")
+                    //Legenda Geral do Filtro
+                    .on("mouseover", function(d) {
+                        d3.selectAll(".chart-uf")
+                            .transition()
+                            .duration(200)
+                            .style("opacity", .85)
+                            .style("stroke", "transparent");
 
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .style("opacity", 1)
-                        .style("stroke", "#999999");
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                            .style("opacity", 1)
+                            .style("stroke", "#999999");
 
-                    var sigla = d.id;
-                    var procura = data.filter(el => el.SiglaUF == sigla);
-                    var totalQtde = _lodash.sumBy(procura,item => 
-                        {
-                            return parseInt(item.QuantidadePedido)
-                        })
-                    var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
-                    var percent = 0
-                    if (getTotalObj.length > 0) {
-                        percent = totalQtde/getTotalObj[0].QuantidadePedido
-                    }
+                        var sigla = d.id;
+                        var procura = data.filter(el => el.SiglaUF == sigla);
+                        var totalQtde = _lodash.sumBy(procura,item => 
+                            {
+                                return parseInt(item.QuantidadePedido)
+                            })
+                        var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
+                        var percent = 0
+                        if (getTotalObj.length > 0) {
+                            percent = totalQtde/getTotalObj[0].QuantidadePedido
+                        }
 
-                    setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla }).Nome,
-                    percent, totalQtde);
-                })
-                .on("mouseout", function(d) {
-                    d3.selectAll(".chart-uf")
-                        .transition()
-                        .duration(200)
-                        .style("opacity", .85);
+                        setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla }).Nome,
+                        percent, totalQtde);
+                    })
+                    .on("mouseout", function(d) {
+                        d3.selectAll(".chart-uf")
+                            .transition()
+                            .duration(200)
+                            .style("opacity", .85);
 
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .style("stroke", "transparent");
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                            .style("stroke", "transparent");
 
-                    setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
-                });
+                        setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
+                    });
 
-            drawBarras(data,totalQtdeByUF);
-            $("#chart-pedidos-uf-info").fadeIn();
+                drawBarras(data,totalQtdeByUF);
+                $("#chart-pedidos-uf-info").fadeIn();
+            }
         }
 
 

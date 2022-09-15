@@ -333,6 +333,93 @@
                 });
         }
 
+        function drawBarrasBrasil(percentBrasil,totalQtdeByBrasilAndStatus) {
+            //
+            var orderByPerc = $("#order-by-perc").is(":checked");
+            var orderByUf = $("#order-by-uf").is(":checked");
+           var totalQtdeByUFConsolidate = [{
+                'SiglaUF': 'BR',
+                'QuantidadePedido': totalQtdeByBrasilAndStatus,
+                'ProrcentagemPedido': percentBrasil
+            }]
+                
+           //remove undefined values
+           totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
+            // Ordena os Dados
+            if (orderByPerc) {
+                totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
+                    return (parseFloat(a.ProrcentagemPedido) * 100).toFixed(0) - (parseFloat(b.ProrcentagemPedido) * 100).toFixed(0)
+                    //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
+                });
+            } else if (orderByUf) {
+                totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
+                    return a.SiglaUF.localeCompare(b.SiglaUF, 'pt-BR', { sensitivity: 'base' });
+                });
+            }
+            // Add X axis
+            var x = d3.scaleLinear()
+                .domain([0.0, 1.0])
+                .range([0, widthC]);
+            svgC.append("g")
+                .attr("transform", "translate(0," + heightC + ")")
+                .call(d3.axisBottom(x).tickFormat(d3.format(".0%")))
+                .selectAll("text")
+                .attr("transform", "translate(-10,0)rotate(-45)")
+                .style("text-anchor", "end");
+
+            // Y axis
+            var y = d3.scaleBand()
+                .range([0, heightC])
+                .domain(totalQtdeByUFConsolidate.map(function(d) { return d.SiglaUF; }))
+                .padding(.1);
+            svgC.append("g")
+                .call(d3.axisLeft(y))
+
+
+            //Bars
+            svgC.selectAll("myRect")
+                .data(totalQtdeByUFConsolidate)
+                .enter()
+                .append("rect")
+                .attr("x", x(0))
+                .attr("y", function(d) { return y(d.SiglaUF); })
+                .attr("width", function(d) { 
+                    return x(d.ProrcentagemPedido);
+                })
+                .attr("height", y.bandwidth())
+                .attr("fill", "#fe9301")
+                .style("opacity", 0.5)
+                .on("mouseover", function(d) {
+                    d3.select(this).style("opacity", 1);
+                    d3.select("#bartext-" + d.SiglaUF).style("opacity", 1);
+                })
+                .on("mouseout", function(d) {
+                    d3.select(this).style("opacity", 0.5);
+                    d3.select("#bartext-" + d.SiglaUF).style("opacity", 0);
+                });
+
+            // Texto da Quantidades de Pedidos
+            svgC.selectAll("myText")
+                .data(totalQtdeByUFConsolidate)
+                .enter()
+                .append("text")
+                .attr("x", function(d) {
+                    return x(d.ProrcentagemPedido) + 5;
+                })
+                .attr("y", function(d) { return y(d.SiglaUF) + 10; })
+                .attr("width", 100)
+                .attr("height", y.bandwidth())
+                .attr("fill", "#000")
+                .attr("id", function(d) {
+                    return "bartext-" + d.SiglaUF;
+                })
+                .style("opacity", 0)
+                .style("z-index", 1000)
+                .text(function(d) {
+                    return d.QuantidadePedido + " pedidos";
+                });
+        }        
+
         function drawMap(error, br) {
             if (error) throw error;
             var ufs = topojson.feature(br, br.objects.br);
@@ -384,7 +471,7 @@
             var totalQtdeByBrasilAndStatus = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido)) 
             var percentBrasil = totalQtdeByBrasilAndStatus/totalQtdeByBrasil
             setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
-
+            console.log(totalQtdeByBrasilAndStatus)
             // Altera a Cor dos Estados de Acordo com a Porcentagem
             //COMENTADO PAULO
             if (nivelFederativo == "Federal") {
@@ -395,7 +482,7 @@
                     .attr("d", map)
                     .attr("fill", "#edf0f5")
                     .attr("stroke", "#e1e1e1")
-                drawBarras(data,totalQtdeByUF);
+                drawBarrasBrasil(percentBrasil,totalQtdeByBrasilAndStatus);
                 $("#chart-pedidos-uf-info").fadeIn();
             } else {
                 gB.selectAll(".chart-uf")

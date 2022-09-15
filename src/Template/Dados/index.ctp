@@ -45,8 +45,7 @@
               <div class="form-group">
                   <label for="filter-nivel">Nível federativo</label>
                   <select id="filter-nivel" class="form-control" name="filter-nivel">
-                      <option value="--">--</option>
-                      <option value="Federal">Federal</option>
+                      <option value="Federal" selected="selected">Federal</option>
                       <option value="Estadual">Estadual</option>
                       <option value="Municipal">Municipal</option>
                   </select>
@@ -56,8 +55,7 @@
               <div class="form-group">
                   <label for="filter-poder">Esfera de poder</label>
                   <select id="filter-poder" class="form-control" name="filter-poder">
-                      <option value="--">--</option>
-                      <option value="Executivo">Executivo</option>
+                      <option value="Executivo" selected="selected">Executivo</option>
                       <option value="Legislativo">Legislativo</option>
                       <option value="Judiciário">Judiciário</option>
                       <option value="Tribunais de Contas">Tribunais de Contas</option>

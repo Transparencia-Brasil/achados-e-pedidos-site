@@ -471,7 +471,6 @@
             var totalQtdeByBrasilAndStatus = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido)) 
             var percentBrasil = totalQtdeByBrasilAndStatus/totalQtdeByBrasil
             setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
-            console.log(totalQtdeByBrasilAndStatus)
             // Altera a Cor dos Estados de Acordo com a Porcentagem
             //COMENTADO PAULO
             if (nivelFederativo == "Federal") {

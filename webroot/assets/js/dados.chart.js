@@ -1,3 +1,7 @@
+function toFixed(num, fixed) {
+    var re = new RegExp('^-?\\d+(?:\.\\d{0,' + (fixed || -1) + '})?');
+    return num.toString().match(re)[0];
+}
 //Grafico classificações de atendimento por ano
 (function() {
 
@@ -198,15 +202,15 @@
             map = d3.geoPath().projection(projection);
 
         // Range de Cores
-        var color_range = ["#969696","#f6e197","#fab94f","#ec7340","#cd134f","#940131"];
+        var color_range = ["#969696","#969696","#f6e197","#f6e197","#fab94f","#fab94f" ,"#ec7340","#ec7340","#cd134f","#cd134f","#940131"];
         var colorScale = d3.scaleLinear()
-            .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
+            .domain([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
             .range(color_range);
         
         statusAtendido =  $('#filter-status').val()
         var legend = d3.legendColor()
             .scale(colorScale)
-            .cells([1.0, 0.80, 0.60, 0.40, 0.20, 0.0])
+            .cells([1.0, 0.8, 0.6, 0.4, 0.2, 0.0])
             .labelFormat(d3.format(".0%"))
             .title("% " + statusAtendido);
         svgB.append("g")
@@ -501,7 +505,7 @@
                         if (getTotalObj.length > 0) {
                             percent = totalQtde/getTotalObj[0].QuantidadePedido
                         }
-                        return procura.length == 0 ? colorScale(0) : colorScale(percent);
+                        return procura.length == 0 ? colorScale(0) : colorScale(toFixed(percent,1));
                     })
                     // Efeito Hover
                     .style("opacity", .85)

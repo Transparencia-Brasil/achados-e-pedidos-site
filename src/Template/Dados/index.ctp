@@ -87,7 +87,6 @@
             </label>
           </div>
       </div>
-
       <div class="row">
           <div class="col-md-7">
               <div id="chart-pedidos-uf-mapa"></div>
@@ -97,9 +96,9 @@
                 <div class="chart-info" id="chart-info-all">
                    <!-- <span id="chart-info-nivel-w">No nível <span id="chart-info-nivel" class="chart-info-text"></span>,</span><span id="chart-info-poder-w"> no <br>
                     <span id="chart-info-poder" class="chart-info-text"></span>,</span> -->
-                    <span id="chart-info-qtd" class="chart-info-text"></span> pedidos<br>
+                    <span id="chart-info-qtd-status" class="chart-info-text"></span> pedidos<br>
                     foram <span id="chart-info-tipo" class="chart-info-text">respondidos</span>, <br>
-                    <span id="chart-info-perc" class="chart-info-text"></span> do total de pedidos<br>correspondentes para este filtro.
+                    <span id="chart-info-perc" class="chart-info-text"></span> do total de pedidos cadastrados para esta <br>seleção (<span id="chart-info-qtd-total" class="chart-info-text"></span>).
                 </div>
               </div>
           </div>

@@ -166,6 +166,7 @@ function toFixed(num, fixed) {
     var _lodash = _.noConflict();
     var unidadesFederativas = [{ "ID": "0", "Sigla": "ÓrgãosFederais", "Nome": "Órgãos Federais" }, { "ID": "1", "Sigla": "AC", "Nome": "Acre" }, { "ID": "2", "Sigla": "AL", "Nome": "Alagoas" }, { "ID": "3", "Sigla": "AM", "Nome": "Amazonas" }, { "ID": "4", "Sigla": "AP", "Nome": "Amapá" }, { "ID": "5", "Sigla": "BA", "Nome": "Bahia" }, { "ID": "6", "Sigla": "CE", "Nome": "Ceará" }, { "ID": "7", "Sigla": "DF", "Nome": "Distrito Federal" }, { "ID": "8", "Sigla": "ES", "Nome": "Espírito Santo" }, { "ID": "9", "Sigla": "GO", "Nome": "Goiás" }, { "ID": "10", "Sigla": "MA", "Nome": "Maranhão" }, { "ID": "11", "Sigla": "MG", "Nome": "Minas Gerais" }, { "ID": "12", "Sigla": "MS", "Nome": "Mato Grosso do Sul" }, { "ID": "13", "Sigla": "MT", "Nome": "Mato Grosso" }, { "ID": "14", "Sigla": "PA", "Nome": "Pará" }, { "ID": "15", "Sigla": "PB", "Nome": "Paraíba" }, { "ID": "16", "Sigla": "PE", "Nome": "Pernambuco" }, { "ID": "17", "Sigla": "PI", "Nome": "Piauí" }, { "ID": "18", "Sigla": "PR", "Nome": "Paraná" }, { "ID": "19", "Sigla": "RJ", "Nome": "Rio de Janeiro" }, { "ID": "20", "Sigla": "RN", "Nome": "Rio Grande do Norte" }, { "ID": "21", "Sigla": "RO", "Nome": "Rondônia" }, { "ID": "22", "Sigla": "RR", "Nome": "Roraima" }, { "ID": "23", "Sigla": "RS", "Nome": "Rio Grande do Sul" }, { "ID": "24", "Sigla": "SC", "Nome": "Santa Catarina" }, { "ID": "25", "Sigla": "SE", "Nome": "Sergipe" }, { "ID": "26", "Sigla": "SP", "Nome": "São Paulo" }, { "ID": "27", "Sigla": "TO", "Nome": "Tocantins" }];
     var pedidosPorUFPoderENivelCache = [];
+    var dataFilteredWithoutStatus = [];
 
 
     var namesPlural = []
@@ -447,7 +448,7 @@ function toFixed(num, fixed) {
 
             if (nivelFederativo !== "--") {
                 data = data.filter(function(el) {
-                    return nivelFederativo == "Federal" ? true : el.NomeNivelFederativo == nivelFederativo;
+                    return el.NomeNivelFederativo == nivelFederativo;
                 })
             }
 
@@ -457,6 +458,7 @@ function toFixed(num, fixed) {
                 });
             }
 
+           dataFilteredWithoutStatus = data
            var groupBy = _lodash(data).groupBy('SiglaUF').value();   
            var totalQtdeByUF = _lodash.map(groupBy, (obj, key) => {
             return {
@@ -467,14 +469,12 @@ function toFixed(num, fixed) {
            })
 
            var totalQtdeByBrasil = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido)) 
-
             data = data.filter(function(el) {
                 return el.NomeStatusPedido == statusAtendido;
             });
-            
             var totalQtdeByBrasilAndStatus = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido)) 
             var percentBrasil = totalQtdeByBrasilAndStatus/totalQtdeByBrasil
-            setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
+            setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus,totalQtdeByBrasil);
             // Altera a Cor dos Estados de Acordo com a Porcentagem
             //COMENTADO PAULO
             if (nivelFederativo == "Federal") {
@@ -512,6 +512,7 @@ function toFixed(num, fixed) {
                     .style("stroke", "transparent")
                     //Legenda Geral do Filtro
                     .on("mouseover", function(d) {
+                        $("#chart-pedidos-uf-info").fadeIn();
                         d3.selectAll(".chart-uf")
                             .transition()
                             .duration(200)
@@ -525,6 +526,13 @@ function toFixed(num, fixed) {
                             .style("stroke", "#999999");
 
                         var sigla = d.id;
+
+                        var procuraWithoutStatus = dataFilteredWithoutStatus.filter(el => el.SiglaUF == sigla);
+                        var totalQtdeWithoutStatus = _lodash.sumBy(procuraWithoutStatus,item => 
+                        {
+                            return parseInt(item.QuantidadePedido)
+                        })
+
                         var procura = data.filter(el => el.SiglaUF == sigla);
                         var totalQtde = _lodash.sumBy(procura,item => 
                             {
@@ -537,9 +545,10 @@ function toFixed(num, fixed) {
                         }
 
                         setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla }).Nome,
-                        percent, totalQtde);
+                        percent, totalQtde,totalQtdeWithoutStatus);
                     })
                     .on("mouseout", function(d) {
+                        $("#chart-pedidos-uf-info").hide();
                         d3.selectAll(".chart-uf")
                             .transition()
                             .duration(200)
@@ -554,15 +563,21 @@ function toFixed(num, fixed) {
                     });
 
                 drawBarras(data,totalQtdeByUF);
-                $("#chart-pedidos-uf-info").fadeIn();
+
+                if (nivelFederativo == 'Federal') {
+                    $("#chart-pedidos-uf-info").fadeIn();
+                } else {
+                    $("#chart-pedidos-uf-info").hide();
+                }
             }
         }
 
 
-        function setMapInfo(title, perc, total) {
+        function setMapInfo(title, perc, totalStatus, total = 0) {
             var statusAtendidoPlural = namesPlural[statusAtendido]
             $("#chart-info-uf").html(title);
-            $("#chart-info-qtd").html(total);
+            $("#chart-info-qtd-total").html(total);
+            $("#chart-info-qtd-status").html(totalStatus);
             $("#chart-info-tipo").html(statusAtendidoPlural)
             $("#chart-info-perc").html((perc * 100).toFixed(1) + "%");
         }

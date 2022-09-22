@@ -29,28 +29,12 @@ class HomeController extends AppController
         $destaqueBU = new DestaqueHome();
 
         $viewModel = [];
+        $ultimosPedidos = $pedidoBU->FiltrarPedidos($this->request->data, 1, 4);
+        $destaques = $destaqueBU->Listar();
+        $destaques2 = $destaqueBU->Listar();
+        $destaques3 = $destaqueBU->Listar();
 
-        //if(($viewModel = Cache::read('dadoshome')) === false){
-
-            //$ultimosPedidos = $pedidoBU->FiltrarPedidos($this->request->data, 1, 4,"2668,3619,902,33397");
-            $ultimosPedidos = $pedidoBU->FiltrarPedidos($this->request->data, 1, 4);
-            $relatorioPorEstado = $pedidoBU->RelatorioPorEstado();
-            $relatorioPorAgentePositivas = $pedidoBU->RelatorioPorAgente(1);
-            $relatorioPorAgenteNegativas = $pedidoBU->RelatorioPorAgente(2);
-            $relatorioTotal = $pedidoBU->RelatorioTotal();
-            $destaques = $destaqueBU->Listar();
-            $destaques2 = $destaqueBU->Listar();
-            $destaques3 = $destaqueBU->Listar();
-            //die(debug($destaques));
-
-            $viewModel["UltimosPedidos"] = $ultimosPedidos;
-            $viewModel["RelatorioPorEstado"] = $relatorioPorEstado;
-            $viewModel["RelatorioPorAgentePositivas"] = $relatorioPorAgentePositivas;
-            $viewModel["RelatorioPorAgenteNegativas"] = $relatorioPorAgenteNegativas;
-            $viewModel["RelatorioTotal"] = $relatorioTotal;
-
-            //Cache::write('dadoshome', $viewModel);
-        //}
+        $viewModel["UltimosPedidos"] = $ultimosPedidos;
         $this->set("viewModel", $viewModel);
         $this->set("destaques", $destaques);
         $this->set("destaques2", $destaques2);

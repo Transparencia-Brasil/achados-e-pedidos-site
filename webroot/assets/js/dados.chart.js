@@ -12,6 +12,10 @@ function toFixed(num, fixed) {
 
     var lineStroke = 4;
 
+    var tooltip = undefined;
+
+    var statusNomes = ["Atendido", "Não Atendido", "Parcialmente Atendido"];
+
     var svg = d3.select("#taxa-resposta-ano")
         .append("svg")
         .attr("width", width + margin.left + margin.right + 200)
@@ -98,6 +102,7 @@ function toFixed(num, fixed) {
             .domain(anosDataq)
             .range([0, width])
             .padding([0.2])
+
         svg.append("g")
             .attr("class", "xaxis")
             .attr("transform", "translate(0," + height + ")")
@@ -157,6 +162,120 @@ function toFixed(num, fixed) {
                 .x(function(d) { return x(d.AnoEnvio) })
                 .y(function(d) { return y(d.PercStatus) })
             )
+
+        drawTooltip(data, anosDataq, x, y);
+    }
+
+    function drawTooltip(data, anosDataq, xScale, yScale) {
+
+        // Consolida os dados por ano X status 
+        var cData = [];
+        anosDataq.forEach(xAno => {
+            statusNomes.forEach(status => {
+                cData[xAno + "-" + status] = data.filter((value, index, self) => value.AnoEnvio == xAno && value.StatusNome == status);
+            });
+        });
+
+        tooltip = d3.select("#taxa-resposta-ano").append("div")
+            .attr('class', 'tooltip-taxa-resposta-ano')
+            .style('position', 'absolute')
+            .style("background-color", "#D3D3D3")
+            .style('padding', 6)
+            .style('display', 'none')
+
+        tooltipTitle = tooltip.append("h4");
+        tooltipContent = tooltip.append("div");
+
+        var color = d3.scaleOrdinal()
+            .domain(statusNomes)
+            .range(["#fbc064", "#e45d88", "#87570b"]);
+
+        mouseG = svg.append("g")
+            .attr("class", "mouse-over-effects");
+
+        mouseG.append("path") // create vertical line to follow mouse
+            .attr("class", "mouse-line")
+            .style("stroke", "#A9A9A9")
+            .style("stroke-width", lineStroke)
+            .style("opacity", "0");
+
+        var mousePerLine = mouseG.selectAll('.mouse-per-line')
+            .data(statusNomes)
+            .enter()
+            .append("g")
+            .attr("class", "mouse-per-line");
+
+        mousePerLine.append("circle")
+            .attr("r", 4)
+            .style("stroke", function(d) {
+                return color(d)
+            })
+            .style("fill", "none")
+            .style("stroke-width", lineStroke)
+            .style("opacity", "0");
+
+        mouseG.append('svg:rect') // append a rect to catch mouse movements on canvas
+            .attr('width', width)
+            .attr('height', height)
+            .attr('fill', 'none')
+            .attr('pointer-events', 'all')
+            .on('mouseout', function() { // on mouse out hide line, circles and text
+                d3.select(".mouse-line")
+                    .style("opacity", "0");
+                d3.selectAll(".mouse-per-line circle")
+                    .style("opacity", "0");
+                d3.selectAll(".mouse-per-line text")
+                    .style("opacity", "0");
+                d3.selectAll(".tooltip-taxa-resposta-ano")
+                    .style('display', 'none');
+
+            })
+            .on('mouseover', function() { // on mouse in show line, circles and text
+                d3.select(".mouse-line")
+                    .style("opacity", "1");
+                d3.selectAll(".mouse-per-line circle")
+                    .style("opacity", "1");
+                d3.selectAll(".tooltip-taxa-resposta-ano")
+                    .style('display', 'block');
+            })
+            .on('mousemove', function() { // update tooltip content, line, circles and text when mouse moves
+                var mouse = d3.mouse(this)
+
+                var eachBand = xScale.step();
+                var index = Math.floor((mouse[0] / eachBand));
+                var xAno = xScale.domain()[index];
+
+                d3.selectAll(".mouse-per-line")
+                    .attr("transform", function(d, i) {
+                        var dPoint = cData[xAno + "-" + d];
+
+                        d3.select(".mouse-line")
+                            .attr("d", function() {
+                                var data = "M" + xScale(xAno) + "," + (height);
+                                data += " " + xScale(xAno) + "," + 0;
+                                return data;
+                            });
+
+                        return "translate(" + xScale(xAno) + "," + yScale(dPoint[0].PercStatus) + ")";
+
+                    });
+
+                tooltipTitle.html(xAno);
+                tooltipContent.html("");
+
+                statusNomes.forEach(status => {
+                    var item = cData[xAno + "-" + status];
+
+                    tooltipContent.append('p')
+                        .html(status + ": " + item[0].TotalStatus);
+                });
+
+
+                var tooltipDiv = document.getElementsByClassName('tooltip-taxa-resposta-ano')[0];
+                tooltipDiv.style.left = (d3.event.pageX + 20) + "px";
+                tooltipDiv.style.top = (d3.event.pageY - 20) + "px";
+            })
+
     }
 
     d3.json("/api/v2/PedidosAtendimentoPorAno", draw);
@@ -174,7 +293,7 @@ function toFixed(num, fixed) {
     namesPlural["Não Atendido"] = "não atendidos"
     namesPlural["Parcialmente Atendido"] = "parcialmente atendidos"
 
-    var statusAtendido =  $('#filter-status').val(); //default filter selected
+    var statusAtendido = $('#filter-status').val(); //default filter selected
 
     d3.json("/api/pedidosPorUFPoderENivelEStatus", function drawMapData(error, data) {
         if (error) throw error;
@@ -203,12 +322,12 @@ function toFixed(num, fixed) {
             map = d3.geoPath().projection(projection);
 
         // Range de Cores
-        var color_range = ["#969696","#969696","#f6e197","#f6e197","#fab94f","#fab94f" ,"#ec7340","#ec7340","#cd134f","#cd134f","#940131"];
+        var color_range = ["#969696", "#969696", "#f6e197", "#f6e197", "#fab94f", "#fab94f", "#ec7340", "#ec7340", "#cd134f", "#cd134f", "#940131"];
         var colorScale = d3.scaleLinear()
             .domain([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
             .range(color_range);
-        
-        statusAtendido =  $('#filter-status').val()
+
+        statusAtendido = $('#filter-status').val()
         var legend = d3.legendColor()
             .scale(colorScale)
             .cells([1.0, 0.8, 0.6, 0.4, 0.2, 0.0])
@@ -240,34 +359,33 @@ function toFixed(num, fixed) {
                 "translate(" + marginC.left + "," + marginC.top + ")");
 
 
-        function drawBarras(data,_totalQtdeByUF) {
+        function drawBarras(data, _totalQtdeByUF) {
             //
             var orderByPerc = $("#order-by-perc").is(":checked");
             var orderByUf = $("#order-by-uf").is(":checked");
 
-           var groupBy = _lodash(data).groupBy('SiglaUF').value();   
-           var totalQtdeByUFConsolidate = _lodash.map(groupBy, (obj, key) => {
-                var getTotalObj = _totalQtdeByUF.filter(el => el.SiglaUF == key)
-                if (key != 'null') {
-                    var totalQtde = _lodash.sumBy(getTotalObj,item => 
-                        {
+            var groupBy = _lodash(data).groupBy('SiglaUF').value();
+            var totalQtdeByUFConsolidate = _lodash.map(groupBy, (obj, key) => {
+                    var getTotalObj = _totalQtdeByUF.filter(el => el.SiglaUF == key)
+                    if (key != 'null') {
+                        var totalQtde = _lodash.sumBy(getTotalObj, item => {
                             return parseInt(item.QuantidadePedido)
-                        })                
-                    return {
+                        })
+                        return {
                             'SiglaUF': key,
                             'QuantidadePedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido)),
-                            'ProrcentagemPedido':_lodash.sumBy(obj, item => parseInt(item.QuantidadePedido))/totalQtde
+                            'ProrcentagemPedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido)) / totalQtde
                         }
-                }
+                    }
 
-           })
-           //remove undefined values
-           totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
-            // Ordena os Dados
+                })
+                //remove undefined values
+            totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
+                // Ordena os Dados
             if (orderByPerc) {
                 totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
                     return (parseFloat(a.ProrcentagemPedido) * 100).toFixed(0) - (parseFloat(b.ProrcentagemPedido) * 100).toFixed(0)
-                    //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
+                        //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
                 });
             } else if (orderByUf) {
                 totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
@@ -301,7 +419,7 @@ function toFixed(num, fixed) {
                 .append("rect")
                 .attr("x", x(0))
                 .attr("y", function(d) { return y(d.SiglaUF); })
-                .attr("width", function(d) { 
+                .attr("width", function(d) {
                     return x(d.ProrcentagemPedido);
                 })
                 .attr("height", y.bandwidth())
@@ -338,23 +456,23 @@ function toFixed(num, fixed) {
                 });
         }
 
-        function drawBarrasBrasil(percentBrasil,totalQtdeByBrasilAndStatus) {
+        function drawBarrasBrasil(percentBrasil, totalQtdeByBrasilAndStatus) {
             //
             var orderByPerc = $("#order-by-perc").is(":checked");
             var orderByUf = $("#order-by-uf").is(":checked");
-           var totalQtdeByUFConsolidate = [{
+            var totalQtdeByUFConsolidate = [{
                 'SiglaUF': 'BR',
                 'QuantidadePedido': totalQtdeByBrasilAndStatus,
                 'ProrcentagemPedido': percentBrasil
             }]
-                
-           //remove undefined values
-           totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
-            // Ordena os Dados
+
+            //remove undefined values
+            totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
+                // Ordena os Dados
             if (orderByPerc) {
                 totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
                     return (parseFloat(a.ProrcentagemPedido) * 100).toFixed(0) - (parseFloat(b.ProrcentagemPedido) * 100).toFixed(0)
-                    //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
+                        //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
                 });
             } else if (orderByUf) {
                 totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
@@ -388,7 +506,7 @@ function toFixed(num, fixed) {
                 .append("rect")
                 .attr("x", x(0))
                 .attr("y", function(d) { return y(d.SiglaUF); })
-                .attr("width", function(d) { 
+                .attr("width", function(d) {
                     return x(d.ProrcentagemPedido);
                 })
                 .attr("height", y.bandwidth())
@@ -423,7 +541,7 @@ function toFixed(num, fixed) {
                 .text(function(d) {
                     return d.QuantidadePedido + " pedidos";
                 });
-        }        
+        }
 
         function drawMap(error, br) {
             if (error) throw error;
@@ -458,23 +576,23 @@ function toFixed(num, fixed) {
                 });
             }
 
-           dataFilteredWithoutStatus = data
-           var groupBy = _lodash(data).groupBy('SiglaUF').value();   
-           var totalQtdeByUF = _lodash.map(groupBy, (obj, key) => {
-            return {
+            dataFilteredWithoutStatus = data
+            var groupBy = _lodash(data).groupBy('SiglaUF').value();
+            var totalQtdeByUF = _lodash.map(groupBy, (obj, key) => {
+                return {
                     'SiglaUF': key,
-                    'QuantidadePedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido)) 
+                    'QuantidadePedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido))
                 }
 
-           })
+            })
 
-           var totalQtdeByBrasil = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido)) 
+            var totalQtdeByBrasil = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido))
             data = data.filter(function(el) {
                 return el.NomeStatusPedido == statusAtendido;
             });
-            var totalQtdeByBrasilAndStatus = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido)) 
-            var percentBrasil = totalQtdeByBrasilAndStatus/totalQtdeByBrasil
-            setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus,totalQtdeByBrasil);
+            var totalQtdeByBrasilAndStatus = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido))
+            var percentBrasil = totalQtdeByBrasilAndStatus / totalQtdeByBrasil
+            setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus, totalQtdeByBrasil);
             // Altera a Cor dos Estados de Acordo com a Porcentagem
             //COMENTADO PAULO
             if (nivelFederativo == "Federal") {
@@ -485,7 +603,7 @@ function toFixed(num, fixed) {
                     .attr("d", map)
                     .attr("fill", "#edf0f5")
                     .attr("stroke", "#e1e1e1")
-                drawBarrasBrasil(percentBrasil,totalQtdeByBrasilAndStatus);
+                drawBarrasBrasil(percentBrasil, totalQtdeByBrasilAndStatus);
                 $("#chart-pedidos-uf-info").fadeIn();
             } else {
                 gB.selectAll(".chart-uf")
@@ -496,16 +614,15 @@ function toFixed(num, fixed) {
                     .attr("fill", function(d) {
                         var sigla = d.id;
                         var procura = data.filter(el => el.SiglaUF == sigla);
-                        var totalQtde = _lodash.sumBy(procura,item => 
-                            {
-                                return parseInt(item.QuantidadePedido)
-                            })
+                        var totalQtde = _lodash.sumBy(procura, item => {
+                            return parseInt(item.QuantidadePedido)
+                        })
                         var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
                         var percent = 0
                         if (getTotalObj.length > 0) {
-                            percent = totalQtde/getTotalObj[0].QuantidadePedido
+                            percent = totalQtde / getTotalObj[0].QuantidadePedido
                         }
-                        return procura.length == 0 ? colorScale(0) : colorScale(toFixed(percent,1));
+                        return procura.length == 0 ? colorScale(0) : colorScale(toFixed(percent, 1));
                     })
                     // Efeito Hover
                     .style("opacity", .85)
@@ -528,24 +645,22 @@ function toFixed(num, fixed) {
                         var sigla = d.id;
 
                         var procuraWithoutStatus = dataFilteredWithoutStatus.filter(el => el.SiglaUF == sigla);
-                        var totalQtdeWithoutStatus = _lodash.sumBy(procuraWithoutStatus,item => 
-                        {
+                        var totalQtdeWithoutStatus = _lodash.sumBy(procuraWithoutStatus, item => {
                             return parseInt(item.QuantidadePedido)
                         })
 
                         var procura = data.filter(el => el.SiglaUF == sigla);
-                        var totalQtde = _lodash.sumBy(procura,item => 
-                            {
-                                return parseInt(item.QuantidadePedido)
-                            })
+                        var totalQtde = _lodash.sumBy(procura, item => {
+                            return parseInt(item.QuantidadePedido)
+                        })
                         var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
                         var percent = 0
                         if (getTotalObj.length > 0) {
-                            percent = totalQtde/getTotalObj[0].QuantidadePedido
+                            percent = totalQtde / getTotalObj[0].QuantidadePedido
                         }
 
                         setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla }).Nome,
-                        percent, totalQtde,totalQtdeWithoutStatus);
+                            percent, totalQtde, totalQtdeWithoutStatus);
                     })
                     .on("mouseout", function(d) {
                         $("#chart-pedidos-uf-info").hide();
@@ -562,7 +677,7 @@ function toFixed(num, fixed) {
                         setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
                     });
 
-                drawBarras(data,totalQtdeByUF);
+                drawBarras(data, totalQtdeByUF);
 
                 if (nivelFederativo == 'Federal') {
                     $("#chart-pedidos-uf-info").fadeIn();

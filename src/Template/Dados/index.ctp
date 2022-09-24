@@ -18,20 +18,20 @@
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
             <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-atendidos.jpeg" alt="<?=$sumario['totalPedidosClassificacao']['Atendido']['label']?>" height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Atendido']['label']?></h2>
-            <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Atendido']['count']?></h3>
-            <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Atendido']['percent']?></h3>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Atendido']['count'], 0, ',', '.')?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=number_format($sumario['totalPedidosClassificacao']['Atendido']['percent'], 1, ',', '.')?>%</h3>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
             <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-nao-atendidos.jpeg" alt="<?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?>"  height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?></h2>
-            <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Não Atendido']['count']?></h3>
-            <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Não Atendido']['percent']?></h3>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Não Atendido']['count'], 0, ',', '.')?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=number_format($sumario['totalPedidosClassificacao']['Não Atendido']['percent'], 1, ',', '.')?>%</h3>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
             <img src="<?=BASE_URL?>assets/images/pedidos/icon-atendidos-parcialmente.png" alt="<?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?>"  height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?></h2>
-            <h3 class="qnt"><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['count']?></h3>
-            <h3 class="qnt" style="font-size:18px;"><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['percent']?></h3>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Parcialmente Atendido']['count'], 0, ',', '.')?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=number_format($sumario['totalPedidosClassificacao']['Parcialmente Atendido']['percent'], 1, ',', '.')?>%</h3>
           </div>          
       </div>
       <h2 class="text-center">Classificação de atendimento por ano</h2>
@@ -124,13 +124,13 @@
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
             <h2>Tempo médio da resposta ao pedido inicial</h2>
-            <h3 class="qnt"><?=number_format($sumario['tempoMedioPrimeiraResposta'], 1)?> dias</h3>
+            <h3 class="qnt"><?=number_format($sumario['tempoMedioPrimeiraResposta'], 1, ',', '.')?> dias</h3>
           </div>
 
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos Atendidos"/>
             <h2>Pedidos respondidos em até 20 dias</h2>
-            <h3 class="qnt"><?=$sumario['totalPedidosRespondidosEmAteVinteDias']?>%</h3>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosRespondidosEmAteVinteDias'], 2, ',', '.')?>%</h3>
           </div>
       </div>
       <h2 class="text-center">Quanto tempo leva para um pedido ser respondido?</h2>

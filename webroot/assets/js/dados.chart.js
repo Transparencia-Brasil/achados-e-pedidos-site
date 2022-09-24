@@ -452,7 +452,9 @@ function toFixed(num, fixed) {
                 .style("opacity", 0)
                 .style("z-index", 1000)
                 .text(function(d) {
-                    return d.QuantidadePedido + " pedidos";
+                    return d.QuantidadePedido.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 0
+                    }) + " pedidos";
                 });
         }
 
@@ -539,7 +541,9 @@ function toFixed(num, fixed) {
                 .style("opacity", 0)
                 .style("z-index", 1000)
                 .text(function(d) {
-                    return d.QuantidadePedido + " pedidos";
+                    return d.QuantidadePedido.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 0
+                    }) + " pedidos";
                 });
         }
 
@@ -691,8 +695,12 @@ function toFixed(num, fixed) {
         function setMapInfo(title, perc, totalStatus, total = 0) {
             var statusAtendidoPlural = namesPlural[statusAtendido]
             $("#chart-info-uf").html(title);
-            $("#chart-info-qtd-total").html(total);
-            $("#chart-info-qtd-status").html(totalStatus);
+            $("#chart-info-qtd-total").html(total.toLocaleString('pt-BR', {
+                minimumFractionDigits: 0
+            }));
+            $("#chart-info-qtd-status").html(totalStatus.toLocaleString('pt-BR', {
+                minimumFractionDigits: 0
+            }));
             $("#chart-info-tipo").html(statusAtendidoPlural)
             $("#chart-info-perc").html((perc * 100).toFixed(1) + "%");
         }
@@ -816,7 +824,9 @@ function toFixed(num, fixed) {
                     } else {
                         tooltipTitle.html("De " + d.key + " dias")
                     }
-                    tooltipBody.html("<p class='chart-tip'>" + d.value + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
+                    tooltipBody.html("<p class='chart-tip'>" + d.value.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 0
+                    }) + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
                     tooltip.style("display", null);
                 })
                 .on("mouseout", function(d) {

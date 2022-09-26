@@ -115,3 +115,14 @@
 .link:hover {
   stroke-opacity: .5;
 }
+
+
+.tooltip-taxa-resposta-ano {
+    padding: 10px;
+}
+
+.tooltip-taxa-resposta-ano p {
+    padding:0px;
+    margin:0px;
+    text-align: left !important;
+}

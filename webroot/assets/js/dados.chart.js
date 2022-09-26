@@ -264,10 +264,23 @@ function toFixed(num, fixed) {
                 tooltipContent.html("");
 
                 statusNomes.forEach(status => {
+                    var colorTooltip = ''
+                    var labelTooltip = ''
+                    if (status == "Não Atendido") {
+                        labelTooltip = "Não Atendidos";
+                        colorTooltip = '#e45d88';
+                    }
+                    if (status == "Parcialmente Atendido") {
+                        labelTooltip = "Parcialmente Atendidos";
+                        colorTooltip = '#87570b';
+                    }
+                    if (status == "Atendido") {
+                        labelTooltip = "Atendidos";
+                        colorTooltip = '#fbc064';
+                    }                    
                     var item = cData[xAno + "-" + status];
-
-                    tooltipContent.append('p')
-                        .html(status + ": " + item[0].TotalStatus);
+                    var totalStatusToolTip = parseInt(item[0].TotalStatus).toLocaleString('pt-BR', {minimumFractionDigits: 0})
+                    tooltipContent.append('p').html("<div style='width:10px;height:10px;background-color:"+ colorTooltip+";display:inline-flex;margin-right:5px;'></div>" + labelTooltip + ": " + totalStatusToolTip);
                 });
 
 

@@ -702,7 +702,7 @@ function toFixed(num, fixed) {
                 minimumFractionDigits: 0
             }));
             $("#chart-info-tipo").html(statusAtendidoPlural)
-            $("#chart-info-perc").html((perc * 100).toFixed(1) + "%");
+            $("#chart-info-perc").html((perc * 100).toFixed(1).replace('.', ',') + "%");
         }
 
         d3.json("/assets/data/br.json", drawMap);

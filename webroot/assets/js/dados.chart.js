@@ -1,65 +1,91 @@
+function toFixed(num, fixed) {
+    var re = new RegExp('^-?\\d+(?:\.\\d{0,' + (fixed || -1) + '})?');
+    return num.toString().match(re)[0];
+}
 //Grafico classificações de atendimento por ano
-(function () {
+(function() {
 
-    var margin = {top: 40, right: 30, bottom: 10, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 470 - margin.top - margin.bottom,
-    tooltip , tooltipBody, tooltipContent, tooltipTitle;
+    var margin = { top: 40, right: 30, bottom: 10, left: 50 },
+        width = 960 - margin.left - margin.right,
+        height = 470 - margin.top - margin.bottom,
+        tooltip, tooltipBody, tooltipContent, tooltipTitle;
 
+    var lineStroke = 4;
 
-    var svg = d3.select("#chart-atendimento")
+    var tooltip = undefined;
+
+    var statusNomes = ["Atendido", "Não Atendido", "Parcialmente Atendido"];
+
+    var svg = d3.select("#taxa-resposta-ano")
         .append("svg")
-            .attr("width", width + margin.left + margin.right + 200)
-            .attr("height", (height + margin.top + margin.bottom) + 20)
+        .attr("width", width + margin.left + margin.right + 200)
+        .attr("height", (height + margin.top + margin.bottom) + 20)
         .append("g")
-            .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 
     // -
-    var subgroups = ["Respondidos","NaoRespondidos"];
+    var subgroups = ["Respondidos", "NaoRespondidos"];
 
     // - Legenda
     svg.append("g")
-    .attr("class", "legendLinear")
-    .attr("transform", "translate(900,145)");
+        .attr("class", "legendLinear")
+        .attr("transform", "translate(900,145)");
 
     svg.select(".legendLinear")
-    .append('rect')
-    .attr("width",24)
-    .attr("height",24)
-    .attr('stroke', 'black')
-    .attr('fill', '#e45d88');
+        .append('rect')
+        .attr("width", 24)
+        .attr("height", 24)
+        .attr('stroke', 'black')
+        .attr('fill', '#fbc064');
 
     svg.select(".legendLinear")
-    .append('text')
-    .attr("y",20)
-    .attr("x",30)
-    .attr('stroke', 'black')
-    .text('Respondidos');
+        .append('text')
+        .attr("y", 20)
+        .attr("x", 30)
+        .attr('stroke', 'black')
+        .text('Atendidos');
 
     svg.select(".legendLinear")
-    .append('rect')
-    .attr("x",0)
-    .attr("y",44)
-    .attr("width",24)
-    .attr("height",24)
-    .attr('stroke', 'black')
-    .attr('fill', '#fbc064');
+        .append('rect')
+        .attr("x", 0)
+        .attr("y", 44)
+        .attr("width", 24)
+        .attr("height", 24)
+        .attr('stroke', 'black')
+        .attr('fill', '#e45d88');
 
     svg.select(".legendLinear")
-    .append('text')
-    .attr("y",64)
-    .attr("x",30)
-    .attr('stroke', 'black')
-    .text('Não Respondidos');
+        .append('text')
+        .attr("y", 64)
+        .attr("x", 30)
+        .attr('stroke', 'black')
+        .text('Não Atendidos');
+
+    svg.select(".legendLinear")
+        .append('rect')
+        .attr("x", 0)
+        .attr("y", 84)
+        .attr("width", 24)
+        .attr("height", 24)
+        .attr('stroke', 'black')
+        .attr('fill', '#87570b');
+
+    svg.select(".legendLinear")
+        .append('text')
+        .attr("y", 104)
+        .attr("x", 30)
+        .attr('stroke', 'black')
+        .text('Parcialmente Atendidos');
+
 
     function tooltipShow(data, x, y) {
         tooltip.attr("transform", "translate(" + x + ", " + y + ")")
         tooltipTitle.html(data.Ano);
 
-        tooltipBody.html("<p class='chart-tip'>" + data.Total + " pedidos</p><p>"
-        + data.Respondido + " pedidos respondidos</p><p>"
-        + data.NaoRespondido + " pedidos não respondidos</p>");
+        tooltipBody.html("<p class='chart-tip'>" + data.Total + " pedidos</p><p>" +
+            data.Respondido + " pedidos respondidos</p><p>" +
+            data.NaoRespondido + " pedidos não respondidos</p>");
 
         tooltip.style("display", null);
     }
@@ -69,222 +95,220 @@
         if (error) throw error;
 
         // Consolida os Anos e Unicos Registros
-        var anosDataq = data.map(el => el.Ano)
-            .filter((value, index, self) => self.indexOf(value) === index); // Distinct
+        var anosDataq = data.map(el => el.AnoEnvio)
+            .filter((value, index, self) => self.indexOf(value) === index);
 
-        var dataC = [];
-        anosDataq.forEach(function(el, i, arr) {
-            var anoNovoItem = {
-                Respondido: 0,
-                NaoRespondido: 0,
-                Total: 0,
-                PercRespondidos: 0,
-                Ano: el
-            };
+        var x = d3.scaleBand()
+            .domain(anosDataq)
+            .range([0, width])
+            .padding([0.2])
 
-            // -
-            data.filter(el2 => el2.Ano == el).forEach(function(itemAno, iItemAno) {
-                var valor = parseInt(itemAno.Qtd);
-
-                if(itemAno.StatusResposta == "Respondido") {
-                    anoNovoItem.Respondido += valor;
-                } else {
-                    anoNovoItem.NaoRespondido += valor;
-                }
-            });
-
-            // -
-            dataC[i] = anoNovoItem;
-        });
-
-        data = dataC;
-
-        // Calcula a Porcentagem
-        data.forEach(function(el, i, arr) {
-            var respondidos = el.Respondido;
-            var naoRespondidos = el.NaoRespondido;
-
-            // - Calcula Porcentagem
-            el.Total = naoRespondidos +  respondidos;
-            if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
-            else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
-            else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
-
-            el.PercNaoRespondidos = 1.00 - el.PercRespondidos;
-        });
-
-         // Add X axis
-      var x = d3.scaleBand()
-        .domain(anosDataq)
-        .range([0, width])
-        .padding([0.2])
         svg.append("g")
-        .attr("class","xaxis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).tickSizeOuter(0));
+            .attr("class", "xaxis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).tickSizeOuter(0))
+            .style("font-size", "15px");
 
         // Add Y axis
         var y = d3.scaleLinear()
-        .domain([0.0,1.0])
-        .range([ height, 0 ]);
+            .domain([0, 100])
+            .range([height, 0]);
 
-        var y_axis = d3.axisLeft().scale(y)
-            .tickValues([0, .25, .5, .75, 1])
-            .tickFormat(d3.format(".0%"));
+        var y_axis = d3.axisLeft(y).tickFormat(d => d + "%");
 
         svg.append("g")
-        .attr("class","yaxis")
-        .call(y_axis);
-
-        var color = d3.scaleOrdinal()
-            .domain(subgroups)
-            .range(['#e45d88','#fbc064']);
+            .attr("class", "yaxis")
+            .call(y_axis)
 
         svg.select(".yaxis")
             .selectAll("text")
-            .style("font-size","15px");
+            .style("font-size", "15px");
 
-        svg.select(".xaxis")
-            .selectAll("text")
-            .style("font-size","16px");
+        // Add the "Atendido" line
+        var dataAtendido = data.filter((value, index, self) => value.StatusNome == 'Atendido');
 
+        svg.append("path")
+            .datum(dataAtendido)
+            .attr("fill", "none")
+            .attr("stroke", "#fbc064")
+            .attr("stroke-width", lineStroke)
+            .attr("d", d3.line()
+                .x(function(d) { return x(d.AnoEnvio) })
+                .y(function(d) { return y(d.PercStatus) })
+            )
 
-        //stack the data? --> stack per subgroup
-        var stackedData = d3.stack()
-                .keys(subgroups)
-                .value(function(obj, key) {
-                    if(key == "Respondidos") {
-                        return obj.PercRespondidos;
-                    }
-                    else if(key == "NaoRespondidos") {
-                        return obj.PercNaoRespondidos;
-                    }
-                })
-                (data)
+        // Add the "Não Atendido" line
+        var dataNaoAtendido = data.filter((value, index, self) => value.StatusNome == 'Não Atendido');
 
-        // Barra do Gráfico
-        svg.append("g")
-        .selectAll("g")
-        .data(stackedData)
-        .enter().append("g")
-            .attr("fill", function(d) {
-                 return color(d.key);
-            })
-            .selectAll("rect")
-            .data(function(d) {
-                d.forEach(function(item, i) {
-                    item.key = d.key;
-                });
+        svg.append("path")
+            .datum(dataNaoAtendido)
+            .attr("fill", "none")
+            .attr("stroke", "#e45d88")
+            .attr("stroke-width", lineStroke)
+            .attr("d", d3.line()
+                .x(function(d) { return x(d.AnoEnvio) })
+                .y(function(d) { return y(d.PercStatus) })
+            )
 
-                return d;
-            })
-            .enter()
-            .append("rect") // Cria a Barra
-            .attr("x", function(d) {
-                return x(d.data.Ano);
-            })
-            .attr("y", function(d) {
-                return y(d[1]);
-             })
-            .attr("height", function(d) {
-                 return y(d[0]) - y(d[1]);
-             })
-            .attr("width",x.bandwidth())
-            .style("cursor", "pointer")
-            .on("mouseover", function (d) {
-                var tooltipY = d.key == "Respondidos" ? y(0.9) : y(0.5);
+        // Add the "Parcial Atendido" line
+        var dataParcialAtendido = data.filter((value, index, self) => value.StatusNome == 'Parcialmente Atendido');
 
-                tooltipShow(d.data, x(d.data.Ano) , tooltipY);
-            })
-            .on("mouseout", function (d) {
-                tooltip.style("display", "none");
-            });
+        svg.append("path")
+            .datum(dataParcialAtendido)
+            .attr("fill", "none")
+            .attr("stroke", "#87570b")
+            .attr("stroke-width", lineStroke)
+            .attr("d", d3.line()
+                .x(function(d) { return x(d.AnoEnvio) })
+                .y(function(d) { return y(d.PercStatus) })
+            )
 
-        // Legendas dos Respondidos
-        var legendaBarrasResp = svg.append("g")
-        .selectAll("g")
-        .data(data)
-        .enter().append("g");
-
-        legendaBarrasResp.append("text")
-            .text(function(d) {
-                return (d.PercRespondidos * 100).toFixed(0) + "%";
-            })
-            .attr("x", function(d){
-                return x(d.Ano) + x.bandwidth()/2;
-            })
-            .attr("y", function(d){
-                d.dy =  y(0) - ((y(0) - y(d.PercRespondidos)) / 2);
-                return d.dy;
-            })
-            .attr("font-family" , "sans-serif")
-            .attr("font-size" , "14px")
-            .attr("fill" , "black")
-            .attr("text-anchor", "middle")
-            .style("cursor", "pointer")
-            .on("mouseover", function (d) {
-                tooltipShow(d, x(d.Ano) , y(0.8));
-            })
-            .on("mouseout", function (d) {
-                tooltip.style("display", "none");
-            });;
-
-        // Legendas dos Não Respondidos
-        var legendaBarrasNaoResp = svg.append("g")
-        .selectAll("g")
-        .data(data)
-        .enter().append("g");
-
-        legendaBarrasNaoResp.append("text")
-            .text(function(d) {
-                return (d.PercNaoRespondidos * 100).toFixed(0) + "%";
-            })
-            .attr("x", function(d){
-                return x(d.Ano) + x.bandwidth()/2;
-            })
-            .attr("y", function(d){
-                d.dy2 =  ((y(0) - y(d.PercNaoRespondidos)) / 2);
-                return d.dy2;
-            })
-            .attr("font-family" , "sans-serif")
-            .attr("font-size" , "14px")
-            .attr("fill" , "black")
-            .attr("text-anchor", "middle")
-            .style("cursor", "pointer")
-            .on("mouseover", function (d) {
-                tooltipShow(d, x(d.Ano) , y(0.5));
-            })
-            .on("mouseout", function (d) {
-                tooltip.style("display", "none");
-            });;
-
-
-        // - Tooltip
-        tooltip = svg.append("foreignObject")
-        .attr("class", "chart-tooltip")
-        .attr("x", -15)
-        .attr("y", 10)
-        .attr("width", 150)
-        .attr("height", 100)
-        .style("display", "none")
-        .style("z-index", 10000);
-        tooltipContent = tooltip.append('xhtml:div')
-            .attr("class", "chart-tooltip-content");
-        tooltipTitle = tooltipContent.append('div')
-            .attr("class", 'chart-tooltip-title');
-        tooltipBody = tooltipContent.append('div')
-            .attr('class', 'chart-tooltip-body');
+        drawTooltip(data, anosDataq, x, y);
     }
 
-    d3.json("/api/PedidosAtendimentoPorAno", draw);
+    function drawTooltip(data, anosDataq, xScale, yScale) {
+
+        // Consolida os dados por ano X status 
+        var cData = [];
+        anosDataq.forEach(xAno => {
+            statusNomes.forEach(status => {
+                cData[xAno + "-" + status] = data.filter((value, index, self) => value.AnoEnvio == xAno && value.StatusNome == status);
+            });
+        });
+
+        tooltip = d3.select("#taxa-resposta-ano").append("div")
+            .attr('class', 'tooltip-taxa-resposta-ano')
+            .style('position', 'absolute')
+            .style("background-color", "#D3D3D3")
+            .style('padding', 6)
+            .style('display', 'none')
+
+        tooltipTitle = tooltip.append("h4");
+        tooltipContent = tooltip.append("div");
+
+        var color = d3.scaleOrdinal()
+            .domain(statusNomes)
+            .range(["#fbc064", "#e45d88", "#87570b"]);
+
+        mouseG = svg.append("g")
+            .attr("class", "mouse-over-effects");
+
+        mouseG.append("path") // create vertical line to follow mouse
+            .attr("class", "mouse-line")
+            .style("stroke", "#A9A9A9")
+            .style("stroke-width", lineStroke)
+            .style("opacity", "0");
+
+        var mousePerLine = mouseG.selectAll('.mouse-per-line')
+            .data(statusNomes)
+            .enter()
+            .append("g")
+            .attr("class", "mouse-per-line");
+
+        mousePerLine.append("circle")
+            .attr("r", 4)
+            .style("stroke", function(d) {
+                return color(d)
+            })
+            .style("fill", "none")
+            .style("stroke-width", lineStroke)
+            .style("opacity", "0");
+
+        mouseG.append('svg:rect') // append a rect to catch mouse movements on canvas
+            .attr('width', width)
+            .attr('height', height)
+            .attr('fill', 'none')
+            .attr('pointer-events', 'all')
+            .on('mouseout', function() { // on mouse out hide line, circles and text
+                d3.select(".mouse-line")
+                    .style("opacity", "0");
+                d3.selectAll(".mouse-per-line circle")
+                    .style("opacity", "0");
+                d3.selectAll(".mouse-per-line text")
+                    .style("opacity", "0");
+                d3.selectAll(".tooltip-taxa-resposta-ano")
+                    .style('display', 'none');
+
+            })
+            .on('mouseover', function() { // on mouse in show line, circles and text
+                d3.select(".mouse-line")
+                    .style("opacity", "1");
+                d3.selectAll(".mouse-per-line circle")
+                    .style("opacity", "1");
+                d3.selectAll(".tooltip-taxa-resposta-ano")
+                    .style('display', 'block');
+            })
+            .on('mousemove', function() { // update tooltip content, line, circles and text when mouse moves
+                var mouse = d3.mouse(this)
+
+                var eachBand = xScale.step();
+                var index = Math.floor((mouse[0] / eachBand));
+                var xAno = xScale.domain()[index];
+
+                d3.selectAll(".mouse-per-line")
+                    .attr("transform", function(d, i) {
+                        var dPoint = cData[xAno + "-" + d];
+
+                        d3.select(".mouse-line")
+                            .attr("d", function() {
+                                var data = "M" + xScale(xAno) + "," + (height);
+                                data += " " + xScale(xAno) + "," + 0;
+                                return data;
+                            });
+
+                        return "translate(" + xScale(xAno) + "," + yScale(dPoint[0].PercStatus) + ")";
+
+                    });
+
+                tooltipTitle.html(xAno);
+                tooltipContent.html("");
+
+                statusNomes.forEach(status => {
+                    var colorTooltip = ''
+                    var labelTooltip = ''
+                    if (status == "Não Atendido") {
+                        labelTooltip = "Não Atendidos";
+                        colorTooltip = '#e45d88';
+                    }
+                    if (status == "Parcialmente Atendido") {
+                        labelTooltip = "Parcialmente Atendidos";
+                        colorTooltip = '#87570b';
+                    }
+                    if (status == "Atendido") {
+                        labelTooltip = "Atendidos";
+                        colorTooltip = '#fbc064';
+                    }                    
+                    var item = cData[xAno + "-" + status];
+                    var totalStatusToolTip = parseInt(item[0].TotalStatus).toLocaleString('pt-BR', {minimumFractionDigits: 0})
+                    tooltipContent.append('p').html("<div style='width:10px;height:10px;background-color:"+ colorTooltip+";display:inline-flex;margin-right:5px;'></div>" + labelTooltip + ": " + totalStatusToolTip);
+                });
+
+
+                var tooltipDiv = document.getElementsByClassName('tooltip-taxa-resposta-ano')[0];
+                tooltipDiv.style.left = (d3.event.pageX + 20) + "px";
+                tooltipDiv.style.top = (d3.event.pageY - 20) + "px";
+            })
+
+    }
+
+    d3.json("/api/v2/PedidosAtendimentoPorAno", draw);
 })();
 //FIM Grafico classificações de atendimento por ano
-(function () {
+(function() {
     var _lodash = _.noConflict();
-    var unidadesFederativas = [{"ID": "0","Sigla": "ÓrgãosFederais","Nome": "Órgãos Federais"},{"ID": "1","Sigla": "AC","Nome": "Acre"}, {"ID": "2","Sigla": "AL","Nome": "Alagoas"}, {"ID": "3","Sigla": "AM","Nome": "Amazonas"}, {"ID": "4","Sigla": "AP","Nome": "Amapá"}, {"ID": "5","Sigla": "BA","Nome": "Bahia"}, {"ID": "6","Sigla": "CE","Nome": "Ceará"}, {"ID": "7","Sigla": "DF","Nome": "Distrito Federal"}, {"ID": "8","Sigla": "ES","Nome": "Espírito Santo"}, {"ID": "9","Sigla": "GO","Nome": "Goiás"}, {"ID": "10","Sigla": "MA","Nome": "Maranhão"}, {"ID": "11","Sigla": "MG","Nome": "Minas Gerais"}, {"ID": "12","Sigla": "MS","Nome": "Mato Grosso do Sul"}, {"ID": "13","Sigla": "MT","Nome": "Mato Grosso"}, {"ID": "14","Sigla": "PA","Nome": "Pará"}, {"ID": "15","Sigla": "PB","Nome": "Paraíba"}, {"ID": "16","Sigla": "PE","Nome": "Pernambuco"}, {"ID": "17","Sigla": "PI","Nome": "Piauí"}, {"ID": "18","Sigla": "PR","Nome": "Paraná"}, {"ID": "19","Sigla": "RJ","Nome": "Rio de Janeiro"}, {"ID": "20","Sigla": "RN","Nome": "Rio Grande do Norte"}, {"ID": "21","Sigla": "RO","Nome": "Rondônia"}, {"ID": "22","Sigla": "RR","Nome": "Roraima"}, {"ID": "23","Sigla": "RS","Nome": "Rio Grande do Sul"}, {"ID": "24","Sigla": "SC","Nome": "Santa Catarina"}, {"ID": "25","Sigla": "SE","Nome": "Sergipe"}, {"ID": "26","Sigla": "SP","Nome": "São Paulo"}, {"ID": "27","Sigla": "TO","Nome": "Tocantins"}];
+    var unidadesFederativas = [{ "ID": "0", "Sigla": "ÓrgãosFederais", "Nome": "Órgãos Federais" }, { "ID": "1", "Sigla": "AC", "Nome": "Acre" }, { "ID": "2", "Sigla": "AL", "Nome": "Alagoas" }, { "ID": "3", "Sigla": "AM", "Nome": "Amazonas" }, { "ID": "4", "Sigla": "AP", "Nome": "Amapá" }, { "ID": "5", "Sigla": "BA", "Nome": "Bahia" }, { "ID": "6", "Sigla": "CE", "Nome": "Ceará" }, { "ID": "7", "Sigla": "DF", "Nome": "Distrito Federal" }, { "ID": "8", "Sigla": "ES", "Nome": "Espírito Santo" }, { "ID": "9", "Sigla": "GO", "Nome": "Goiás" }, { "ID": "10", "Sigla": "MA", "Nome": "Maranhão" }, { "ID": "11", "Sigla": "MG", "Nome": "Minas Gerais" }, { "ID": "12", "Sigla": "MS", "Nome": "Mato Grosso do Sul" }, { "ID": "13", "Sigla": "MT", "Nome": "Mato Grosso" }, { "ID": "14", "Sigla": "PA", "Nome": "Pará" }, { "ID": "15", "Sigla": "PB", "Nome": "Paraíba" }, { "ID": "16", "Sigla": "PE", "Nome": "Pernambuco" }, { "ID": "17", "Sigla": "PI", "Nome": "Piauí" }, { "ID": "18", "Sigla": "PR", "Nome": "Paraná" }, { "ID": "19", "Sigla": "RJ", "Nome": "Rio de Janeiro" }, { "ID": "20", "Sigla": "RN", "Nome": "Rio Grande do Norte" }, { "ID": "21", "Sigla": "RO", "Nome": "Rondônia" }, { "ID": "22", "Sigla": "RR", "Nome": "Roraima" }, { "ID": "23", "Sigla": "RS", "Nome": "Rio Grande do Sul" }, { "ID": "24", "Sigla": "SC", "Nome": "Santa Catarina" }, { "ID": "25", "Sigla": "SE", "Nome": "Sergipe" }, { "ID": "26", "Sigla": "SP", "Nome": "São Paulo" }, { "ID": "27", "Sigla": "TO", "Nome": "Tocantins" }];
     var pedidosPorUFPoderENivelCache = [];
+    var dataFilteredWithoutStatus = [];
 
-    d3.json("/api/pedidosPorUFPoderENivel", function drawMapData(error, data) {
+
+    var namesPlural = []
+    namesPlural["Atendido"] = "atendidos"
+    namesPlural["Não Atendido"] = "não atendidos"
+    namesPlural["Parcialmente Atendido"] = "parcialmente atendidos"
+
+    var statusAtendido = $('#filter-status').val(); //default filter selected
+
+    d3.json("/api/pedidosPorUFPoderENivelEStatus", function drawMapData(error, data) {
         if (error) throw error;
 
         pedidosPorUFPoderENivelCache = data;
@@ -295,36 +319,34 @@
         $("#chart-pedidos-uf-mapa").empty();
         $("#chart-pedidos-uf-barras").empty();
         var
-            totais = { Respondidos : 0, NaoRespondidos : 0, Total: 0},
             marginB = { top: 0, right: 0, bottom: 0, left: 0 },
             viewBoxB = { width: 600, height: 460 },
-            widthB = viewBoxB.width - marginB.left - marginB.right,
             heightB = viewBoxB.height - marginB.top - marginB.bottom,
-            dotB = { minRadius: 3, maxRadius: 30 },
             svgB = d3.select("#chart-pedidos-uf-mapa").append('svg')
-                .attr("version", "1.1")
-                .attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
-                .attr("width", "100%"),
+            .attr("version", "1.1")
+            .attr("viewBox", "0 0 " + viewBoxB.width + " " + viewBoxB.height)
+            .attr("width", "100%"),
             gB = svgB.append("g").attr("transform", "translate(" + marginB.left + "," + marginB.top + ")"),
             projection = d3.geoAlbers()
-                .center([-44, -15])
-                .rotate([0, 0])
-                .parallels([0, 0])
-                .scale(700),
+            .center([-44, -15])
+            .rotate([0, 0])
+            .parallels([0, 0])
+            .scale(700),
             map = d3.geoPath().projection(projection);
 
         // Range de Cores
-        var color_range = ["#969696","#940131","#cd134f","#ec7340","#fab94f","#f6e197"];
+        var color_range = ["#969696", "#969696", "#f6e197", "#f6e197", "#fab94f", "#fab94f", "#ec7340", "#ec7340", "#cd134f", "#cd134f", "#940131"];
         var colorScale = d3.scaleLinear()
-        .domain([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
-        .range(color_range);
+            .domain([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+            .range(color_range);
 
+        statusAtendido = $('#filter-status').val()
         var legend = d3.legendColor()
             .scale(colorScale)
-            .cells([1.0,0.80, 0.60, 0.40, 0.20,0.0])
+            .cells([1.0, 0.8, 0.6, 0.4, 0.2, 0.0])
             .labelFormat(d3.format(".0%"))
-            .title("% Respondidos");
-            svgB.append("g")
+            .title("% " + statusAtendido);
+        svgB.append("g")
             .attr("transform", "translate(60,20)")
             .call(legend);
 
@@ -336,12 +358,6 @@
             .attr("width", 150)
             .attr("height", 100)
             .style("display", "none");
-        var tooltipContentB = tooltipB.append('xhtml:div')
-            .attr("class", "chart-tooltip-content");
-        var tooltipTitleB = tooltipContentB.append('div')
-            .attr("class", 'chart-tooltip-title');
-        var tooltipBodyB = tooltipContentB.append('div')
-            .attr('class', 'chart-tooltip-body');
 
         var
             marginC = { top: 20, right: 60, bottom: 20, left: 90 },
@@ -351,201 +367,286 @@
             svgC = d3.select("#chart-pedidos-uf-barras").append("svg")
             .attr("width", widthC + marginC.left + marginC.right + 230)
             .attr("height", heightC + marginC.top + marginC.bottom + 20)
-          .append("g")
+            .append("g")
             .attr("transform",
-                  "translate(" + marginC.left + "," + marginC.top + ")");
+                "translate(" + marginC.left + "," + marginC.top + ")");
 
 
-        function drawBarras(data) {
+        function drawBarras(data, _totalQtdeByUF) {
             //
             var orderByPerc = $("#order-by-perc").is(":checked");
             var orderByUf = $("#order-by-uf").is(":checked");
 
-            // Ordena os Dados
-            if(orderByPerc) {
-                data = data.sort(function(a,b) {
-                    return a.PercRespondidos - b.PercRespondidos;
+            var groupBy = _lodash(data).groupBy('SiglaUF').value();
+            var totalQtdeByUFConsolidate = _lodash.map(groupBy, (obj, key) => {
+                    var getTotalObj = _totalQtdeByUF.filter(el => el.SiglaUF == key)
+                    if (key != 'null') {
+                        var totalQtde = _lodash.sumBy(getTotalObj, item => {
+                            return parseInt(item.QuantidadePedido)
+                        })
+                        return {
+                            'SiglaUF': key,
+                            'QuantidadePedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido)),
+                            'ProrcentagemPedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido)) / totalQtde
+                        }
+                    }
+
+                })
+                //remove undefined values
+            totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
+                // Ordena os Dados
+            if (orderByPerc) {
+                totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
+                    return (parseFloat(a.ProrcentagemPedido) * 100).toFixed(0) - (parseFloat(b.ProrcentagemPedido) * 100).toFixed(0)
+                        //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
                 });
-            } else if(orderByUf) {
-                data = data.sort(function(a,b) {
-                    return a.SiglaUf.localeCompare(b.SiglaUf, 'pt-BR', { sensitivity: 'base' });
+            } else if (orderByUf) {
+                totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
+                    return a.SiglaUF.localeCompare(b.SiglaUF, 'pt-BR', { sensitivity: 'base' });
                 });
             }
-
-            // Consolida os Dados por Estado
-            var ufsData = data.map(el => el.SiglaUf)
-                .filter((value, index, self) => self.indexOf(value) === index); // Distinct
-
             // Add X axis
             var x = d3.scaleLinear()
-            .domain([0.0, 1.0])
-            .range([ 0, widthC]);
+                .domain([0.0, 1.0])
+                .range([0, widthC]);
             svgC.append("g")
-            .attr("transform", "translate(0," + heightC + ")")
-            .call(d3.axisBottom(x).tickFormat(d3.format(".0%")))
-            .selectAll("text")
+                .attr("transform", "translate(0," + heightC + ")")
+                .call(d3.axisBottom(x).tickFormat(d3.format(".0%")))
+                .selectAll("text")
                 .attr("transform", "translate(-10,0)rotate(-45)")
                 .style("text-anchor", "end");
 
-              // Y axis
+            // Y axis
             var y = d3.scaleBand()
-            .range([ 0, heightC ])
-            .domain(data.map(function(d) { return d.SiglaUf; }))
-            .padding(.1);
+                .range([0, heightC])
+                .domain(totalQtdeByUFConsolidate.map(function(d) { return d.SiglaUF; }))
+                .padding(.1);
             svgC.append("g")
-            .call(d3.axisLeft(y))
+                .call(d3.axisLeft(y))
 
 
             //Bars
             svgC.selectAll("myRect")
-            .data(data)
-            .enter()
-            .append("rect")
-            .attr("x", x(0) )
-            .attr("y", function(d) { return y(d.SiglaUf); })
-            .attr("width", function(d) { return x(d.PercRespondidos); })
-            .attr("height", y.bandwidth() )
-            .attr("fill", "#fe9301")
-            .style("opacity", 0.5)
-            .on("mouseover", function(d) {
-                d3.select(this).style("opacity", 1);
-                d3.select("#bartext-" + d.SiglaUf).style("opacity", 1);
-            })
-            .on("mouseout", function(d) {
-                d3.select(this).style("opacity", 0.5);
-                d3.select("#bartext-" + d.SiglaUf).style("opacity", 0);
-            });
+                .data(totalQtdeByUFConsolidate)
+                .enter()
+                .append("rect")
+                .attr("x", x(0))
+                .attr("y", function(d) { return y(d.SiglaUF); })
+                .attr("width", function(d) {
+                    return x(d.ProrcentagemPedido);
+                })
+                .attr("height", y.bandwidth())
+                .attr("fill", "#fe9301")
+                .style("opacity", 0.5)
+                .on("mouseover", function(d) {
+                    d3.select(this).style("opacity", 1);
+                    d3.select("#bartext-" + d.SiglaUF).style("opacity", 1);
+                })
+                .on("mouseout", function(d) {
+                    d3.select(this).style("opacity", 0.5);
+                    d3.select("#bartext-" + d.SiglaUF).style("opacity", 0);
+                });
 
             // Texto da Quantidades de Pedidos
             svgC.selectAll("myText")
-            .data(data)
-            .enter()
-            .append("text")
-            .attr("x", function(d) {
-                return x(d.PercRespondidos) + 5;
-            })
-            .attr("y", function(d) { return y(d.SiglaUf) + 10; })
-            .attr("width", 100)
-            .attr("height", y.bandwidth() )
-            .attr("fill", "#000")
-            .attr("id", function(d) {
-                return "bartext-" + d.SiglaUf;
-            })
-            .style("opacity", 0)
-            .style("z-index", 1000)
-            .text(function(d) {
-                return d.Respondido + " pedidos";
-            });
+                .data(totalQtdeByUFConsolidate)
+                .enter()
+                .append("text")
+                .attr("x", function(d) {
+                    return x(d.ProrcentagemPedido) + 5;
+                })
+                .attr("y", function(d) { return y(d.SiglaUF) + 10; })
+                .attr("width", 100)
+                .attr("height", y.bandwidth())
+                .attr("fill", "#000")
+                .attr("id", function(d) {
+                    return "bartext-" + d.SiglaUF;
+                })
+                .style("opacity", 0)
+                .style("z-index", 1000)
+                .text(function(d) {
+                    return d.QuantidadePedido.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 0
+                    }) + " pedidos";
+                });
+        }
+
+        function drawBarrasBrasil(percentBrasil, totalQtdeByBrasilAndStatus) {
+            //
+            var orderByPerc = $("#order-by-perc").is(":checked");
+            var orderByUf = $("#order-by-uf").is(":checked");
+            var totalQtdeByUFConsolidate = [{
+                'SiglaUF': 'BR',
+                'QuantidadePedido': totalQtdeByBrasilAndStatus,
+                'ProrcentagemPedido': percentBrasil
+            }]
+
+            //remove undefined values
+            totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.filter(n => n)
+                // Ordena os Dados
+            if (orderByPerc) {
+                totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
+                    return (parseFloat(a.ProrcentagemPedido) * 100).toFixed(0) - (parseFloat(b.ProrcentagemPedido) * 100).toFixed(0)
+                        //return parseFloat(a.ProrcentagemPedido) - parseFloat(b.ProrcentagemPedido)
+                });
+            } else if (orderByUf) {
+                totalQtdeByUFConsolidate = totalQtdeByUFConsolidate.sort(function(a, b) {
+                    return a.SiglaUF.localeCompare(b.SiglaUF, 'pt-BR', { sensitivity: 'base' });
+                });
+            }
+            // Add X axis
+            var x = d3.scaleLinear()
+                .domain([0.0, 1.0])
+                .range([0, widthC]);
+            svgC.append("g")
+                .attr("transform", "translate(0," + heightC + ")")
+                .call(d3.axisBottom(x).tickFormat(d3.format(".0%")))
+                .selectAll("text")
+                .attr("transform", "translate(-10,0)rotate(-45)")
+                .style("text-anchor", "end");
+
+            // Y axis
+            var y = d3.scaleBand()
+                .range([0, heightC])
+                .domain(totalQtdeByUFConsolidate.map(function(d) { return d.SiglaUF; }))
+                .padding(.1);
+            svgC.append("g")
+                .call(d3.axisLeft(y))
+
+
+            //Bars
+            svgC.selectAll("myRect")
+                .data(totalQtdeByUFConsolidate)
+                .enter()
+                .append("rect")
+                .attr("x", x(0))
+                .attr("y", function(d) { return y(d.SiglaUF); })
+                .attr("width", function(d) {
+                    return x(d.ProrcentagemPedido);
+                })
+                .attr("height", y.bandwidth())
+                .attr("fill", "#fe9301")
+                .style("opacity", 0.5)
+                .on("mouseover", function(d) {
+                    d3.select(this).style("opacity", 1);
+                    d3.select("#bartext-" + d.SiglaUF).style("opacity", 1);
+                })
+                .on("mouseout", function(d) {
+                    d3.select(this).style("opacity", 0.5);
+                    d3.select("#bartext-" + d.SiglaUF).style("opacity", 0);
+                });
+
+            // Texto da Quantidades de Pedidos
+            svgC.selectAll("myText")
+                .data(totalQtdeByUFConsolidate)
+                .enter()
+                .append("text")
+                .attr("x", function(d) {
+                    return x(d.ProrcentagemPedido) + 5;
+                })
+                .attr("y", function(d) { return y(d.SiglaUF) + 10; })
+                .attr("width", 100)
+                .attr("height", y.bandwidth())
+                .attr("fill", "#000")
+                .attr("id", function(d) {
+                    return "bartext-" + d.SiglaUF;
+                })
+                .style("opacity", 0)
+                .style("z-index", 1000)
+                .text(function(d) {
+                    return d.QuantidadePedido.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 0
+                    }) + " pedidos";
+                });
         }
 
         function drawMap(error, br) {
             if (error) throw error;
             var ufs = topojson.feature(br, br.objects.br);
-
             // Filtra os Resultados
             var nivelFederativo = $("#filter-nivel").val();
             var esferaPoder = $("#filter-poder").val();
+            statusAtendido = $('#filter-status').val();
 
             data = pedidosPorUFPoderENivelCache
-            .map(function(el) {
-                var el2 = Object.assign({}, el);
+                .map(function(el) {
+                    var el2 = Object.assign({}, el);
 
-                // - Se o Nivel federativo for Federal, Considera tudo como BR
+                    // - Se o Nivel federativo for Federal, Considera tudo como BR
 
-                if(nivelFederativo == "Federal")
-                {
-                    el2.SiglaUf = "BR";
-                }
+                    if (nivelFederativo == "Federal") {
+                        el2.SiglaUf = "BR";
+                    }
 
-                return el2;
-            });;
+                    return el2;
+                });;
 
-            if(nivelFederativo !== "--") {
+            if (nivelFederativo !== "--") {
                 data = data.filter(function(el) {
-                    return nivelFederativo == "Federal" ? true : el.NomeNivelFederativo == nivelFederativo;
+                    return el.NomeNivelFederativo == nivelFederativo;
                 })
             }
 
-            if(esferaPoder !== "--") {
+            if (esferaPoder !== "--") {
                 data = data.filter(function(el) {
                     return el.NomePoder == esferaPoder;
                 });
             }
 
-            // Consolida os Dados por Estado
-            var ufsData = data
-                .map(el => el.SiglaUf)
-                .filter((value, index, self) => self.indexOf(value) === index); // Distinct
+            dataFilteredWithoutStatus = data
+            var groupBy = _lodash(data).groupBy('SiglaUF').value();
+            var totalQtdeByUF = _lodash.map(groupBy, (obj, key) => {
+                return {
+                    'SiglaUF': key,
+                    'QuantidadePedido': _lodash.sumBy(obj, item => parseInt(item.QuantidadePedido))
+                }
 
-            // Recria o Dados Consolidados
-            var dataC = [];
-            ufsData.forEach(function(el, i, arr) {
-                var ufNovoItem = {
-                    Respondido: 0,
-                    NaoRespondido: 0,
-                    Total: 0,
-                    PercRespondidos: 0,
-                    SiglaUf: el
-                };
+            })
 
-                // -
-                data.filter(el2 => el2.SiglaUf == el).forEach(function(itemUf, iItemUf) {
-                    var respondidos = itemUf.Respondido;
-                    var naoRespondidos = itemUf.NaoRespondido;
-
-                    // -
-                    if(respondidos == null) { respondidos = 0 } else { respondidos = parseInt(respondidos) };
-                    if(naoRespondidos == null) { naoRespondidos = 0 } else { naoRespondidos = parseInt(naoRespondidos) };
-
-                    ufNovoItem.Respondido += respondidos;
-                    ufNovoItem.NaoRespondido += naoRespondidos;
-                });
-
-                // -
-                dataC[i] = ufNovoItem;
+            var totalQtdeByBrasil = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido))
+            data = data.filter(function(el) {
+                return el.NomeStatusPedido == statusAtendido;
             });
-
-            data = dataC;
-
-            // Calcula a Porcentagem
-            data.forEach(function(el, i, arr) {
-                var respondidos = el.Respondido;
-                var naoRespondidos = el.NaoRespondido;
-
-                // - Calcula Porcentagem
-                el.Total = naoRespondidos +  respondidos;
-                if(respondidos > 0) {  el.PercRespondidos = ((respondidos/el.Total)); }
-                else if(respondidos == 0 && naoRespondidos > 0) { el.PercRespondidos = 0; }
-                else if(respondidos == 0 && naoRespondidos == 0) { el.PercRespondidos = 1; }
-
-                // - Totais Gerais
-                totais.Respondidos = totais.Respondidos + respondidos;
-                totais.NaoRespondidos = totais.NaoRespondidos + naoRespondidos;
-                totais.Total = totais.Total + el.Total;
-            });
-
-            // Perc. Total Geral
-            if(  totais.Respondidos > 0) {  totais.PercRespondidos = (( totais.Respondidos/totais.Total)); }
-            else if(totais.Respondidos == 0 &&  totais.NaoRespondidos > 0) { totais.PercRespondidos = 0; }
-            else if(totais.Respondidos == 0 &&  totais.NaoRespondidos == 0) { totais.PercRespondidos = 1; }
-            setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
-
+            var totalQtdeByBrasilAndStatus = _lodash.sumBy(data, item => parseInt(item.QuantidadePedido))
+            var percentBrasil = totalQtdeByBrasilAndStatus / totalQtdeByBrasil
+            setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus, totalQtdeByBrasil);
             // Altera a Cor dos Estados de Acordo com a Porcentagem
-            gB.selectAll(".chart-uf")
+            //COMENTADO PAULO
+            if (nivelFederativo == "Federal") {
+                gB.selectAll(".chart-uf")
                     .data(ufs.features)
                     .enter().append("path")
                     .attr("class", "chart-uf")
                     .attr("d", map)
-                    .attr("fill", function (d) {
+                    .attr("fill", "#edf0f5")
+                    .attr("stroke", "#e1e1e1")
+                drawBarrasBrasil(percentBrasil, totalQtdeByBrasilAndStatus);
+                $("#chart-pedidos-uf-info").fadeIn();
+            } else {
+                gB.selectAll(".chart-uf")
+                    .data(ufs.features)
+                    .enter().append("path")
+                    .attr("class", "chart-uf")
+                    .attr("d", map)
+                    .attr("fill", function(d) {
                         var sigla = d.id;
-                        var procura = data.filter(el => el.SiglaUf == sigla);
-                        return procura.length == 0 ? colorScale(0) : colorScale(procura[0].PercRespondidos);
+                        var procura = data.filter(el => el.SiglaUF == sigla);
+                        var totalQtde = _lodash.sumBy(procura, item => {
+                            return parseInt(item.QuantidadePedido)
+                        })
+                        var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
+                        var percent = 0
+                        if (getTotalObj.length > 0) {
+                            percent = totalQtde / getTotalObj[0].QuantidadePedido
+                        }
+                        return procura.length == 0 ? colorScale(0) : colorScale(toFixed(percent, 1));
                     })
                     // Efeito Hover
                     .style("opacity", .85)
                     .style("stroke", "transparent")
-                    //  Legenda Geral do Filtro
+                    //Legenda Geral do Filtro
                     .on("mouseover", function(d) {
+                        $("#chart-pedidos-uf-info").fadeIn();
                         d3.selectAll(".chart-uf")
                             .transition()
                             .duration(200)
@@ -559,34 +660,62 @@
                             .style("stroke", "#999999");
 
                         var sigla = d.id;
-                        var procura = data.filter(el => el.SiglaUf == sigla);
 
-                        setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla}).Nome,
-                                procura[0].PercRespondidos, procura[0].Respondido);
+                        var procuraWithoutStatus = dataFilteredWithoutStatus.filter(el => el.SiglaUF == sigla);
+                        var totalQtdeWithoutStatus = _lodash.sumBy(procuraWithoutStatus, item => {
+                            return parseInt(item.QuantidadePedido)
+                        })
+
+                        var procura = data.filter(el => el.SiglaUF == sigla);
+                        var totalQtde = _lodash.sumBy(procura, item => {
+                            return parseInt(item.QuantidadePedido)
+                        })
+                        var getTotalObj = totalQtdeByUF.filter(el => el.SiglaUF == sigla)
+                        var percent = 0
+                        if (getTotalObj.length > 0) {
+                            percent = totalQtde / getTotalObj[0].QuantidadePedido
+                        }
+
+                        setMapInfo(_lodash.find(unidadesFederativas, { Sigla: sigla }).Nome,
+                            percent, totalQtde, totalQtdeWithoutStatus);
                     })
                     .on("mouseout", function(d) {
+                        $("#chart-pedidos-uf-info").hide();
                         d3.selectAll(".chart-uf")
-                        .transition()
-                        .duration(200)
-                        .style("opacity", .85);
+                            .transition()
+                            .duration(200)
+                            .style("opacity", .85);
 
                         d3.select(this)
                             .transition()
                             .duration(200)
                             .style("stroke", "transparent");
 
-                        setMapInfo("Brasil", totais.PercRespondidos, totais.Respondidos);
+                        setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
                     });
 
-            drawBarras(data);
-            $("#chart-pedidos-uf-info").fadeIn();
+                drawBarras(data, totalQtdeByUF);
+
+                if (nivelFederativo == 'Federal') {
+                    $("#chart-pedidos-uf-info").fadeIn();
+                } else {
+                    $("#chart-pedidos-uf-info").hide();
+                }
+            }
         }
 
 
-        function setMapInfo(title, perc, total) {
+        function setMapInfo(title, perc, totalStatus, total = 0) {
+            var statusAtendidoPlural = namesPlural[statusAtendido]
             $("#chart-info-uf").html(title);
-            $("#chart-info-qtd").html(total);
-            $("#chart-info-perc").html((perc * 100).toFixed(1));
+            $("#chart-info-qtd-total").html(total.toLocaleString('pt-BR', {
+                minimumFractionDigits: 0
+            }));
+            $("#chart-info-qtd-status").html(totalStatus.toLocaleString('pt-BR', {
+                minimumFractionDigits: 0
+            }));
+            $("#chart-info-tipo").html(statusAtendidoPlural)
+            $("#chart-info-perc").html((perc * 100).toFixed(1).replace('.', ',') + "%");
         }
 
         d3.json("/assets/data/br.json", drawMap);
@@ -600,6 +729,10 @@
         doDrawMap();
     });
 
+    $("#filter-status").change(function() {
+        doDrawMap();
+    });
+
     $("#order-by-perc").change(function() {
         doDrawMap();
     });
@@ -609,7 +742,7 @@
     });
 })();
 
-(function () {
+(function() {
     var
         margin = { top: 80, right: 50, bottom: 30, left: 50 },
         viewBox = { width: 860, height: 420 },
@@ -617,9 +750,9 @@
         height = viewBox.height - margin.top - margin.bottom,
         dot = { radius: 3 },
         svg = d3.select("#chart-tempo-resposta").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
-            .attr("width", "100%"),
+        .attr("version", "1.1")
+        .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
+        .attr("width", "100%"),
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var filter_tipo = "--";
@@ -628,8 +761,8 @@
     var x = d3.scaleBand().rangeRound([0, width]).padding(0.01).paddingOuter(0.5),
         y = d3.scaleLinear().range([height, 0]),
         z = d3.scaleThreshold()
-            .domain([6, 11, 16, 21, 26, 31, 36, 41])
-            .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "mais de 40"]);
+        .domain([6, 11, 16, 21, 26, 31, 36, 41])
+        .range(["1 a 5", "6 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "mais de 40"]);
     x.domain(z.range());
 
     g.append("g")
@@ -657,37 +790,35 @@
     function draw(error, data) {
         if (error) throw error;
 
-        data.forEach(function (d) {
+        data.forEach(function(d) {
             d.DataEnvio = new Date(d.DataEnvio);
             d.DataResposta = new Date(d.DataResposta);
             d.Grupo = z(d.DiasCorridos);
         });
 
-        d3.select("#filter-tipo-tempo").on("change", function () {
+        d3.select("#filter-tipo-tempo").on("change", function() {
             filter_tipo = this.value;
             filter();
         });
 
-        d3.select("#filter-tempo-esfera").on("change", function () {
+        d3.select("#filter-tempo-esfera").on("change", function() {
             filter_esfera = this.value;
             filter();
         });
 
         function filter() {
-            var entries = _.filter(data, function (d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
-            entries = _.filter(entries, function (d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
+            var entries = _.filter(data, function(d) { return (filter_tipo !== "--") ? d.NomeEsferaPoder == filter_tipo : true });
+            entries = _.filter(entries, function(d) { return (filter_esfera !== "--") ? d.NomeNivelFederativo == filter_esfera : true });
             var series = d3.nest()
-                .key(function (d) { return d.Grupo; })
-                .rollup(function (leaves) { return leaves.length; })
+                .key(function(d) { return d.Grupo; })
+                .rollup(function(leaves) { return leaves.length; })
                 .entries(entries);
-            series.sort(function (a, b) { return d3.ascending(a.value, b.value); });
+            series.sort(function(a, b) { return d3.ascending(a.value, b.value); });
 
             var total = d3.nest()
-                .rollup(function (leaves) { return leaves.length; })
+                .rollup(function(leaves) { return leaves.length; })
                 .entries(entries);
-            console.log("total")
-            console.log(total)
-            y.domain([0, Math.ceil(d3.max(series, function (d) { return d.value / total; }) * 10) / 10]);
+            y.domain([0, Math.ceil(d3.max(series, function(d) { return d.value / total; }) * 10) / 10]);
             yAxis.call(d3.axisLeft(y).tickFormat(d3.format(".1%")).ticks(4));
 
             g.selectAll(".chart-bar").remove();
@@ -695,28 +826,30 @@
                 .data(series)
                 .enter().append("rect")
                 .attr("class", "chart-bar")
-                .attr("x", function (d) { return x(d.key); })
+                .attr("x", function(d) { return x(d.key); })
                 .attr("y", height)
                 .attr("width", x.bandwidth())
                 .attr("height", 0)
-                .on("mouseover", function (d) {
+                .on("mouseover", function(d) {
                     tooltip.attr("transform", "translate(" + x(d.key) + ", " + (y(d.value / total) + 10) + ")")
                     if (d.key == "mais de 40") {
                         tooltipTitle.html(d.key + " dias")
                     } else {
                         tooltipTitle.html("De " + d.key + " dias")
                     }
-                    tooltipBody.html("<p class='chart-tip'>" + d.value + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
+                    tooltipBody.html("<p class='chart-tip'>" + d.value.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 0
+                    }) + " pedidos</p><p>" + d3.format(".0%")(d.value / total) + " do total</p>");
                     tooltip.style("display", null);
                 })
-                .on("mouseout", function (d) {
+                .on("mouseout", function(d) {
                     tooltip.style("display", "none");
                 });
             g.selectAll(".chart-bar")
                 .transition()
-                .duration(function (d, i) { return i * 100; })
-                .attr("y", function (d) { return y(d.value / total); })
-                .attr("height", function (d) { return height - y(d.value / total); });
+                .duration(function(d, i) { return i * 100; })
+                .attr("y", function(d) { return y(d.value / total); })
+                .attr("height", function(d) { return height - y(d.value / total); });
         }
         filter();
     }
@@ -724,7 +857,7 @@
     d3.json("/api/pedidosTempoMedioDeTramitacao", draw);
 })();
 
-(function () {
+(function() {
     var
         margin = { top: 0, right: 0, bottom: 0, left: 0 },
         viewBox = { width: 520, height: 160 },
@@ -733,14 +866,15 @@
         dot = { radius: 40 },
         text = { padding: 10 },
         svg = d3.select("#chart-taxa-reversao").append('svg')
-            .attr("version", "1.1")
-            .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
-            .attr("width", "100%"),
+        .attr("version", "1.1")
+        .attr("viewBox", "0 0 " + viewBox.width + " " + viewBox.height)
+        .attr("width", "100%"),
         clip = svg.append("defs").append("clipPath").attr("id", "circles-clip-path"),
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     var
         x = d3.scaleBand().rangeRound([0, width]).paddingOuter(0.5),
         y = d3.scaleLinear().range([0, dot.radius * 2]);
+
     function draw(error, data) {
         if (error) throw error;
         var nulldata = [
@@ -754,19 +888,19 @@
             { Interacao: "11", Status: "Nenhum", Qtd: 0 }
         ];
         data = data.concat(nulldata);
-        var dividend = _.filter(data, function (d) {
+        var dividend = _.filter(data, function(d) {
             return d.Interacao == "5" || d.Interacao == "7" || d.Interacao == "9" || d.Interacao == "11";
         });
-        var divisor = _.filter(data, function (d) {
+        var divisor = _.filter(data, function(d) {
             return d.Interacao == "4" || d.Interacao == "6" || d.Interacao == "8" || d.Interacao == "10";
         });
         dividend = d3.nest()
-            .key(function (d) { return d.Interacao; })
-            .rollup(function (leaves) { return { "sum": d3.sum(leaves, function (l) { return +l.Qtd; }) } })
+            .key(function(d) { return d.Interacao; })
+            .rollup(function(leaves) { return { "sum": d3.sum(leaves, function(l) { return +l.Qtd; }) } })
             .entries(dividend);
         divisor = d3.nest()
-            .key(function (d) { return d.Interacao; })
-            .rollup(function (leaves) { return { "sum": d3.sum(leaves, function (l) { return +l.Qtd; }) } })
+            .key(function(d) { return d.Interacao; })
+            .rollup(function(leaves) { return { "sum": d3.sum(leaves, function(l) { return +l.Qtd; }) } })
             .entries(divisor);
         var series = [
             { instancia: "1ª instância", dividend: +dividend[0].value.sum, divisor: divisor[0].value.sum },
@@ -774,12 +908,12 @@
             { instancia: "3ª instância", dividend: +dividend[2].value.sum, divisor: divisor[2].value.sum },
             { instancia: "4ª instância", dividend: +dividend[3].value.sum, divisor: divisor[3].value.sum },
         ];
-        x.domain(series.map(function (d) { return d.instancia; }));
+        x.domain(series.map(function(d) { return d.instancia; }));
 
         var paths = clip.selectAll("circle")
             .data(series)
             .enter().append("circle")
-            .attr("cx", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("cx", function(d) { return x(d.instancia) + dot.radius; })
             .attr("cy", height * 0.5)
             .attr("r", dot.radius);
 
@@ -788,36 +922,36 @@
             .enter().append("g")
             .attr("class", "chart-circle");
         gCircles.append("text")
-            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("x", function(d) { return x(d.instancia) + dot.radius; })
             .attr("y", (height * 0.5) - dot.radius - text.padding)
             .attr("fill", "#000000")
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
-            .text(function (d) { return d.instancia; });
+            .text(function(d) { return d.instancia; });
         gCircles.append("text")
-            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("x", function(d) { return x(d.instancia) + dot.radius; })
             .attr("y", (height * 0.5) + dot.radius + text.padding)
             .attr("fill", "#000000")
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "hanging")
-            .text(function (d) { return d.dividend + " pedidos"; });
+            .text(function(d) { return d.dividend + " pedidos"; });
         gCircles.append("circle")
-            .attr("cx", function (d) { return x(d.instancia) + dot.radius; })
+            .attr("cx", function(d) { return x(d.instancia) + dot.radius; })
             .attr("cy", height * 0.5)
             .attr("r", dot.radius)
             .attr("fill", "#edf0f5")
             .attr("stroke", "#e1e1e1")
             .attr("stroke-width", 2);
         gCircles.append("rect")
-            .attr("x", function (d) { return x(d.instancia); })
-            .attr("y", function (d) {
+            .attr("x", function(d) { return x(d.instancia); })
+            .attr("y", function(d) {
                 if (d.divisor > 0) {
                     return (height * 0.5 + dot.radius) - y(d.dividend / d.divisor);
                 }
             })
             .attr("width", dot.radius * 2)
-            .attr("height", function (d) {
+            .attr("height", function(d) {
                 if (d.divisor > 0) {
                     return y(d.dividend / d.divisor);
                 }
@@ -826,8 +960,8 @@
             .attr("fill", "#FFA401")
             .attr("clip-path", "url(#circles-clip-path)");
         gCircles.append("text")
-            .attr("x", function (d) { return x(d.instancia) + dot.radius; })
-            .attr("y", function (d) {
+            .attr("x", function(d) { return x(d.instancia) + dot.radius; })
+            .attr("y", function(d) {
                 if (d.divisor > 0) {
                     if (d.dividend / d.divisor > 0.2 || d.dividend / d.divisor < 0.8) {
                         return (height * 0.5 + dot.radius) - y(d.dividend / d.divisor) - (text.padding * 0.4);
@@ -839,7 +973,7 @@
             .attr("font-size", "8px")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "middle")
-            .text(function (d) {
+            .text(function(d) {
                 if (d.divisor > 0) {
                     return d3.format(".1f")((d.dividend / d.divisor) * 100) + "%";
                 }

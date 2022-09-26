@@ -14,46 +14,38 @@
       <div class="row">
           <h1>DADOS</h1>
           <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="--">
-          <p>Veja a taxa de resposta dos pedidos de acesso à informação cadastrados no Achados e Pedidos.<br>Pedidos respondidos são aqueles que receberam algum tipo de resposta do órgão público (sem considerar recursos)<br>Pedidos não respondidos são aqueles que não receberam resposta do órgão público (mesmo depois de uma reclamação pela omissão ter sido apresentada)<br>Os dados não indicam se a resposta foi satisfatória ou adequada.</p>
+          <p>Veja a taxa de atendimento dos pedidos de acesso à informação cadastrados no Achados e Pedidos. A classificação é feita com um modelo de inteligência artificial que analisa a estrutura dos textos do pedido e da resposta para determinar se a solicitação foi atendida de fato, ou seja, se a informação foi fornecida. O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. Saiba mais <a href="https://achadosepedidos.org.br/na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a></p>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
-            <h2>Pedidos<br> na base</h2>
-            <h3 class="qnt"><?=$sumario['totalPedidos']?></h3>
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-atendidos.jpeg" alt="<?=$sumario['totalPedidosClassificacao']['Atendido']['label']?>" height="150px"/>
+            <h2><?=$sumario['totalPedidosClassificacao']['Atendido']['label']?></h2>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Atendido']['count'], 0, ',', '.')?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=number_format(intval($sumario['totalPedidosClassificacao']['Atendido']['percent']), 1, ',', '.')?>%</h3>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-nao-atendidos.jpg" alt="Pedidos não respondidos"/>
-            <h2>Pedidos<br> não respondidos</h2>
-            <h3 class="qnt"><?=$sumario['totalPedidosNaoRespondidos']?></h3>
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-nao-atendidos.jpeg" alt="<?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?>"  height="150px"/>
+            <h2><?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?></h2>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Não Atendido']['count'], 0, ',', '.')?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=number_format(intval($sumario['totalPedidosClassificacao']['Não Atendido']['percent']), 1, ',', '.')?>%</h3>
           </div>
-
           <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
-            <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos respondidos"/>
-            <h2>Pedidos<br> respondidos</h2>
-            <h3 class="qnt"><?=$sumario['totalPedidosRespondidos']?></h3>
-          </div>
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-atendidos-parcialmente.png" alt="<?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?>"  height="150px"/>
+            <h2><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?></h2>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Parcialmente Atendido']['count'], 0, ',', '.')?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=number_format(intval($sumario['totalPedidosClassificacao']['Parcialmente Atendido']['percent']), 1, ',', '.')?>%</h3>
+          </div>          
       </div>
-      <h2 class="text-center">Taxa de resposta por ano</h2>
+      <h2 class="text-center">Classificação de atendimento por ano</h2>
       <div id="my_dataviz"></div>
-      <div id="chart-atendimento"></div>
-      <p>&nbsp;</p>
-      <h2 class="text-center">Pedidos respondidos - Brasil e UFs</h2>
-
+      <div id="taxa-resposta-ano"></div>
+      <p>&nbsp;</p>     
+      <h2 class="text-center">Atendimento a pedidos</h2>
+      <p>&nbsp;</p>     
       <div class="row">
-          <!--<div class="col-xs-4">
-              <div class="form-group">
-                  <label for="filter-tipo" class="form-inline-label">Classificação do pedido</label>
-                  <select id="filter-tipo" class="form-control" name="filter-tipo">
-                      <option value="Respondido">Respondido</option>
-                      <option value="Não respondido">Não Respondido</option>
-                  </select>
-              </div>
-          </div>-->
           <div class="col-xs-4">
               <div class="form-group">
                   <label for="filter-nivel">Nível federativo</label>
                   <select id="filter-nivel" class="form-control" name="filter-nivel">
-                      <option value="--">--</option>
-                      <option value="Federal">Federal</option>
+                      <option value="Federal" selected="selected">Federal</option>
                       <option value="Estadual">Estadual</option>
                       <option value="Municipal">Municipal</option>
                   </select>
@@ -63,12 +55,21 @@
               <div class="form-group">
                   <label for="filter-poder">Esfera de poder</label>
                   <select id="filter-poder" class="form-control" name="filter-poder">
-                      <option value="--">--</option>
-                      <option value="Executivo">Executivo</option>
+                      <option value="Executivo" selected="selected">Executivo</option>
                       <option value="Legislativo">Legislativo</option>
                       <option value="Judiciário">Judiciário</option>
                       <option value="Tribunais de Contas">Tribunais de Contas</option>
                       <option value="Ministério Público">Ministério Público</option>
+                  </select>
+              </div>
+          </div>
+          <div class="col-xs-4">
+              <div class="form-group">
+                  <label for="filter-status">Status de Atendimento do Pedido</label>
+                  <select id="filter-status" class="form-control" name="filter-status">
+                      <option value="Atendido" selected="selected">Atendido</option>
+                      <option value="Não Atendido">Não Atendido</option>
+                      <option value="Parcialmente Atendido">Parcialmente Atendido</option>
                   </select>
               </div>
           </div>
@@ -86,7 +87,6 @@
             </label>
           </div>
       </div>
-
       <div class="row">
           <div class="col-md-7">
               <div id="chart-pedidos-uf-mapa"></div>
@@ -96,9 +96,9 @@
                 <div class="chart-info" id="chart-info-all">
                    <!-- <span id="chart-info-nivel-w">No nível <span id="chart-info-nivel" class="chart-info-text"></span>,</span><span id="chart-info-poder-w"> no <br>
                     <span id="chart-info-poder" class="chart-info-text"></span>,</span> -->
-                    <span id="chart-info-qtd" class="chart-info-text"></span> pedidos<br>
+                    <span id="chart-info-qtd-status" class="chart-info-text"></span> pedidos<br>
                     foram <span id="chart-info-tipo" class="chart-info-text">respondidos</span>, <br>
-                    <span id="chart-info-perc" class="chart-info-text"></span>% do total de pedidos<br>correspondentes para este filtro.
+                    <span id="chart-info-perc" class="chart-info-text"></span> do total de pedidos cadastrados para esta <br>seleção (<span id="chart-info-qtd-total" class="chart-info-text"></span>).
                 </div>
               </div>
           </div>
@@ -124,13 +124,13 @@
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-base.jpg" alt="Pedidos na Base"/>
             <h2>Tempo médio da resposta ao pedido inicial</h2>
-            <h3 class="qnt"><?=number_format($sumario['tempoMedioPrimeiraResposta'], 1)?> dias</h3>
+            <h3 class="qnt"><?=number_format($sumario['tempoMedioPrimeiraResposta'], 1, ',', '.')?> dias</h3>
           </div>
 
           <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
             <img src="<?=BASE_URL?>assets/images/home/icon-pedidos-atendidos.jpg" alt="Pedidos Atendidos"/>
             <h2>Pedidos respondidos em até 20 dias</h2>
-            <h3 class="qnt"><?=$sumario['totalPedidosRespondidosEmAteVinteDias']?>%</h3>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosRespondidosEmAteVinteDias'], 2, ',', '.')?>%</h3>
           </div>
       </div>
       <h2 class="text-center">Quanto tempo leva para um pedido ser respondido?</h2>
@@ -179,7 +179,7 @@
         "https://d3js.org/d3-geo-projection.v2.min.js",
         "<?=BASE_URL?>assets/js/topojson/3.0.2/topojson.min.js",
         "<?=BASE_URL?>assets/js/lodash.js/4.17.4/lodash.min.js",
-        "<?=BASE_URL?>assets/js/dados.chart.js"];
+        "<?=BASE_URL?>assets/js/dados.chart.js?version=9"];
     function loadScriptInOrder() {
         if (order == scriptMap.length) return;
         var

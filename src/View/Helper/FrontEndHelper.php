@@ -165,13 +165,13 @@ class FrontEndHelper extends Helper
             switch($codigoStatusInterno)
             {
                 case 1:
-                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-atendido-verificado.png" class="img-responsive" alt="Atendido">';
+                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-atendido.png" class="img-responsive" alt="Atendido">';
                     $statusPedido["texto"]  = '<strong>Atendido</strong><br>'; break;
                 case 2:
-                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-nao-atendido-verificado.png" class="img-responsive" alt="Não Atendido">';
+                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-nao-atendido.png" class="img-responsive" alt="Não Atendido">';
                     $statusPedido["texto"] = '<strong>Não Atendido</strong><br>'; break;
                 case 3:
-                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-parcialmente-atendido-verificado.png" class="img-responsive" alt="Parcialmente Atendido">';
+                    $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-parcialmente-atendido.png" class="img-responsive" alt="Parcialmente Atendido">';
                     $statusPedido["texto"]  = '<strong>Parcialmente Atendido</strong><br>'; break;
                 case 4:
                     $statusPedido["imagem"] = '<img src="'.BASE_URL.'assets/images/pedidos/icon-naoclassificado.png" class="img-responsive" alt="Não Classificado">';

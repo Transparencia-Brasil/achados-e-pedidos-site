@@ -22,9 +22,24 @@ class DadosController extends AppController
         $this->set("sumario", $result);
     }
 
+    public function TaxaDeAtendimentoPorAno() {
+        $record = new Dados();
+        $result = $record->TaxaDeAtendimentoPorAno();
+        echo($result);
+        $this->autoRender = false;        
+    }
+
     public function AtendimentoPedidosPorAnoETipo() {
         $record = new Dados();
         $result = $record->AtendimentoPedidosPorAnoETipo();
+        echo($result);
+        $this->autoRender = false;
+
+    }
+
+    public function PedidosPorUFPoderENivelEStatus() {
+        $record = new Dados();
+        $result = $record->PedidosPorUFPoderENivelEStatus();
         echo($result);
         $this->autoRender = false;
 
@@ -37,6 +52,14 @@ class DadosController extends AppController
         $this->autoRender = false;
 
     }
+
+    public function PedidosAtendimentoPorAno_V2() {
+        $record = new Dados();
+        $result = $record->PedidosAtendimentoPorAno_V2();
+        echo($result);
+        $this->autoRender = false;
+    }
+
 
     public function PedidosAtendimentoPorAno() {
         $record = new Dados();

@@ -29,24 +29,21 @@ class Dados extends Entity{
     //     Total de pedidos com recurso
     //     Total de pedidos com recurso e que foram atendidos
     public function Sumario() {
-
-
         $connection = ConnectionManager::get('default');
         
-        //Total de pedidos na base de dados
-        $query = "SELECT count(*) as total FROM v_pedidos_ativos_groups";
+
+        $query = "select p.Ativo, count(p.Codigo) as QuantidadePedido, sp.Nome as StatusPedido from pedidos as p left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) group by sp.Nome having Ativo = 1";
         
         $totalPedido_array = $connection->execute($query)->fetchAll('assoc');
-        $totalPedidos = $totalPedido_array[0]["total"];
-
-        //Total de pedidos não-respondidos e respondidos
-        $query = "SELECT * FROM v_pedidos_count_sresposta ORDER BY StatusResposta ASC";
-        $totalPedidosRespostas_array = $connection->execute($query)->fetchAll('assoc');
-        $totalPedidosNaoRespondidos = $totalPedidosRespostas_array[0]["TotalPedidos"];
-        $totalPedidosRespondidos = $totalPedidosRespostas_array[1]["TotalPedidos"];
+        $totalCount = array_sum(array_column($totalPedido_array,'QuantidadePedido'));
+        $totalPedido_new_array = [];
+        foreach ($totalPedido_array as $pedido) {
+            $perc = round($pedido['QuantidadePedido']/$totalCount * 100,1) ;
+            $totalPedido_new_array[$pedido["StatusPedido"]] = ['label' => $pedido['StatusPedido'],'count' => $pedido['QuantidadePedido'],'percent' => $perc . '%'];
+            
+        }
         
         $pedidos = TableRegistry::get("Pedidos");
-
 
         //Tempo médios de primeira resposta (em dias)
         //  "SELECT AVG(DATEDIFF(DataResposta, DataEnvio)) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta;"
@@ -71,9 +68,7 @@ class Dados extends Entity{
         $totalPedidosComRecursosAtendidos = floatval($totalPedidosComRecursosAtendidos->totalPedidos);
 
         $results = [
-            'totalPedidos'=>$totalPedidos
-            ,'totalPedidosRespondidos'=>$totalPedidosRespondidos
-            ,'totalPedidosNaoRespondidos'=>$totalPedidosNaoRespondidos
+            'totalPedidosClassificacao'=>$totalPedido_new_array
             ,'tempoMedioPrimeiraResposta'=>$tempoMedioPrimeiraResposta
             ,'totalPedidosRespondidosEmAteVinteDias'=>$totalPedidosRespondidosEmAteVinteDias
             ,'totalPedidosComRecursos'=>$totalPedidosComRecursos
@@ -121,6 +116,13 @@ class Dados extends Entity{
     //         "qtd" : 20
     //     }, {...}
     // ]
+    
+    public function TaxaDeAtendimentoPorAno() {
+        $connection = ConnectionManager::get('default');
+        $query = "select p.Ativo,count(p.Codigo) as QuantidadePedido,year(p.DataEnvio) as AnoEnvio,sp.Nome as NomeStatusPedido from pedidos as p left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) group by sp.Nome, year(p.DataEnvio) having Ativo = 1";
+        $atendimentoPedidosPorAno_arr = $connection->execute($query)->fetchAll('assoc');
+        return json_encode($atendimentoPedidosPorAno_arr);        
+    }
 
     public function AtendimentoPedidosPorAnoETipo() {
 
@@ -139,6 +141,15 @@ class Dados extends Entity{
         
         $query = "SELECT Count(CodigoPedido) as Qtd, year(DataEnvio) As Ano, StatusResposta FROM v_pedidos_ativos_status_resposta Group By Ano, StatusResposta";
 
+
+        $pedidos = $connection->execute($query)->fetchAll('assoc');
+        return json_encode($pedidos);
+    }
+
+    public function PedidosAtendimentoPorAno_V2() {
+        $connection = ConnectionManager::get('default');
+        
+        $query = "CALL `sp_calc_taxa_atendimento_ano`()";
 
         $pedidos = $connection->execute($query)->fetchAll('assoc');
         return json_encode($pedidos);
@@ -205,7 +216,6 @@ class Dados extends Entity{
                     on (m.NomeNivelFederativo = v2.NomeNivelFederativo and m.NomePoder = v2.NomePoder and v2.SiglaUf = m.SiglaUf)
                     where m.SiglaUF is not null";
 
-
         // {StatusResposta: "Não respondido", SiglaUF: "AC", TotalPedidos: "2", TotalPedidosPoder: "103513"}
 
         // {"Não respondido":111, "Respondido":111, SiglaUF: "AC", TotalPedidos: "2"}
@@ -217,32 +227,37 @@ class Dados extends Entity{
         return json_encode($pedidos);
     }
 
-    // public function PedidosPorUFPoderENivel() {
-    //     $pedidos = TableRegistry::get("Pedidos");
-    //     $query = $pedidos->find();
-    //     $query->select(['uf' => 'Uf.Nome','sigla' => 'IF(Uf.Sigla IS NULL, "ÓrgãosFederais", Uf.Sigla)','nivel' => 'TipoNivelFederativo.Nome','poder' => 'TipoPoder.Nome','status' => 'StatusPedido.Nome','qtd' => $query->func()->count('Pedidos.Codigo')]);
-    //     $query->matching('agentes', function ($q) {
-    //         return $q->contain(['Uf'])->matching('TipoNivelFederativo')->matching('TipoPoder');
-    //     });
-    //     $query->matching('StatusPedido');
-    //     $query->hydrate(false)->where(['Pedidos.Ativo = 1'])->group(['Uf.Codigo','TipoNivelFederativo.Codigo','TipoPoder.Codigo','StatusPedido.Codigo']);
-    //     // print_r($query);
-    //     // die();
-    //     return json_encode($query);
-    // }
+    public function PedidosPorUFPoderENivelEStatus() {
+        $connection = ConnectionManager::get('default');
+        
+        $connection->execute("call sp_count_total()")->execute();
+
+        //Total de pedidos na base de dados
+        $query = "select p.Ativo,
+            sp.Nome as NomeStatusPedido,
+            count(p.Codigo) as QuantidadePedido,
+            pd.Nome as NomePoder,
+            nf.Nome as NomeNivelFederativo,
+            uf.Sigla as SiglaUF
+        from pedidos p
+            left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo)
+            left join agentes as a on (p.CodigoAgente = a.Codigo)
+            left join tipo_poder as pd on (a.CodigoPoder = pd.Codigo)
+            left join tipo_nivel_federativo as nf on (a.CodigoNivelFederativo = nf.Codigo)
+            left join uf as uf on (a.CodigoUF = uf.Codigo)
+            group by sp.Nome, pd.Nome, nf.Nome, uf.Sigla
+            having Ativo = 1 AND NomeStatusPedido <> 'Não Classificado'";
+
+        $pedidos = $connection->execute($query)->fetchAll('assoc');
+
+        return json_encode($pedidos);
+    }
 
     public function PedidosTempoMedioDeTramitacao() {
 
         $connection = ConnectionManager::get('default');
         $query = "SELECT * FROM v_pedidos_count_dias_resposta";
         return  json_encode($connection->execute($query)->fetchAll('assoc'));
-
-
-        // $pedidos = TableRegistry::get("Pedidos");
-        // $query = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta = 1 AND Pedidos.Ativo = 1']);
-        // $pedidosTempoMedioDeTramitacao = $query->select(['Codigo' => 'Pedidos.Codigo','Status' => 'StatusPedido.Nome','DataEnvio' => 'Pedidos.DataEnvio','DataResposta' => 'PedidosInteracoes.DataResposta'])->contain(['PedidosInteracoes'])->matching('StatusPedido')->all();
-
-        // return json_encode($pedidosTempoMedioDeTramitacao);
     }
 
 

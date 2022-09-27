@@ -98,7 +98,7 @@ function toFixed(num, fixed) {
         var anosDataq = data.map(el => el.AnoEnvio)
             .filter((value, index, self) => self.indexOf(value) === index);
 
-        var x = d3.scaleBand()
+        var x = d3.scalePoint()
             .domain(anosDataq)
             .range([0, width])
             .padding([0.2])
@@ -106,7 +106,9 @@ function toFixed(num, fixed) {
         svg.append("g")
             .attr("class", "xaxis")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x).tickSizeOuter(0))
+            .call(d3
+                .axisBottom(x)
+                .tickSizeOuter(0))
             .style("font-size", "15px");
 
         // Add Y axis
@@ -277,10 +279,10 @@ function toFixed(num, fixed) {
                     if (status == "Atendido") {
                         labelTooltip = "Atendidos";
                         colorTooltip = '#fbc064';
-                    }                    
+                    }
                     var item = cData[xAno + "-" + status];
-                    var totalStatusToolTip = parseInt(item[0].TotalStatus).toLocaleString('pt-BR', {minimumFractionDigits: 0})
-                    tooltipContent.append('p').html("<div style='width:10px;height:10px;background-color:"+ colorTooltip+";display:inline-flex;margin-right:5px;'></div>" + labelTooltip + ": " + totalStatusToolTip);
+                    var totalStatusToolTip = parseInt(item[0].TotalStatus).toLocaleString('pt-BR', { minimumFractionDigits: 0 })
+                    tooltipContent.append('p').html("<div style='width:10px;height:10px;background-color:" + colorTooltip + ";display:inline-flex;margin-right:5px;'></div>" + labelTooltip + ": " + totalStatusToolTip);
                 });
 
 
@@ -341,11 +343,12 @@ function toFixed(num, fixed) {
             .range(color_range);
 
         statusAtendido = $('#filter-status').val()
+        var nFormat = d3.format(".0%");
         var legend = d3.legendColor()
             .scale(colorScale)
-            .cells([1.0, 0.8, 0.6, 0.4, 0.2, 0.0])
-            .labelFormat(d3.format(".0%"))
-            .title("% " + statusAtendido);
+            .cells([0.8, 0.6, 0.4, 0.2, 0.0])
+            .labels([">60% até 80%", ">40% até 60%", ">20% até 40%", ">0% até 20%", "Sem Pedidos"])
+            .title("% Atendimento");
         svgB.append("g")
             .attr("transform", "translate(60,20)")
             .call(legend);

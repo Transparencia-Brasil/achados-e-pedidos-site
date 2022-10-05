@@ -614,8 +614,19 @@ function toFixed(num, fixed) {
             var percentBrasil = totalQtdeByBrasilAndStatus / totalQtdeByBrasil
             setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus, totalQtdeByBrasil);
             // Altera a Cor dos Estados de Acordo com a Porcentagem
-            //COMENTADO PAULO
-            if (nivelFederativo == "Federal") {
+            if (nivelFederativo == "Municipal" && (esferaPoder == "Ministério Público" || esferaPoder == "Judiciário")) {
+                gB.selectAll(".chart-uf")
+                    .data(ufs.features)
+                    .enter().append("path")
+                    .attr("class", "chart-uf")
+                    .attr("d", map)
+                    .attr("fill", "#edf0f5")
+                    .attr("stroke", "#e1e1e1")
+                // drawBarrasBrasil(percentBrasil, totalQtdeByBrasilAndStatus);
+                $("#chart-pedidos-uf-info").hide();                
+                $("#chart-pedidos-uf-warning").fadeIn();
+                $("#chart-warning-esfera-poder").html(esferaPoder)             
+            } else if (nivelFederativo == "Federal") {
                 gB.selectAll(".chart-uf")
                     .data(ufs.features)
                     .enter().append("path")
@@ -624,6 +635,7 @@ function toFixed(num, fixed) {
                     .attr("fill", "#edf0f5")
                     .attr("stroke", "#e1e1e1")
                 drawBarrasBrasil(percentBrasil, totalQtdeByBrasilAndStatus);
+                $("#chart-pedidos-uf-warning").hide();  
                 $("#chart-pedidos-uf-info").fadeIn();
             } else {
                 gB.selectAll(".chart-uf")
@@ -649,6 +661,7 @@ function toFixed(num, fixed) {
                     .style("stroke", "transparent")
                     //Legenda Geral do Filtro
                     .on("mouseover", function(d) {
+                        $("#chart-pedidos-uf-warning").hide(); 
                         $("#chart-pedidos-uf-info").fadeIn();
                         d3.selectAll(".chart-uf")
                             .transition()
@@ -683,6 +696,7 @@ function toFixed(num, fixed) {
                             percent, totalQtde, totalQtdeWithoutStatus);
                     })
                     .on("mouseout", function(d) {
+                        $("#chart-pedidos-uf-warning").hide(); 
                         $("#chart-pedidos-uf-info").hide();
                         d3.selectAll(".chart-uf")
                             .transition()
@@ -694,12 +708,13 @@ function toFixed(num, fixed) {
                             .duration(200)
                             .style("stroke", "transparent");
 
-                        setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
+                        // setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
                     });
 
                 drawBarras(data, totalQtdeByUF);
 
                 if (nivelFederativo == 'Federal') {
+                    $("#chart-pedidos-uf-warning").hide();  
                     $("#chart-pedidos-uf-info").fadeIn();
                 } else {
                     $("#chart-pedidos-uf-info").hide();

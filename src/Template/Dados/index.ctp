@@ -101,6 +101,9 @@
                     <span id="chart-info-perc" class="chart-info-text"></span> do total de pedidos cadastrados para esta <br>seleção (<span id="chart-info-qtd-total" class="chart-info-text"></span>).
                 </div>
               </div>
+              <div id="chart-pedidos-uf-warning" class="chart-info-wrapper" style="display: none;">
+                <div class="chart-info" id="chart-warning-error" style="font-size:15px;">Não existe <span id="chart-warning-esfera-poder"></span> Municipal</div>
+              </div>              
           </div>
           <div class="col-md-5">
               <div id="chart-pedidos-uf-barras"></div>

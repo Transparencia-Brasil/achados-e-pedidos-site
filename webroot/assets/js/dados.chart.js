@@ -282,7 +282,7 @@ function toFixed(num, fixed) {
                     }
                     var item = cData[xAno + "-" + status];
                     var totalStatusToolTip = parseInt(item[0].TotalStatus).toLocaleString('pt-BR', { minimumFractionDigits: 0 })
-                    tooltipContent.append('p').html("<div style='width:10px;height:10px;background-color:" + colorTooltip + ";display:inline-flex;margin-right:5px;'></div>" + labelTooltip + ": " + totalStatusToolTip);
+                    tooltipContent.append('p').html("<div style='width:10px;height:10px;background-color:" + colorTooltip + ";display:inline-flex;margin-right:5px;'></div>" + labelTooltip + ": " + totalStatusToolTip + " ("+item[0].PercStatus+"%)");
                 });
 
 

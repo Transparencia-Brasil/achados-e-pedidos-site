@@ -182,7 +182,7 @@
         "https://d3js.org/d3-geo-projection.v2.min.js",
         "<?=BASE_URL?>assets/js/topojson/3.0.2/topojson.min.js",
         "<?=BASE_URL?>assets/js/lodash.js/4.17.4/lodash.min.js",
-        "<?=BASE_URL?>assets/js/dados.chart.js?version=10"];
+        "<?=BASE_URL?>assets/js/dados.chart.js?version=11"];
     function loadScriptInOrder() {
         if (order == scriptMap.length) return;
         var

@@ -757,7 +757,7 @@ class Pedido extends Entity{
         Log::info("[TASK] Pesquisando ...");
         TaskEnvHelper::getInstance()->setProgress("Pesquisando", 1);
 		try{
-            $cntPedidos = $this->ES_TotalPedidosPendentesImportacao();
+            $cntPedidos = $this->ES_TotalPedidosPendentesImportacao($codigoPedido);
             if($cntPedidos > 0) {
                 Log::info("[TASK] Total para indexar: " . $cntPedidos);
                 $cntPedidosPerPage = 100;
@@ -811,11 +811,15 @@ class Pedido extends Entity{
         TaskEnvHelper::getInstance()->setProgress("Concluido", 100);
 	}
 
-
-	public function ES_TotalPedidosPendentesImportacao()
+	public function ES_TotalPedidosPendentesImportacao($codigoPedido = null)
 	{
 		$connection = ConnectionManager::get('default');
-		$query = 'SELECT COUNT(*) as TotalPendenteES FROM pedidos LEFT JOIN es_pedidos ON pedidos.Codigo = es_pedidos.CodigoPedido WHERE es_pedidos.CodigoPedido IS NULL AND pedidos.CodigoTipoOrigem = 3;';
+		if($codigoPedido != null)
+			$filtro = ' es_pedidos.CodigoPedido is null AND pedidos.Codigo = ' . $codigoPedido;
+		else
+			$filtro = ' es_pedidos.CodigoPedido is null ';
+
+		$query = 'SELECT COUNT(*) as TotalPendenteES FROM pedidos LEFT JOIN es_pedidos ON pedidos.Codigo = es_pedidos.CodigoPedido WHERE ' . $filtro . ' AND pedidos.CodigoTipoOrigem = 3;';
 
 		$results = $connection->execute($query)->fetchAll('assoc');
 

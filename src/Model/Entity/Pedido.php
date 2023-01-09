@@ -819,7 +819,7 @@ class Pedido extends Entity{
 		else
 			$filtro = ' es_pedidos.CodigoPedido is null ';
 
-		$query = 'SELECT COUNT(*) as TotalPendenteES FROM pedidos LEFT JOIN es_pedidos ON pedidos.Codigo = es_pedidos.CodigoPedido WHERE ' . $filtro . ' AND pedidos.CodigoTipoOrigem = 3;';
+		$query = 'SELECT COUNT(*) as TotalPendenteES FROM pedidos LEFT JOIN es_pedidos ON pedidos.Codigo = es_pedidos.CodigoPedido WHERE ' . $filtro . ' AND pedidos.CodigoTipoOrigem IN (1,2,3);';
 
 		$results = $connection->execute($query)->fetchAll('assoc');
 
@@ -832,7 +832,7 @@ class Pedido extends Entity{
 	public function ES_TotalPedidosInteracoesPendentesImportacao()
 	{
 		$connection = ConnectionManager::get('default');
-		$query = 'SELECT COUNT(*) as TotalPendenteES FROM pedidos_interacoes JOIN pedidos ON pedidos_interacoes.CodigoPedido = pedidos.Codigo LEFT JOIN es_pedidos_interacoes ON pedidos_interacoes.Codigo = es_pedidos_interacoes.CodigoPedidoInteracao WHERE es_pedidos_interacoes.CodigoPedidoInteracao IS NULL AND pedidos.CodigoTipoOrigem = 3;';
+		$query = 'SELECT COUNT(*) as TotalPendenteES FROM pedidos_interacoes JOIN pedidos ON pedidos_interacoes.CodigoPedido = pedidos.Codigo LEFT JOIN es_pedidos_interacoes ON pedidos_interacoes.Codigo = es_pedidos_interacoes.CodigoPedidoInteracao WHERE es_pedidos_interacoes.CodigoPedidoInteracao IS NULL AND pedidos.CodigoTipoOrigem IN (1,2,3);';
 
 		$results = $connection->execute($query)->fetchAll('assoc');
 
@@ -862,7 +862,7 @@ class Pedido extends Entity{
 	public function ES_TotalPedidosAnexosPendentesImportacaoPastas()
 	{
 		$connection = ConnectionManager::get('default');
-		$query = 'SELECT COUNT(*) as TotalPendenteES FROM pedidos_anexos JOIN pedidos_interacoes ON pedidos_anexos.CodigoPedidoInteracao = pedidos_interacoes.Codigo JOIN pedidos ON pedidos_interacoes.CodigoPedido = pedidos.Codigo LEFT JOIN es_pedidos_anexos ON pedidos_anexos.Codigo = es_pedidos_anexos.CodigoPedidoAnexo WHERE es_pedidos_anexos.CodigoPedidoAnexo IS NULL AND pedidos.CodigoTipoOrigem = 3 AND Arquivo LIKE "%/";';
+		$query = 'SELECT COUNT(*) as TotalPendenteES FROM pedidos_anexos JOIN pedidos_interacoes ON pedidos_anexos.CodigoPedidoInteracao = pedidos_interacoes.Codigo JOIN pedidos ON pedidos_interacoes.CodigoPedido = pedidos.Codigo LEFT JOIN es_pedidos_anexos ON pedidos_anexos.Codigo = es_pedidos_anexos.CodigoPedidoAnexo WHERE es_pedidos_anexos.CodigoPedidoAnexo IS NULL AND pedidos.CodigoTipoOrigem IN (1,2,3); AND Arquivo LIKE "%/";';
 
 		$results = $connection->execute($query)->fetchAll('assoc');
 

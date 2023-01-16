@@ -17156,12 +17156,16 @@ svg:not(:root) {
 .dados .box {
     border: 1px solid #c2c2c2;
     background-color: #fff;
-    margin-bottom: 5%;
+    margin-bottom: 2%;
     margin-left: 2%;
-    max-width: 31%;
+    margin-top: 0 !important;
+    max-width:40%;
     border-radius: 3px;
     padding: 0;
 }
+.dados .box.m-left {
+    margin-left:10%;
+}    
 .dados .box img {
     float: left;
     padding: 5%;
@@ -17924,6 +17928,11 @@ footer .copyright p {
     .dados .box {
         max-width: 96%;
     }
+
+    .dados .box.m-left {
+        margin-left:2%!important;
+    }    
+
     .dados .box img {
         float: left;
         padding: 3%;

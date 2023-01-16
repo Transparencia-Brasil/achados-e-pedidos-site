@@ -32,7 +32,7 @@ function InitTooltipsAjuda() {
                 var tooltipId = $(this).data("tooltip");
                 return $("#" + tooltipId).html();
             },
-            placement: 'right',
+            placement: 'top',
             boundary: 'window',
             container: 'body',
             trigger: "manual"

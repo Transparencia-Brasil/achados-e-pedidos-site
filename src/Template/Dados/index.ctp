@@ -11,28 +11,34 @@
 
 <section class="dados">
   <div class="container">
-      <div class="row">
+      <div class="row" style="margin-bottom:6%;">
           <h1>DADOS</h1>
           <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="--">
           <p>Veja a taxa de atendimento dos pedidos de acesso à informação cadastrados no Achados e Pedidos. A classificação é feita com um modelo de inteligência artificial que analisa a estrutura dos textos do pedido e da resposta para determinar se a solicitação foi atendida de fato, ou seja, se a informação foi fornecida. O código, desenvolvido especialmente para o Achados e Pedidos, classifica corretamente os pedidos em 85% dos casos. Saiba mais <a href="https://achadosepedidos.org.br/na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos">aqui</a></p>
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;">
+          <div class="col-md-6 col-sm-6 col-xs-12 box wow slideInLeft animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInLeft;margin-left:10%;">
             <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-atendidos.jpeg" alt="<?=$sumario['totalPedidosClassificacao']['Atendido']['label']?>" height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Atendido']['label']?></h2>
             <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Atendido']['count'], 0, ',', '.')?></h3>
             <h3 class="qnt" style="font-size:18px;"><?=number_format(intval($sumario['totalPedidosClassificacao']['Atendido']['percent']), 1, ',', '.')?>%</h3>
           </div>
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
+          <div class="col-md-6 col-sm-6 col-xs-12 box wow slideInRight animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: slideInRight;">
             <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-nao-atendidos.jpeg" alt="<?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?>"  height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Não Atendido']['label']?></h2>
             <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Não Atendido']['count'], 0, ',', '.')?></h3>
             <h3 class="qnt" style="font-size:18px;"><?=number_format(intval($sumario['totalPedidosClassificacao']['Não Atendido']['percent']), 1, ',', '.')?>%</h3>
           </div>
-          <div class="col-md-4 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
+          <div class="col-md-6 col-sm-6 col-xs-12 box wow fadeInDown animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;margin-left:10%;">
             <img src="<?=BASE_URL?>assets/images/pedidos/icon-atendidos-parcialmente.png" alt="<?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?>"  height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Parcialmente Atendido']['label']?></h2>
             <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Parcialmente Atendido']['count'], 0, ',', '.')?></h3>
             <h3 class="qnt" style="font-size:18px;"><?=number_format(intval($sumario['totalPedidosClassificacao']['Parcialmente Atendido']['percent']), 1, ',', '.')?>%</h3>
-          </div>          
+          </div>
+          <div class="col-md-6 col-sm-6 col-xs-12 box" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
+            <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-nao-classificados.png" alt="<?=$sumario['totalPedidosClassificacao']['Não Classificado']['label']?>"  height="150px"/>
+            <h2><?=$sumario['totalPedidosClassificacao']['Não Classificado']['label']?></h2>
+            <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Não Classificado']['count'], 0, ',', '.')?></h3>
+            <h3 class="qnt" style="font-size:18px;"><?=number_format(intval($sumario['totalPedidosClassificacao']['Não Classificado']['percent']), 1, ',', '.')?>%</h3>
+          </div>                    
       </div>
       <h2 class="text-center">Classificação de atendimento por ano</h2>
       <div id="my_dataviz"></div>

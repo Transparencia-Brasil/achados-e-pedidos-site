@@ -744,16 +744,11 @@ function toFixed(num, fixed) {
                             .style("stroke", "transparent");
 
                         // setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
-                    });
-
+                    }
+                );
+                
+                $("#chart-pedidos-uf-warning").hide();
                 drawBarras(data, totalQtdeByUF);
-
-                if (nivelFederativo == 'Federal') {
-                    $("#chart-pedidos-uf-warning").hide();  
-                    $("#chart-pedidos-uf-info").fadeIn();
-                } else {
-                    $("#chart-pedidos-uf-info").hide();
-                }
             }
         }
 

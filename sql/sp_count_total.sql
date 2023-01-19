@@ -1,4 +1,17 @@
-CREATE PROCEDURE `sp_count_total`()
+--
+-- Dumping routines for database 'achadosepedidos_staging'
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_count_total` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`achadosepedidos_staging`@`%` PROCEDURE `sp_count_total`()
 BEGIN
 
 declare SiglaUf varchar(2);
@@ -254,4 +267,9 @@ insert into maps (SiglaUf, NomeNivelFederativo, NomePoder) values ('SE', 'Munici
 insert into maps (SiglaUf, NomeNivelFederativo, NomePoder) values ('SP', 'Municipal', 'Tribunais de Contas');
 insert into maps (SiglaUf, NomeNivelFederativo, NomePoder) values ('TO', 'Municipal', 'Tribunais de Contas');
 
-END
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;

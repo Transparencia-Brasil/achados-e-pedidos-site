@@ -42,7 +42,7 @@
           </div>                    
       </div>
       <h2 class="text-center">Classificação de atendimento por ano</h2>
-      <div id="my_dataviz"></div>
+      <div id="my_dataviz"><p class="text-center" style="padding:0px;margin:0px;margin-bottom:0px;font-size:20px;">Todos os pedidos</p></div>
       <div id="taxa-resposta-ano"></div>
       <p>&nbsp;</p>     
       <h2 class="text-center">Atendimento a pedidos</h2>

@@ -85,7 +85,7 @@ function toFixed(num, fixed) {
         .attr("width", 24)
         .attr("height", 24)
         .attr('stroke', 'black')
-        .attr('fill', '#505050');
+        .attr('fill', '#cccccc');
 
     svg.select(".legendLinear")
         .append('text')
@@ -188,7 +188,7 @@ function toFixed(num, fixed) {
         svg.append("path")
             .datum(dataNaoClassificado)
             .attr("fill", "none")
-            .attr("stroke", "#505050")
+            .attr("stroke", "#cccccc")
             .attr("stroke-width", lineStroke)
             .attr("d", d3.line()
                 .x(function(d) { return x(d.AnoEnvio) })
@@ -220,7 +220,7 @@ function toFixed(num, fixed) {
 
         var color = d3.scaleOrdinal()
             .domain(statusNomes)
-            .range(["#fbc064", "#e45d88", "#87570b", "#505050"]);
+            .range(["#fbc064", "#e45d88", "#87570b", "#cccccc"]);
 
         mouseG = svg.append("g")
             .attr("class", "mouse-over-effects");
@@ -312,7 +312,7 @@ function toFixed(num, fixed) {
                     }
                     if (status == "Não Classificado") {
                         labelTooltip = "Não Classificado";
-                        colorTooltip = '#505050';
+                        colorTooltip = '#cccccc';
                     }                    
                     var item = cData[xAno + "-" + status];
                     var totalStatusToolTip = parseInt(item[0].TotalStatus).toLocaleString('pt-BR', { minimumFractionDigits: 0 })

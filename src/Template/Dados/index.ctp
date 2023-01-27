@@ -36,7 +36,7 @@
           <div class="col-md-6 col-sm-6 col-xs-12 box" data-wow-delay="300ms" data-wow-duration="2s" style="visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: fadeInDown;">
             <img src="<?=BASE_URL?>assets/images/pedidos/icon-pedidos-nao-classificados.png" alt="<?=$sumario['totalPedidosClassificacao']['Não Classificado']['label']?>"  height="150px"/>
             <h2><?=$sumario['totalPedidosClassificacao']['Não Classificado']['label']?></h2>
-            <img src="<?=BASE_URL?>assets/images/pedidos/informacao.png" alt="" data-tooltip="tooltip-bignumber" class="img-responsive tooltip-ajuda-action" style="cursor:pointer;padding:22px 0 0 0;" data-original-title="" title="">
+            <img src="<?=BASE_URL?>assets/images/pedidos/informacao.png" alt="" data-tooltip="tooltip-bignumber" class="img-responsive tooltip-ajuda-mouseover-action" style="cursor:pointer;padding:22px 0 0 0;" data-original-title="" title="">
             <h3 class="qnt"><?=number_format($sumario['totalPedidosClassificacao']['Não Classificado']['count'], 0, ',', '.')?></h3>
             <h3 class="qnt" style="font-size:18px;"><?=number_format(floatval($sumario['totalPedidosClassificacao']['Não Classificado']['percent']), 1, ',', '.')?>%</h3>
           </div>                    

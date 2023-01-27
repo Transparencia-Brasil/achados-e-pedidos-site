@@ -46,7 +46,8 @@
       <div id="taxa-resposta-ano"></div>
       <p>&nbsp;</p>     
       <h2 class="text-center">Atendimento a pedidos</h2>
-      <p>&nbsp;</p>     
+      <div><p class="text-center" style="padding:0px;margin:0px;margin-bottom:0px;font-size:20px;">São considerados os pedidos classificados pelo <a href="https://achadosepedidos.org.br/na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos" target="_blank">modelo de Inteligência Artificial</a>.</p></div>     
+      <p>&nbsp;</p>
       <div class="row">
           <div class="col-xs-4">
               <div class="form-group">

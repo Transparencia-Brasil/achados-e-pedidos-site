@@ -42,11 +42,11 @@
           </div>                    
       </div>
       <h2 class="text-center">Classificação de atendimento por ano</h2>
-      <div id="my_dataviz"><p class="text-center" style="padding:0px;margin:0px;margin-bottom:0px;font-size:20px;">Todos os pedidos</p></div>
+      <div id="my_dataviz"><p class="text-center" style="padding:0px;margin:0px;margin-bottom:0px;font-size:13px;">Todos os pedidos</p></div>
       <div id="taxa-resposta-ano"></div>
       <p>&nbsp;</p>     
       <h2 class="text-center">Atendimento a pedidos</h2>
-      <div><p class="text-center" style="padding:0px;margin:0px;margin-bottom:0px;font-size:20px;">São considerados os pedidos classificados pelo <a href="https://achadosepedidos.org.br/na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos" target="_blank">modelo de Inteligência Artificial</a>.</p></div>     
+      <div><p class="text-center" style="padding:0px;margin:0px;margin-bottom:0px;">São considerados os pedidos classificados pelo <a href="https://achadosepedidos.org.br/na-midia/achados-e-pedidos-usa-inteligencia-artificial-para-classificar-atendimento-a-pedidos" target="_blank">modelo de Inteligência Artificial</a>.</p></div>     
       <p>&nbsp;</p>
       <div class="row">
           <div class="col-xs-4">

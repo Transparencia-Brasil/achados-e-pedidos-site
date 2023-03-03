@@ -14,7 +14,7 @@ function toFixed(num, fixed) {
 
     var tooltip = undefined;
 
-    var statusNomes = ["Atendido", "Não Atendido", "Parcialmente Atendido"];
+    var statusNomes = ["Atendido", "Não Atendido", "Parcialmente Atendido", "Não Classificado"];
 
     var svg = d3.select("#taxa-resposta-ano")
         .append("svg")
@@ -77,6 +77,23 @@ function toFixed(num, fixed) {
         .attr("x", 30)
         .attr('stroke', 'black')
         .text('Parcialmente Atendidos');
+
+        svg.select(".legendLinear")
+        .append('rect')
+        .attr("x", 0)
+        .attr("y", 124)
+        .attr("width", 24)
+        .attr("height", 24)
+        .attr('stroke', 'black')
+        .attr('fill', '#cccccc');
+
+    svg.select(".legendLinear")
+        .append('text')
+        .attr("y", 144)
+        .attr("x", 30)
+        .attr('stroke', 'black')
+        .text('Não Classificados');
+
 
 
     function tooltipShow(data, x, y) {
@@ -165,6 +182,19 @@ function toFixed(num, fixed) {
                 .y(function(d) { return y(d.PercStatus) })
             )
 
+        // Add the "Parcial Atendido" line
+        var dataNaoClassificado = data.filter((value, index, self) => value.StatusNome == 'Não Classificado');
+
+        svg.append("path")
+            .datum(dataNaoClassificado)
+            .attr("fill", "none")
+            .attr("stroke", "#cccccc")
+            .attr("stroke-width", lineStroke)
+            .attr("d", d3.line()
+                .x(function(d) { return x(d.AnoEnvio) })
+                .y(function(d) { return y(d.PercStatus) })
+            )            
+
         drawTooltip(data, anosDataq, x, y);
     }
 
@@ -190,7 +220,7 @@ function toFixed(num, fixed) {
 
         var color = d3.scaleOrdinal()
             .domain(statusNomes)
-            .range(["#fbc064", "#e45d88", "#87570b"]);
+            .range(["#fbc064", "#e45d88", "#87570b", "#cccccc"]);
 
         mouseG = svg.append("g")
             .attr("class", "mouse-over-effects");
@@ -280,6 +310,10 @@ function toFixed(num, fixed) {
                         labelTooltip = "Atendidos";
                         colorTooltip = '#fbc064';
                     }
+                    if (status == "Não Classificado") {
+                        labelTooltip = "Não Classificado";
+                        colorTooltip = '#cccccc';
+                    }                    
                     var item = cData[xAno + "-" + status];
                     var totalStatusToolTip = parseInt(item[0].TotalStatus).toLocaleString('pt-BR', { minimumFractionDigits: 0 })
                     tooltipContent.append('p').html("<div style='width:10px;height:10px;background-color:" + colorTooltip + ";display:inline-flex;margin-right:5px;'></div>" + labelTooltip + ": " + totalStatusToolTip + " ("+item[0].PercStatus+"%)");
@@ -307,6 +341,7 @@ function toFixed(num, fixed) {
     namesPlural["Atendido"] = "atendidos"
     namesPlural["Não Atendido"] = "não atendidos"
     namesPlural["Parcialmente Atendido"] = "parcialmente atendidos"
+    namesPlural["Não Classificado"] = "não classificados"
 
     var statusAtendido = $('#filter-status').val(); //default filter selected
 
@@ -709,16 +744,11 @@ function toFixed(num, fixed) {
                             .style("stroke", "transparent");
 
                         // setMapInfo("Brasil", percentBrasil, totalQtdeByBrasilAndStatus);
-                    });
-
+                    }
+                );
+                
+                $("#chart-pedidos-uf-warning").hide();
                 drawBarras(data, totalQtdeByUF);
-
-                if (nivelFederativo == 'Federal') {
-                    $("#chart-pedidos-uf-warning").hide();  
-                    $("#chart-pedidos-uf-info").fadeIn();
-                } else {
-                    $("#chart-pedidos-uf-info").hide();
-                }
             }
         }
 

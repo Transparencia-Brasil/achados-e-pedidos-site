@@ -8,6 +8,19 @@ $(document).ready(function() {
         tooltip.tooltip('toggle');
     })
 
+    var tooltip = '';
+    $(document).on("mouseover", ".tooltip-ajuda-mouseover-action", function() {
+        $(".tooltip-ajuda-mouseover-action").tooltip('hide');
+        tooltip = $(this);
+        tooltip.tooltip('toggle');
+    })   
+    
+    var tooltip = '';
+    $(document).on("mouseout", ".tooltip-ajuda-mouseover-action", function() {
+        tooltip.tooltip('hide');
+        $(this).data("tooltipstate", false);
+    })      
+
     $(document).on("click", ".close-tooltip", function() {
         tooltip.tooltip('hide');
         $(this).data("tooltipstate", false);
@@ -25,6 +38,20 @@ $(document).ready(function() {
 
 function InitTooltipsAjuda() {
     // Tooltips
+    $('.tooltip-ajuda-mouseover-action').each(function() {
+        $(this).tooltip({
+            html: true,
+            title: function() {
+                var tooltipId = $(this).data("tooltip");
+                return $("#" + tooltipId).html();
+            },
+            placement: 'top',
+            boundary: 'window',
+            container: 'body',
+            trigger: "manual"
+        });
+    });    
+    // Tooltips
     $('.tooltip-ajuda-action').each(function() {
         $(this).tooltip({
             html: true,
@@ -32,7 +59,7 @@ function InitTooltipsAjuda() {
                 var tooltipId = $(this).data("tooltip");
                 return $("#" + tooltipId).html();
             },
-            placement: 'right',
+            placement: 'top',
             boundary: 'window',
             container: 'body',
             trigger: "manual"

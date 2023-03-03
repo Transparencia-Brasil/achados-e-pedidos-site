@@ -323,68 +323,58 @@ class PedidoAnexo extends Entity{
 		$connection = ConnectionManager::get('default');
 
 		if($codigoPedido != null)
-			$filtro = ' and a.Codigo = ' . $codigoPedido;
+			$filtro = ' and paesview.pedidos_codigo = ' . $codigoPedido;
 		else
-			$filtro = ' and b.Codigo is null ';
+			$filtro = ' and paesview.es_pedidos_anexos_codigo is null ';
 	    //tpr.Codigo tipo_pedidos_resposta_codigo_local = tpr.Codigo tipo_pedido_origem_codigo,
 	    //tpr.Nome tipo_pedidos_resposta_nome_local = tpr.Nome tipo_pedido_origem_nome,
 	    //a.CodigoStatusPedidoInterno status_pedido_interno_codigo,
 		$query = '
-				Select
-					pa.Codigo anexos_codigo,
-				    pa.Arquivo anexos_arquivo,
-				    "" anexos_conteudo_arquivo,
-					pi.Codigo interacoes_codigo,
-					pi.Descricao interacoes_descricao,
-					DATE_FORMAT(pi.DataResposta,"%Y-%m-%d") interacoes_data_resposta,
-					a.Codigo pedidos_codigo,
-					a.CodigoUsuario usuarios_codigo,
-					c.Nome usuarios_nome,
-					c.Nome usuarios_slug,
-					c.Email usuarios_email,
-				    d.Codigo agentes_codigo,
-				    d.Nome agentes_nome,
-				    d.Nome agentes_slug,
-				    h.Codigo tipo_pedido_origem_codigo,
-				    h.Nome tipo_pedido_origem_nome,
-					a.CodigoTipoPedidoSituacao tipo_pedido_situacao_codigo,
-				    g.Nome tipo_pedido_situacao_nome,
-					a.CodigoStatusPedido status_pedido_codigo,
-				    e.Nome status_pedido_nome,
-				    f.Codigo status_pedido_interno_codigo,
-				    f.Nome status_pedido_interno_nome,
-				    tpr.Codigo tipo_pedidos_resposta_codigo,
-				    tpr.Nome tipo_pedido_origem_nome,
-					tp.Codigo tipo_poder_codigo,
-				    tp.Nome tipo_poder_nome,
-				    tnf.Codigo tipo_nivel_federativo_codigo,
-				    tnf.Nome tipo_nivel_federativo_nome,
-				    a.Protocolo pedidos_protocolo,
-				    a.Titulo pedidos_titulo,
-				    a.Slug pedidos_slug,
-				    a.Descricao pedidos_descricao,
-				    "" pedidos_enviado_para,
-				   	DATE_FORMAT(a.DataEnvio,"%Y-%m-%d") pedidos_data_envio,
-				    a.FoiProrrogado pedidos_foi_prorrogado,
-				    a.Anonimo pedidos_anonimo,
-				    case when b.Codigo is null Then 0 Else 1 end JaEnviado
-				from
-					pedidos a join
-				    pedidos_interacoes pi on a.Codigo = pi.CodigoPedido join
-				    pedidos_anexos pa on pa.CodigoPedidoInteracao = pi.Codigo left join
-					es_pedidos_anexos b on pa.Codigo = b.CodigoPedidoAnexo join
-				    usuarios c on a.CodigoUsuario = c.Codigo join
-				    agentes d on d.Codigo = a.CodigoAgente join
-				    status_pedido e on a.CodigoStatusPedido = e.Codigo join
-				    status_pedido f on a.CodigoStatusPedidoInterno = f.Codigo join
-				    tipo_pedido_situacao g on g.Codigo = a.CodigoTipoPedidoSituacao join
-				    tipo_pedido_origem h on a.CodigoTipoOrigem = h.Codigo join
-				    tipo_poder tp on tp.Codigo = d.CodigoPoder join
-				    tipo_nivel_federativo tnf on tnf.Codigo = d.CodigoNivelFederativo join
-				    tipo_pedido_resposta tpr on tpr.Codigo = pi.CodigoTipoPedidoResposta join
-				    moderacoes modera on modera.CodigoObjeto = a.Codigo and modera.CodigoTipoObjeto = 1 and modera.CodigoStatusModeracao = 2
-				where
-					a.Ativo = 1 ' . $filtro;
+		SELECT 
+			paesview.*,
+			"" anexos_conteudo_arquivo, 
+			pi.Descricao interacoes_descricao, 
+			DATE_FORMAT(pi.DataResposta,"%Y-%m-%d") interacoes_data_resposta,
+			c.Nome usuarios_nome,
+			c.Nome usuarios_slug,
+			c.Email usuarios_email,
+			d.Codigo agentes_codigo,
+			d.Nome agentes_nome,
+			d.Nome agentes_slug,
+			h.Codigo tipo_pedido_origem_codigo,
+			h.Nome tipo_pedido_origem_nome,
+			g.Nome tipo_pedido_situacao_nome,
+			e.Nome status_pedido_nome,
+			f.Codigo status_pedido_interno_codigo,
+			f.Nome status_pedido_interno_nome,
+			tpr.Codigo tipo_pedidos_resposta_codigo,
+			tpr.Nome tipo_pedido_origem_nome,
+			tp.Codigo tipo_poder_codigo,
+			tp.Nome tipo_poder_nome,
+			tnf.Codigo tipo_nivel_federativo_codigo,
+			tnf.Nome tipo_nivel_federativo_nome,
+			p.Protocolo pedidos_protocolo,
+			p.Titulo pedidos_titulo,
+			p.Slug pedidos_slug,
+			p.Descricao pedidos_descricao,
+			"" pedidos_enviado_para,
+			DATE_FORMAT(p.DataEnvio,"%Y-%m-%d") pedidos_data_envio,
+			p.FoiProrrogado pedidos_foi_prorrogado,
+			p.Anonimo pedidos_anonimo
+		FROM 
+			pedidosAnexosElasticSearchView as paesview
+			LEFT JOIN pedidos as p ON p.Codigo =  paesview.pedidos_codigo
+			LEFT JOIN pedidos_interacoes as pi ON pi.CodigoPedido = p.Codigo
+			LEFT JOIN usuarios c on p.CodigoUsuario = c.Codigo 
+			LEFT JOIN agentes d on d.Codigo = p.CodigoAgente 
+			LEFT JOIN status_pedido e on p.CodigoStatusPedido = e.Codigo 
+			LEFT JOIN status_pedido f on p.CodigoStatusPedidoInterno = f.Codigo 
+			LEFT JOIN tipo_pedido_situacao g on g.Codigo = p.CodigoTipoPedidoSituacao 
+			LEFT JOIN tipo_pedido_origem h on p.CodigoTipoOrigem = h.Codigo 
+			LEFT JOIN tipo_poder tp on tp.Codigo = d.CodigoPoder 
+			LEFT JOIN tipo_nivel_federativo tnf on tnf.Codigo = d.CodigoNivelFederativo 
+			LEFT JOIN tipo_pedido_resposta tpr on tpr.Codigo = pi.CodigoTipoPedidoResposta
+		WHERE 1 = 1 ' . $filtro;
 
 		$results = $connection->execute($query)->fetchAll('assoc');
 		try{

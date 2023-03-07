@@ -60,19 +60,34 @@ class PedidoAnexo extends Entity{
 		return $arrayErros;
 	}
 
-	public function SalvarMultiplos($arquivos, $codigoPedidoInteracao)
+	public function SalvarMultiplos($arquivos, $codigoPedidoInteracao, $codigoPedido = null, &$erros = "")
 	{
+		$temErro = false;
+
 		try{
             foreach ($arquivos as $arquivo) {
-                $pedidoAnexo = new PedidoAnexo();
-                $pedidoAnexo->CodigoPedidoInteracao = $codigoPedidoInteracao;
-				$status = $pedidoAnexo->Salvar($arquivo);
+				try {
+                	$pedidoAnexo = new PedidoAnexo();
+                	$pedidoAnexo->CodigoPedidoInteracao = $codigoPedidoInteracao;
+					$status = $pedidoAnexo->Salvar($arquivo);
+				}
+				catch(Exception $ex) {
+					$erros += "Falha ao tentar salvar o anexo: " . $arquivo['name'] . " \r\n";
+					$temErro = true;
+				}
 			}
-			$pedidoAnexo->ES_AtualizarInserirAnexosPorPedido(null);
+			$pedidoAnexo->ES_AtualizarInserirAnexosPorPedido($codigoPedido);
         }
         catch(Exception $ex){
-            // logar erro no banco
+            $temErro = true;
+			$erros += "Falha ao Salvar os Anexos \r\n";
         }
+
+		if($temErro) {
+			Log::error("[SalvarArquivos] Interacao = " . $codigoPedidoInteracao . " : " . $erros);
+		}
+
+		return $temErro;
 	}
 
 	public function Salvar($arquivoStream){

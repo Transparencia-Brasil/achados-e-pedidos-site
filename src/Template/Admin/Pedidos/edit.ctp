@@ -16,9 +16,15 @@
           </div>
         </div>
         <div class="control-group">
-          <label class="control-label" for="CodigoTipoPedidoOrigem">Origem *</label>
+          <label class="control-label" for="CodigoTipoOrigem">Origem *</label>
           <div class="controls">
-          <?=$this->Form->select('Pedidos.CodigoTipoPedidoOrigem', $tipo_origem, ['class' => 'span3']);?>
+          <?=$this->Form->select('Pedidos.CodigoTipoOrigem', $tipo_origem, ['class' => 'span3']);?>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="CodigoUsuario">Usuario *</label>
+          <div class="controls">
+          <?=$this->Form->select('Pedidos.CodigoUsuario', $nome_usuario, ['class' => 'span3']);?>
           </div>
         </div>
         <div class="control-group">

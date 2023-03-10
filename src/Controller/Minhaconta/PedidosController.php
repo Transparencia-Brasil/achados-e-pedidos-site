@@ -191,10 +191,16 @@ class PedidosController extends AppController
                     $pedidoInteracaoEdicaoBU->ES_AtualizarInserirInteracoes($pedidoInteracao->Codigo);
 
                     if($possuiArquivo){
-                        $pedidoAnexo->SalvarMultiplos($arquivos, $pedidoInteracao->Codigo);
-                    }
+                        $erros = "";
+                        $sucesso = $pedidoAnexo->SalvarMultiplos($arquivos, $pedidoInteracao->Codigo, $codigoPedido, $erros);
 
-                    $sucesso = true;
+                        if(!$sucesso) {
+                            array_push($errosArquivo, $erros);
+                        }
+                    }
+                    else {
+                        $sucesso = true;
+                    }
                 }else{
                     $sucesso = false;
                 }
@@ -363,10 +369,16 @@ class PedidosController extends AppController
                         $pedidoInteracaoEdicaoBU->ES_AtualizarInserirInteracoes($pedidoInteracaoAtualizacao->Codigo);
 
                         if($possuiArquivo){
-                            $pedidoAnexo->SalvarMultiplos($arquivos, $pedidoInteracaoAtualizacao->Codigo);
-                        }
+                            $erros = "";
+                            $sucessoAtualizadoInteracao = $pedidoAnexo->SalvarMultiplos($arquivos, $pedidoInteracaoAtualizacao->Codigo, $pedidoValido->Codigo, $erros);
 
-                        $sucessoAtualizadoInteracao = true;
+                            if(!$sucessoAtualizadoInteracao) {
+                                array_push($errosArquivo, $erros);
+                            }    
+                        }
+                        else {                    
+                            $sucessoAtualizadoInteracao = true;
+                        }
                     }else{
                         $sucessoAtualizadoInteracao = false;
                     }

@@ -53,7 +53,8 @@ class PedidosController extends AppController{
 
 
 		$agentes = TableRegistry::get('Agentes')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
-		$tipo_origem = TableRegistry::get('TipoPedidoOrigem')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
+		$tipo_origem = TableRegistry::get('TipoPedidoOrigem')->find('list', ['conditions' => ['Codigo' => 2, 'Nome' => 'admin'],
+        'keyField' => 'Codigo', 'valueField' => 'Nome']);
 		$tipo_situacao = TableRegistry::get('TipoPedidoSituacao')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
 		$status_pedido = TableRegistry::get('StatusPedido')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
         $tipo_resposta = TableRegistry::get('TipoPedidoResposta')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);

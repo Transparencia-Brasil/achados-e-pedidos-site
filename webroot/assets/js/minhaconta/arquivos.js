@@ -33,8 +33,8 @@ $(document).ready(function(){
 
 		total = $("#arquivos").children('input[type="file"]').length;
 
-		if(total >19){
-			$("#arquivos").append("<span class='error'>Só é permitido 20 arquivos por interação</span>");
+		if(total >1){
+			$("#arquivos").append("<span class='error'>Só é permitido 2 arquivos por interação</span>");
 			return;
 		}
 		
@@ -64,8 +64,8 @@ function validarTamanhoArquivo(file){
 
 	var tamanhoEmMegaBytes = file.size/1048576;
 
-	if(tamanhoEmMegaBytes > 10){
-			$("#arquivos").append("<span class='error'>O Arquivo ultrapassa os 10MB permitidos por arquivo.</span>");
+	if(tamanhoEmMegaBytes > 100){
+			$("#arquivos").append("<span class='error'>O Arquivo ultrapassa os 100MB permitidos por arquivo.</span>");
 	}
 
 }

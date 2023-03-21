@@ -55,10 +55,10 @@ class PedidoAnexo extends Entity{
 
 				switch ($arquivoStream['error']) {
 					case UPLOAD_ERR_INI_SIZE:
-						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio.";
+						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio de 200MB.";
 						break;
 					case UPLOAD_ERR_FORM_SIZE:
-						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio.";
+						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio de 200MB. ";
 						break;
 						
 					default:

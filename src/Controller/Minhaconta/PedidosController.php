@@ -384,7 +384,7 @@ class PedidosController extends AppController
                 }
             } else {
                 $sucessoAtualizadoInteracao = false;
-                $errosPedido = ["Falha ao receber os arquivos"];
+                $errosArquivo["Erro"] = "Falha ao receber os arquivos. Tente substituir o arquivo.";
             }
         }
         // verifica se usuário quer atualizar um pedido ou interação

@@ -54,13 +54,13 @@ class PedidoAnexo extends Entity{
 				Log::error("[Validar.Arquivo] " . $$arquivoStream['name'] . " : " . $arquivoStream['error']);
 
 				switch ($arquivoStream['error']) {
-					case 1:
+					case UPLOAD_ERR_INI_SIZE:
 						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio.";
 						break;
-					case 2:
+					case UPLOAD_ERR_FORM_SIZE:
 						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio.";
 						break;
-
+						
 					default:
 						$arrayErros['Arquivo'] = "Um erro foi encontrado ao realizar o upload do arquivo!";
 						break;

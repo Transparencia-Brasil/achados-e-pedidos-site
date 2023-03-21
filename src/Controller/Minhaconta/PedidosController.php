@@ -267,10 +267,10 @@ class PedidosController extends AppController
         $errosArquivo = [];
         $t = $this->UNumero->ValidarNumeroEmArray($this->request->query, "t");
 
-        if (array_key_exists("processed", $_GET) && $_GET['processed'] == '1') {
+        // verifica se usuário está atualizando um pedido ou interação
+        if ($this->request->isPost() || $this->request->isPut()) {
 
-            // verifica se usuário está atualizando um pedido ou interação
-            if ($this->request->isPost() || $this->request->isPut()) {
+            if (array_key_exists("processed", $_GET) && $_GET['processed'] == '1') {
 
                 $t = $this->UNumero->ValidarNumeroEmArray($this->request->data, "t");
                 // verifica se é pedido ou interação
@@ -382,29 +382,27 @@ class PedidosController extends AppController
                         }
                     }
                 }
+            } else {
+                $sucessoAtualizadoInteracao = false;
+                $errosPedido = ["Falha ao receber os arquivos"];
             }
-            // verifica se usuário quer atualizar um pedido ou interação
-            else if (count($this->request->query) > 0) {
-                if ($t == 2) {
-                    $pedidoInteracaoEdicaoBU = new PedidoInteracao();
-                    $pedidoInteracaoEdicaoBU->CodigoPedido = $pedido["Codigo"];
-                    $codigoPedidoInteracao = $this->UNumero->ValidarNumeroEmArray($this->request->query, "ci");
-                    $pedidoInteracaoEdicao = $pedidoInteracaoEdicaoBU->Listar()->where(["PedidosInteracoes.Codigo" => $codigoPedidoInteracao])->first();
-                    $pedidoCodigoStatusPedido = $pedidoBU->ListarUnico($pedido["Codigo"]);
-                    if (isset($pedidoInteracaoEdicao) && !empty($pedidoInteracaoEdicao)) {
-                        $pedidoInteracaoEdicao->CodigoStatusPedido = $pedidoCodigoStatusPedido->CodigoStatusPedido;
-                    }
-                    if ($pedidoInteracaoEdicao != null) {
-                        $pedidoInteracaoEdicao->DataResposta = $this->UData->ConverterDataBrasil($pedidoInteracaoEdicao->DataResposta);
-                    }
+        }
+        // verifica se usuário quer atualizar um pedido ou interação
+        else if (count($this->request->query) > 0) {
+            if ($t == 2) {
+                $pedidoInteracaoEdicaoBU = new PedidoInteracao();
+                $pedidoInteracaoEdicaoBU->CodigoPedido = $pedido["Codigo"];
+                $codigoPedidoInteracao = $this->UNumero->ValidarNumeroEmArray($this->request->query, "ci");
+                $pedidoInteracaoEdicao = $pedidoInteracaoEdicaoBU->Listar()->where(["PedidosInteracoes.Codigo" => $codigoPedidoInteracao])->first();
+                $pedidoCodigoStatusPedido = $pedidoBU->ListarUnico($pedido["Codigo"]);
+                if (isset($pedidoInteracaoEdicao) && !empty($pedidoInteracaoEdicao)) {
+                    $pedidoInteracaoEdicao->CodigoStatusPedido = $pedidoCodigoStatusPedido->CodigoStatusPedido;
+                }
+                if ($pedidoInteracaoEdicao != null) {
+                    $pedidoInteracaoEdicao->DataResposta = $this->UData->ConverterDataBrasil($pedidoInteracaoEdicao->DataResposta);
                 }
             }
         }
-        else {
-            $sucessoAtualizadoInteracao = false;
-            $errosPedido = ["Falha ao receber os arquivos"];
-        }
-
         // se atualizado, recarregar dados
         if ($sucessoAtualizadoPedido || $sucessoAtualizadoInteracao)
             $pedido = $pedidoBU->ListarPorSlug(false);

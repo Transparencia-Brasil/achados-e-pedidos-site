@@ -32,14 +32,13 @@ class PedidoAnexo extends Entity{
 	*/
 	public function Validar($arquivoStream){
 		$arrayErros = [];
-
 		if($arquivoStream == null || empty($arquivoStream['name']))
 		{
 			$arrayErros["Arquivo"] = "Nenhum arquivo recebido.";
 		}else{
 	
 			// Tamanho do Arquivo
-			$tamanho = $arquivoStream['size']/1048576;
+			$tamanho = $arquivoStream['size']/1048576;		
 			if($tamanho > 200){
 				$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa os 200MB permitidos por arquivo.";
 			}
@@ -49,17 +48,16 @@ class PedidoAnexo extends Entity{
 			if(array_search(strtolower($extensao), $this->EXTENSOES_VALIDAS) === false){
 				$arrayErros["Arquivo"] = "Tipo de arquivo inválido: ". $arquivoStream['name']. ". Por favor, envie os arquivos no formatos: \"pdf\", \"xls\", \"xlsx\", \"txt\", \"doc\",\"docx\", \"csv\",\"rar\",\"zip\",\"7z\",\"jpg\",\"jpeg";
 			}
-
 			// Erro do PHP
-			if($arquivoStream['error'] >= 0) {
+			if($arquivoStream['error'] > 0) {
 
 				Log::error("[Validar.Arquivo] " . $$arquivoStream['name'] . " : " . $arquivoStream['error']);
 
 				switch ($arquivoStream['error']) {
-					case UPLOAD_ERR_INI_SIZE:
+					case 1:
 						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio.";
 						break;
-					case UPLOAD_ERR_FORM_SIZE:
+					case 2:
 						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio.";
 						break;
 

@@ -270,120 +270,118 @@ class PedidosController extends AppController
         // verifica se usuário está atualizando um pedido ou interação
         if ($this->request->isPost() || $this->request->isPut()) {
 
-            if (array_key_exists("processed", $_GET) && $_GET['processed'] == '1') {
+            $t = $this->UNumero->ValidarNumeroEmArray($this->request->data, "t");
+            // verifica se é pedido ou interação
+            if ($t == 1) {
+                // atualiza o pedido.
 
-                $t = $this->UNumero->ValidarNumeroEmArray($this->request->data, "t");
-                // verifica se é pedido ou interação
-                if ($t == 1) {
-                    // atualiza o pedido.
+                $pedidoAtualizacao = $pedidoBU->ListarUnico($pedido["Codigo"]);
+                // coleta e valida dados
+                $pedidoAtualizacao->CodigoTipoPedidoSituacao = $this->UNumero->ValidarNumeroEmArray($this->request->data, "CodigoTipoPedidoSituacao");
+                $pedidoAtualizacao->CodigoStatusPedido = $this->UNumero->ValidarNumeroEmArray($this->request->data, "CodigoStatusPedido");
+                $pedidoAtualizacao->CodigoStatusPedido = is_null($pedidoAtualizacao->CodigoStatusPedido) || $pedidoAtualizacao->CodigoStatusPedido == 0 ? 4 : $pedidoAtualizacao->CodigoStatusPedido;
 
-                    $pedidoAtualizacao = $pedidoBU->ListarUnico($pedido["Codigo"]);
-                    // coleta e valida dados
-                    $pedidoAtualizacao->CodigoTipoPedidoSituacao = $this->UNumero->ValidarNumeroEmArray($this->request->data, "CodigoTipoPedidoSituacao");
-                    $pedidoAtualizacao->CodigoStatusPedido = $this->UNumero->ValidarNumeroEmArray($this->request->data, "CodigoStatusPedido");
-                    $pedidoAtualizacao->CodigoStatusPedido = is_null($pedidoAtualizacao->CodigoStatusPedido) || $pedidoAtualizacao->CodigoStatusPedido == 0 ? 4 : $pedidoAtualizacao->CodigoStatusPedido;
+                $pedidoAtualizacao->Titulo = $this->UString->AntiXSSComLimite($this->request->data["Titulo"], 1000); //2017-01-21 Paulo Campos: tirando validação strlen
+                //$pedidoAtualizacao->Titulo = $this->UString->LimitarTamanho($this->request->data["Titulo"], 1000); //2017-01-21 Paulo Campos: tirando validação strlen
+                //2017-04-27 Paulo Campos: Aumentando o limite de strings de 1.000 para 100.000
+                //$pedidoAtualizacao->Descricao = $this->UString->AntiXSSComLimite($this->request->data["Descricao"], 1000);
+                //$pedidoAtualizacao->Descricao = $this->UString->AntiXSSComLimite($this->request->data["Descricao"], 100000);
+                $pedidoAtualizacao->Descricao = $this->UString->LimitarTamanho($this->request->data["Descricao"], 100000);
+                $pedidoAtualizacao->DataEnvio = $this->UString->AntiXSSComLimite($this->request->data["DataEnvio"], 20);
 
-                    $pedidoAtualizacao->Titulo = $this->UString->AntiXSSComLimite($this->request->data["Titulo"], 1000); //2017-01-21 Paulo Campos: tirando validação strlen
-                    //$pedidoAtualizacao->Titulo = $this->UString->LimitarTamanho($this->request->data["Titulo"], 1000); //2017-01-21 Paulo Campos: tirando validação strlen
-                    //2017-04-27 Paulo Campos: Aumentando o limite de strings de 1.000 para 100.000
-                    //$pedidoAtualizacao->Descricao = $this->UString->AntiXSSComLimite($this->request->data["Descricao"], 1000);
-                    //$pedidoAtualizacao->Descricao = $this->UString->AntiXSSComLimite($this->request->data["Descricao"], 100000);
-                    $pedidoAtualizacao->Descricao = $this->UString->LimitarTamanho($this->request->data["Descricao"], 100000);
-                    $pedidoAtualizacao->DataEnvio = $this->UString->AntiXSSComLimite($this->request->data["DataEnvio"], 20);
+                $errosPedido = $pedidoAtualizacao->ValidarPedidoAtualizacao();
 
-                    $errosPedido = $pedidoAtualizacao->ValidarPedidoAtualizacao();
+                if (count($errosPedido) == 0) {
+                    $sucessoAtualizadoPedido = $pedidoAtualizacao->AtualizarPedido();
+                    $pedidoBU->ES_InserirAtualizarPedidos($sucessoAtualizadoPedido->Codigo);
+                }
+            } else if ($t == 2) {
+                // atualiza ou insere uma interação
+                $ci = $this->UNumero->ValidarNumeroEmArray($this->request->query, "ci");
 
-                    if (count($errosPedido) == 0) {
+                $pedidoAtualizacao = $pedidoBU->ListarUnico($pedido["Codigo"]);
+                $pedidoAtualizacao->CodigoStatusPedido = $this->UNumero->ValidarNumeroEmArray($this->request->data, "CodigoStatusPedido");
+                $errosPedido = $pedidoAtualizacao->ValidarPedidoAtualizacaoStatus();
+
+                $pedidoInteracaoEdicaoBU = new PedidoInteracao();
+                $pedidoInteracaoEdicaoBU->CodigoPedido = $pedido["Codigo"];
+
+                $pedidoInteracaoAtualizacao = $pedidoInteracaoEdicaoBU->Listar()->where(["PedidosInteracoes.Codigo" => $ci])->first();
+
+                if ($pedidoInteracaoAtualizacao == null) {
+                    $pedidoInteracaoAtualizacao = new PedidoInteracao();
+                    $pedidoInteracaoAtualizacao->CodigoPedido = $pedido["Codigo"];
+                }
+
+                if (array_key_exists('arquivos', $_FILES)) {
+                    $possuiArquivo = true;
+                    $arquivos = $this->UArquivo->reArrayFiles($_FILES['arquivos']);
+                }
+
+                // if(array_key_exists('arquivos_hidden',$_POST)){
+                //     $possuiArquivo = true;
+                //     foreach ($_POST['arquivos_hidden'] as $key=>$value) {
+                //         echo $key;
+                //         $postUnserialize = [$key => unserialize($value)];
+
+                //     }
+                //     $arquivos = $postUnserialize;
+                //     //debug(array_push($arquivos,$postUnserialize));
+                //     //$arquivos = $this->UArquivo->reArrayFiles($_POST['arquivos_hidden']);
+                // }
+
+                //2017-04-27 Paulo Campos: Aumentando o limite de strings de 1.000 para 100.000
+                //$pedidoAtualizacao->Descricao = $this->UString->AntiXSSComLimite($this->request->data["Descricao"], 1000);
+                //$pedidoInteracaoAtualizacao->Descricao = $this->UString->AntiXSSComLimite($this->request->data["Descricao"], 100000);
+                $pedidoInteracaoAtualizacao->Descricao = $this->UString->LimitarTamanho($this->request->data["Descricao"], 100000);
+                $pedidoInteracaoAtualizacao->DataResposta = $this->UString->AntiXSSComLimite($this->request->data["DataResposta"], 20);
+                $pedidoInteracaoAtualizacao->CodigoTipoPedidoResposta = $this->UNumero->ValidarNumeroEmArray($this->request->data, "CodigoTipoPedidoResposta");
+
+                $errosPedidoInteracao = $pedidoInteracaoAtualizacao->ValidarAtualizacao();
+
+                $pedidoAnexo = new PedidoAnexo();
+
+                if ($possuiArquivo) {
+                    // valida se os arquivos tem o formato e tamanho corretos
+
+                    $errosArquivo = $pedidoAnexo->ValidarArquivos($arquivos);
+                }
+
+                if (count($errosPedido) == 0 && count($errosPedidoInteracao) == 0 && count($errosArquivo) == 0) {
+
+                    if (array_key_exists("FoiProrrogado", $this->request->data)) {
+                        $foiProrrogado = $this->UNumero->ValidarNumeroEmArray($this->request->data, "FoiProrrogado");
+
+                        if ($foiProrrogado == 1) {
+                            // atualiza o pedido
+                            $pedidoValido->PedidoProrrogado();
+                        }
+                    }
+
+                    if ($pedidoInteracaoAtualizacao->Salvar()) {
                         $sucessoAtualizadoPedido = $pedidoAtualizacao->AtualizarPedido();
                         $pedidoBU->ES_InserirAtualizarPedidos($sucessoAtualizadoPedido->Codigo);
-                    }
-                } else if ($t == 2) {
-                    // atualiza ou insere uma interação
-                    $ci = $this->UNumero->ValidarNumeroEmArray($this->request->query, "ci");
 
-                    $pedidoAtualizacao = $pedidoBU->ListarUnico($pedido["Codigo"]);
-                    $pedidoAtualizacao->CodigoStatusPedido = $this->UNumero->ValidarNumeroEmArray($this->request->data, "CodigoStatusPedido");
-                    $errosPedido = $pedidoAtualizacao->ValidarPedidoAtualizacaoStatus();
+                        // atualiza interação no Elastic Search
+                        $pedidoInteracaoEdicaoBU->ES_AtualizarInserirInteracoes($pedidoInteracaoAtualizacao->Codigo);
 
-                    $pedidoInteracaoEdicaoBU = new PedidoInteracao();
-                    $pedidoInteracaoEdicaoBU->CodigoPedido = $pedido["Codigo"];
+                        if ($possuiArquivo) {
+                            $erros = "";
+                            $sucessoAtualizadoInteracao = $pedidoAnexo->SalvarMultiplos($arquivos, $pedidoInteracaoAtualizacao->Codigo, $pedidoValido->Codigo, $erros);
 
-                    $pedidoInteracaoAtualizacao = $pedidoInteracaoEdicaoBU->Listar()->where(["PedidosInteracoes.Codigo" => $ci])->first();
-
-                    if ($pedidoInteracaoAtualizacao == null) {
-                        $pedidoInteracaoAtualizacao = new PedidoInteracao();
-                        $pedidoInteracaoAtualizacao->CodigoPedido = $pedido["Codigo"];
-                    }
-
-                    if (array_key_exists('arquivos', $_FILES)) {
-                        $possuiArquivo = true;
-                        $arquivos = $this->UArquivo->reArrayFiles($_FILES['arquivos']);
-                    }
-
-                    // if(array_key_exists('arquivos_hidden',$_POST)){
-                    //     $possuiArquivo = true;
-                    //     foreach ($_POST['arquivos_hidden'] as $key=>$value) {
-                    //         echo $key;
-                    //         $postUnserialize = [$key => unserialize($value)];
-
-                    //     }
-                    //     $arquivos = $postUnserialize;
-                    //     //debug(array_push($arquivos,$postUnserialize));
-                    //     //$arquivos = $this->UArquivo->reArrayFiles($_POST['arquivos_hidden']);
-                    // }
-
-                    //2017-04-27 Paulo Campos: Aumentando o limite de strings de 1.000 para 100.000
-                    //$pedidoAtualizacao->Descricao = $this->UString->AntiXSSComLimite($this->request->data["Descricao"], 1000);
-                    //$pedidoInteracaoAtualizacao->Descricao = $this->UString->AntiXSSComLimite($this->request->data["Descricao"], 100000);
-                    $pedidoInteracaoAtualizacao->Descricao = $this->UString->LimitarTamanho($this->request->data["Descricao"], 100000);
-                    $pedidoInteracaoAtualizacao->DataResposta = $this->UString->AntiXSSComLimite($this->request->data["DataResposta"], 20);
-                    $pedidoInteracaoAtualizacao->CodigoTipoPedidoResposta = $this->UNumero->ValidarNumeroEmArray($this->request->data, "CodigoTipoPedidoResposta");
-
-                    $errosPedidoInteracao = $pedidoInteracaoAtualizacao->ValidarAtualizacao();
-
-                    $pedidoAnexo = new PedidoAnexo();
-
-                    if ($possuiArquivo) {
-                        // valida se os arquivos tem o formato e tamanho corretos
-
-                        $errosArquivo = $pedidoAnexo->ValidarArquivos($arquivos);
-                    }
-
-                    if (count($errosPedido) == 0 && count($errosPedidoInteracao) == 0 && count($errosArquivo) == 0) {
-
-                        if (array_key_exists("FoiProrrogado", $this->request->data)) {
-                            $foiProrrogado = $this->UNumero->ValidarNumeroEmArray($this->request->data, "FoiProrrogado");
-
-                            if ($foiProrrogado == 1) {
-                                // atualiza o pedido
-                                $pedidoValido->PedidoProrrogado();
-                            }
-                        }
-
-                        if ($pedidoInteracaoAtualizacao->Salvar()) {
-                            $sucessoAtualizadoPedido = $pedidoAtualizacao->AtualizarPedido();
-                            $pedidoBU->ES_InserirAtualizarPedidos($sucessoAtualizadoPedido->Codigo);
-
-                            // atualiza interação no Elastic Search
-                            $pedidoInteracaoEdicaoBU->ES_AtualizarInserirInteracoes($pedidoInteracaoAtualizacao->Codigo);
-
-                            if ($possuiArquivo) {
-                                $erros = "";
-                                $sucessoAtualizadoInteracao = $pedidoAnexo->SalvarMultiplos($arquivos, $pedidoInteracaoAtualizacao->Codigo, $pedidoValido->Codigo, $erros);
-
-                                if (!$sucessoAtualizadoInteracao) {
-                                    array_push($errosArquivo, $erros);
-                                }
-                            } else {
-                                $sucessoAtualizadoInteracao = true;
+                            if (!$sucessoAtualizadoInteracao) {
+                                array_push($errosArquivo, $erros);
                             }
                         } else {
-                            $sucessoAtualizadoInteracao = false;
+                            $sucessoAtualizadoInteracao = true;
                         }
+                    } else {
+                        $sucessoAtualizadoInteracao = false;
                     }
                 }
             } else {
                 $sucessoAtualizadoInteracao = false;
+                $t = 2;
                 $errosArquivo["Erro"] = "Falha ao receber os arquivos. Tente substituir o arquivo.";
             }
         }

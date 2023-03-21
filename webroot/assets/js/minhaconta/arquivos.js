@@ -64,8 +64,8 @@ function validarTamanhoArquivo(file){
 
 	var tamanhoEmMegaBytes = file.size/1048576;
 
-	if(tamanhoEmMegaBytes > 200){
-			$("#arquivos").append("<span class='error'>O Arquivo ultrapassa os 200MB permitidos por arquivo.</span>");
+	if(tamanhoEmMegaBytes > 10){
+			$("#arquivos").append("<span class='error'>O Arquivo ultrapassa os 10MB permitidos por arquivo.</span>");
 	}
 
 }

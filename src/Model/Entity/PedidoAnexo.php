@@ -40,7 +40,7 @@ class PedidoAnexo extends Entity{
 			// Tamanho do Arquivo
 			$tamanho = $arquivoStream['size']/1048576;		
 			if($tamanho > 200){
-				$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa os 200MB permitidos por arquivo.";
+				$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa os 10MB permitidos por arquivo.";
 			}
 
 			// Formatos Permitidos
@@ -55,10 +55,10 @@ class PedidoAnexo extends Entity{
 
 				switch ($arquivoStream['error']) {
 					case UPLOAD_ERR_INI_SIZE:
-						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio de 200MB.";
+						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio de 10MB.";
 						break;
 					case UPLOAD_ERR_FORM_SIZE:
-						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio de 200MB. ";
+						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio de 10MB. ";
 						break;
 						
 					default:

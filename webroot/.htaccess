@@ -10,7 +10,7 @@
 	CheckCaseOnly On
 </IfModule>
 
-php_value upload_max_size 8500M
-php_value post_max_size 8500M
+php_value upload_max_size 2500M
+php_value post_max_size 2500M
 php_value max_execution_time 2000
-php_value upload_max_filesize 1500M
+php_value upload_max_filesize 200MB

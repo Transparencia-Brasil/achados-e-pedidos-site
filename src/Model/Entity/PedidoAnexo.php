@@ -39,7 +39,7 @@ class PedidoAnexo extends Entity{
 	
 			// Tamanho do Arquivo
 			$tamanho = $arquivoStream['size']/1048576;		
-			if($tamanho > 200){
+			if($tamanho > 50){
 				$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa os 100MB permitidos por arquivo.";
 			}
 
@@ -170,7 +170,7 @@ class PedidoAnexo extends Entity{
 
     	$tamanhoEmMegaBytes = round($tamanhoArquivosTotal/1048576);
 
-    	if($tamanhoEmMegaBytes > 1500){
+    	if($tamanhoEmMegaBytes > 200){
     		$errosArquivo["Erro"] = "O tamanho do lote é: ".$tamanhoEmMegaBytes
     		." MB e o máximo por interação 1500MB";
     	}

@@ -40,8 +40,8 @@ $(document).ready(function() {
 
         total = $("#arquivos").children('input[type="file"]').length;
 
-        if (total > 1) {
-            $("#arquivos").append("<span class='error'>Só é permitido 2 arquivos por interação</span>");
+        if (total > 19) {
+            $("#arquivos").append("<span class='error'>Só é permitido 20 arquivos por interação</span>");
             return;
         }
 
@@ -75,17 +75,29 @@ function validarArquivosTamanho() {
     }
 
     var tamanhoTotal = 0;
+    var total_arquivos = arquivos.length
+    for (i=0; i<total_arquivos; i++)
+    {
+        var arqFile = arquivos[i].files;
+        const arqFileArr = Array.from(arqFile)
+        // Loop through an array
+        arqFileArr.forEach(file => {
+            var arqFileSize =file.size
+            var tamanho = Math.round(arqFileSize / 1048576);
+            tamanhoTotal += tamanho;
+        })
 
-    arquivos.forEach(arq => {
-        var arqFile = arq.files[0];
-        var tamanho = Mah.round(arqFile / 1048576);
-        tamanhoTotal += tamanho;
-    });
-
+    }
     if (tamanhoTotal > 200) {
+        if ($('.error').length > 0) {
+            $('.error').remove()
+        }
         $("#arquivos").append("<span class='error'>Só é permitido 200mb de arquivos por interação</span>");
         return false;
     } else {
+        if ($('.error').length > 0) {
+            $('.error').remove()
+        }        
         return true;
     }
 }

@@ -290,4 +290,4 @@
     ?>
   });
 </script>
-<script type="text/javascript" src="<?=BASE_URL?>assets/js/minhaconta/arquivos.js?v=1"></script>
+<script type="text/javascript" src="<?=BASE_URL?>assets/js/minhaconta/arquivos.js?v=2"></script>

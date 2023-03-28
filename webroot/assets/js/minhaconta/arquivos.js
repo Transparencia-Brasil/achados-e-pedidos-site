@@ -92,7 +92,7 @@ function validarArquivosTamanho() {
         if ($('.error').length > 0) {
             $('.error').remove()
         }
-        $("#arquivos").append("<span class='error'>Só é permitido 200mb de arquivos por interação</span>");
+        $("#arquivos").append("<span class='error' style='font-size:15px;'>O tamanho dos arquivos excede o máximo de 200MB do nosso formulário.</span><br><span class='error' style='font-size:13px;'>Entre em contato com <a href='mailto:suporteaep@transparencia.org.br' style='color:red;text-decoration: underline;'>suporteaep@transparencia.org.br</a> para realizarmos o cadastro do anexo manualmente. Você pode subir o(s) arquivo(s) em uma nuvem compartilhada (ex: Google Drive) e anexar o link público para o arquivo também no email.</span>");
         return false;
     } else {
         if ($('.error').length > 0) {

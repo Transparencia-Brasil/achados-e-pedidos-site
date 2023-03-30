@@ -58,7 +58,7 @@ class PedidosController extends AppController{
 		$tipo_situacao = TableRegistry::get('TipoPedidoSituacao')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
 		$status_pedido = TableRegistry::get('StatusPedido')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
         $tipo_resposta = TableRegistry::get('TipoPedidoResposta')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
-        $nome_usuario = TableRegistry::get('Usuarios')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
+        $nome_usuario = TableRegistry::get('Usuarios')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome'])->order(['Nome' => 'asc']);
 
 
 		if ($this->request->is(['post', 'put'])) {

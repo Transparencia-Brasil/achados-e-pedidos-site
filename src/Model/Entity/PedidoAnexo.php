@@ -39,7 +39,7 @@ class PedidoAnexo extends Entity{
 	
 			// Tamanho do Arquivo
 			$tamanho = $arquivoStream['size']/1048576;		
-			if($tamanho > 50){
+			if($tamanho > 200){
 				$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa os 200MB permitidos por arquivo.";
 			}
 

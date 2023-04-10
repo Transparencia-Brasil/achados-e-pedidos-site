@@ -65,7 +65,7 @@
             }
             ?>
             <?=$this->ValidationText->exibirErro($erros, "Pedido"); ?>
-            <?=$this->Form->create($pedidoInteracao, ['action' => 'pedidointeracao/' . $slug , "id" => "frmPedidoInteracao",'enctype' => 'multipart/form-data']) ?>
+            <?=$this->Form->create($pedidoInteracao, ['action' => 'pedidointeracao/' . $slug . "?processed=1", "id" => "frmPedidoInteracao",'enctype' => 'multipart/form-data']) ?>
               <?=$this->Form->hidden("CodigoPedido",["value" => $pedidoInteracao->CodigoPedido]); ?>
               <p><strong>Qual é o tipo da resposta ou recurso ?</strong></p>
               

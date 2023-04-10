@@ -33,7 +33,7 @@ class PedidosController extends AppController{
 	public function index($id = null)
 	{
         $title = $this->request->query('t');
-
+        
         if (!empty($title)) {
             $query = ['Pedidos.Titulo LIKE' => '%'.$title.'%'];
         } else {
@@ -53,14 +53,17 @@ class PedidosController extends AppController{
 
 
 		$agentes = TableRegistry::get('Agentes')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
-		$tipo_origem = TableRegistry::get('TipoPedidoOrigem')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
+		$tipo_origem = TableRegistry::get('TipoPedidoOrigem')->find('list', ['conditions' => ['Codigo' => 2, 'Nome' => 'admin'],
+        'keyField' => 'Codigo', 'valueField' => 'Nome']);
 		$tipo_situacao = TableRegistry::get('TipoPedidoSituacao')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
 		$status_pedido = TableRegistry::get('StatusPedido')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
         $tipo_resposta = TableRegistry::get('TipoPedidoResposta')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome']);
+        $nome_usuario = TableRegistry::get('Usuarios')->find('list', ['keyField' => 'Codigo', 'valueField' => 'Nome'])->order(['Nome' => 'asc']);
+
 
 		if ($this->request->is(['post', 'put'])) {
             $this->Pedidos->patchEntity($pedido, $this->request->data);
-
+            
             if($pedido->errors())
                 $this->Flash->success('Erro ao salvar pedido. Verifique os campos obrigatórios.');
             else{
@@ -93,7 +96,7 @@ class PedidosController extends AppController{
             $pedido->Revisoes = $lista;
 
             $pedido->ES_InserirAtualizarPedidos($pedido->Codigo);
-
+            
 
         }
 
@@ -103,6 +106,8 @@ class PedidosController extends AppController{
 		$this->set('tipo_situacao', $tipo_situacao);
 		$this->set('status_pedido', $status_pedido);
         $this->set('tipo_resposta', $tipo_resposta);
+        $this->set('nome_usuario', $nome_usuario);
+
 
 	}
 

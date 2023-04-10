@@ -32,47 +32,75 @@ class PedidoAnexo extends Entity{
 	*/
 	public function Validar($arquivoStream){
 		$arrayErros = [];
-
 		if($arquivoStream == null || empty($arquivoStream['name']))
 		{
 			$arrayErros["Arquivo"] = "Nenhum arquivo recebido.";
 		}else{
-			// validar os formatos de arquivo permitidos
-			$nome = $arquivoStream['name'];
-			$tamanho = $arquivoStream['size']/1048576;
-
+	
+			// Tamanho do Arquivo
+			$tamanho = $arquivoStream['size']/1048576;		
 			if($tamanho > 200){
 				$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa os 200MB permitidos por arquivo.";
 			}
 
+			// Formatos Permitidos
 			$extensao = pathinfo($arquivoStream['name'], PATHINFO_EXTENSION);
-
 			if(array_search(strtolower($extensao), $this->EXTENSOES_VALIDAS) === false){
 				$arrayErros["Arquivo"] = "Tipo de arquivo inválido: ". $arquivoStream['name']. ". Por favor, envie os arquivos no formatos: \"pdf\", \"xls\", \"xlsx\", \"txt\", \"doc\",\"docx\", \"csv\",\"rar\",\"zip\",\"7z\",\"jpg\",\"jpeg";
 			}
-			//valida também por mime.
-			//if(array_search($arquivoStream['type'], $this->MIMES_VALIDOS)===false){
-			//	$arrayErros["Arquivo"] = $arquivoStream['type']." Tipo de arquivo inválido. Por favor, envie os arquivos no formatos: \"pdf\", \"xls\", \"xlsx\", \"txt\", \"doc\",\"docx\", \"csv\"";
-			//}
+			// Erro do PHP
+			if($arquivoStream['error'] > 0) {
 
+				Log::error("[Validar.Arquivo] " . $$arquivoStream['name'] . " : " . $arquivoStream['error']);
+
+				switch ($arquivoStream['error']) {
+					case UPLOAD_ERR_INI_SIZE:
+						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio de 200MB.";
+						break;
+					case UPLOAD_ERR_FORM_SIZE:
+						$arrayErros["Arquivo"] = "O Arquivo ".$arquivoStream['name'].", ultrapassa o tamanho máximo de envio de 200MB. ";
+						break;
+						
+					default:
+						$arrayErros['Arquivo'] = "Um erro foi encontrado ao realizar o upload do arquivo!";
+						break;
+				}
+
+				$arrayErros['Arquivo'] = $arrayErros['Arquivo'] . " (" . $arquivoStream['error'] . ")";
+			}
 		}
 
 		return $arrayErros;
 	}
 
-	public function SalvarMultiplos($arquivos, $codigoPedidoInteracao)
+	public function SalvarMultiplos($arquivos, $codigoPedidoInteracao, $codigoPedido = null, &$erros = "")
 	{
+		$temErro = false;
+
 		try{
             foreach ($arquivos as $arquivo) {
-                $pedidoAnexo = new PedidoAnexo();
-                $pedidoAnexo->CodigoPedidoInteracao = $codigoPedidoInteracao;
-				$status = $pedidoAnexo->Salvar($arquivo);
+				try {
+                	$pedidoAnexo = new PedidoAnexo();
+                	$pedidoAnexo->CodigoPedidoInteracao = $codigoPedidoInteracao;
+					$status = $pedidoAnexo->Salvar($arquivo);
+				}
+				catch(Exception $ex) {
+					$erros += "Falha ao tentar salvar o anexo: " . $arquivo['name'] . " \r\n";
+					$temErro = true;
+				}
 			}
-			$pedidoAnexo->ES_AtualizarInserirAnexosPorPedido(null);
+			$pedidoAnexo->ES_AtualizarInserirAnexosPorPedido($codigoPedido);
         }
         catch(Exception $ex){
-            // logar erro no banco
+            $temErro = true;
+			$erros += "Falha ao Salvar os Anexos \r\n";
         }
+
+		if($temErro) {
+			Log::error("[SalvarArquivos] Interacao = " . $codigoPedidoInteracao . " : " . $erros);
+		}
+
+		return $temErro;
 	}
 
 	public function Salvar($arquivoStream){
@@ -142,12 +170,10 @@ class PedidoAnexo extends Entity{
 
     	$tamanhoEmMegaBytes = round($tamanhoArquivosTotal/1048576);
 
-    	if($tamanhoEmMegaBytes > 900){
+    	if($tamanhoEmMegaBytes > 200){
     		$errosArquivo["Erro"] = "O tamanho do lote é: ".$tamanhoEmMegaBytes
-    		." MB e o máximo por interação 900MB";
+    		." MB e o máximo por interação 200MB";
     	}
-
-
 
 
         return $errosArquivo;
@@ -467,5 +493,3 @@ class PedidoAnexo extends Entity{
 		}
 	}
 }
-
-?>

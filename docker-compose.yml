@@ -12,7 +12,6 @@ services:
       - ./:/var/www
     environment:
       - "DB_PORT=3306"
-      - "DB_HOST=database"
       - "APP_DEBUG=TRUE"
       - "APP_URL=http://localhost:8080/"
       - "API_URL=https://endp.achadosepedidos.org.br/api/"
@@ -20,12 +19,13 @@ services:
       - "MYSQL_HOST=database"
       - "MYSQL_USERNAME=root"
       - "MYSQL_PASSWORD=secret"
-      - "MYSQL_DATABASE=tblai"
+      - "MYSQL_DATABASE=achadosepedidos"      
       - "MAIL_DRIVER=Smtp"
       - "MAIL_HOST="
       - "MAIL_USERNAME="
       - "MAIL_PASSWORD="   
       - "MYSQL_ATTR_SSL_CA="
+      - "BLIPCHAT_KEY=YWNoYWRvc2VwZWRpZG9zOjllMmYzM2FlLWFhOGItNDliMC1iNjNiLWFmODIwMjEyNDE0Yg=="
 
   # The Web Server
   web:
@@ -44,9 +44,8 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
     environment:
-      - "MYSQL_DATABASE=tblai"
-      - "MYSQL_USER=root"
-      - "MYSQL_PASSWORD=secret"
+      - "MYSQL_DATABASE=achadosepedidos"
+      - "MYSQL_HOST=database"
       - "MYSQL_ROOT_PASSWORD=secret"
     ports:
         - "33061:3306"

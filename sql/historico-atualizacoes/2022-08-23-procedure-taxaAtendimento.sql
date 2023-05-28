@@ -3,7 +3,7 @@ DELIMITER $$
 BEGIN
     DECLARE cTotalPedidos INT;
     DECLARE cTotalStatusPedidos INT;
-DECLARE cPercPedidos INT;
+    DECLARE cPercPedidos INT;
     DECLARE sAnoEnvio INT;
     DECLARE sStatusNome VARCHAR(255);
     DECLARE done INT DEFAULT FALSE;
@@ -11,7 +11,7 @@ DECLARE cPercPedidos INT;
 DECLARE search CURSOR FOR select  year(p.DataEnvio) as AnoEnvio, sp.Nome as NomeStatusPedido
 from pedidos as p
 left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo)
-Where p.Ativo = 1
+Where p.Ativo = 1 AND YEAR(p.DataEnvio) != YEAR(CURDATE()) 
 group by sp.Nome, year(p.DataEnvio);       
 DECLARE
 CONTINUE HANDLER FOR NOT FOUND

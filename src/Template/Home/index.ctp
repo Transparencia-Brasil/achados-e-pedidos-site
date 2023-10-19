@@ -124,7 +124,7 @@
             </p>
             <div class="enviado">Pedido enviado para: <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></div>
             <div class="porr">Pedido disponibilizado por: <a href="<?=$this->Url->build($slugUsuario)?>"><?=$nomeUsuario?></a></div>
-            <div class="em">Em: <?=$pedido["DataEnvio"]?></div>
+            <div class="em">Em: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></div>
             <div class="btnVerMais btn-size-small pull-right">
               <a href="<?=$this->Url->build('/pedidos/' . $pedido["Slug"])?>">Ver
                 <div class="seta seta-direita"></div>

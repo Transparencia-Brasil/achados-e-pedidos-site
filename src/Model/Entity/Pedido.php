@@ -278,7 +278,7 @@ class Pedido extends Entity{
 		$connection = ConnectionManager::get('default');
 
 		if($moderar){
-			$query = 'select distinct pedidos.Codigo, pedidos.Slug, pedidos.CodigoUsuario,pedidos.CodigoAgente,pedidos.CodigoTipoOrigem,pedidos.CodigoTipoPedidoSituacao,pedidos.CodigoStatusPedido,pedidos.CodigoStatusPedidoInterno,pedidos.IdentificadorExterno,pedidos.Protocolo,pedidos.Titulo,pedidos.Descricao,DATE_FORMAT(pedidos.DataEnvio,"%d/%m/%Y") DataEnvio,pedidos.FoiProrrogado,pedidos.Anonimo,DATE_FORMAT(pedidos.Criacao,"%d/%m/%Y") Criacao,pedidos.Alteracao, stat.Nome StatusPedido, statInterno.Nome StatusInternoPedido, agente.Nome NomeAgente, agente.Slug SlugAgente, usuario.Nome NomeUsuario, usuario.Slug SlugUsuario, tipoSit.Nome NomeSituacao, cidade.Nome NomeCidade, uf.Sigla SiglaUF, nfed.Nome NomeNivelFederativo from
+			$query = 'select distinct pedidos.Codigo, pedidos.Slug, pedidos.CodigoUsuario,pedidos.CodigoAgente,pedidos.CodigoTipoOrigem,pedidos.CodigoTipoPedidoSituacao,pedidos.CodigoStatusPedido,pedidos.CodigoStatusPedidoInterno,pedidos.IdentificadorExterno,pedidos.Protocolo,pedidos.Titulo,pedidos.Descricao,pedidos.DataEnvio,pedidos.FoiProrrogado,pedidos.Anonimo,pedidos.Criacao,pedidos.Alteracao, stat.Nome StatusPedido, statInterno.Nome StatusInternoPedido, agente.Nome NomeAgente, agente.Slug SlugAgente, usuario.Nome NomeUsuario, usuario.Slug SlugUsuario, tipoSit.Nome NomeSituacao, cidade.Nome NomeCidade, uf.Sigla SiglaUF, nfed.Nome NomeNivelFederativo from
 			pedidos pedidos
 			join moderacoes b on pedidos.Codigo = b.CodigoObjeto and b.CodigoTipoObjeto = 1
             join status_pedido	stat on pedidos.CodigoStatusPedido = stat.Codigo
@@ -292,7 +292,7 @@ class Pedido extends Entity{
             where	b.CodigoStatusModeracao = '.$CodigoStatusModeracao.' and agente.Ativo = 1 and pedidos.Ativo = 1 ' . $condicao . $filtro . ' order by pedidos.Criacao DESC' .$limite;
         }
         else{
-        	$query = 'select distinct pedidos.Codigo, pedidos.Slug, pedidos.CodigoUsuario,pedidos.CodigoAgente,pedidos.CodigoTipoOrigem,pedidos.CodigoTipoPedidoSituacao,pedidos.CodigoStatusPedido,pedidos.CodigoStatusPedidoInterno,pedidos.IdentificadorExterno,pedidos.Protocolo,pedidos.Titulo,pedidos.Descricao,DATE_FORMAT(pedidos.DataEnvio,"%d/%m/%Y") DataEnvio,pedidos.FoiProrrogado,pedidos.Anonimo,DATE_FORMAT(pedidos.Criacao,"%d/%m/%Y") Criacao,pedidos.Alteracao, stat.Nome StatusPedido, statInterno.Nome StatusInternoPedido, agente.Nome NomeAgente, agente.Slug SlugAgente, usuario.Nome NomeUsuario, usuario.Slug SlugUsuario, tipoSit.Nome NomeSituacao, cidade.Nome NomeCidade, uf.Sigla SiglaUF, nfed.Nome NomeNivelFederativo from
+        	$query = 'select distinct pedidos.Codigo, pedidos.Slug, pedidos.CodigoUsuario,pedidos.CodigoAgente,pedidos.CodigoTipoOrigem,pedidos.CodigoTipoPedidoSituacao,pedidos.CodigoStatusPedido,pedidos.CodigoStatusPedidoInterno,pedidos.IdentificadorExterno,pedidos.Protocolo,pedidos.Titulo,pedidos.Descricao,pedidos.DataEnvio,pedidos.FoiProrrogado,pedidos.Anonimo,pedidos.Criacao,pedidos.Alteracao, stat.Nome StatusPedido, statInterno.Nome StatusInternoPedido, agente.Nome NomeAgente, agente.Slug SlugAgente, usuario.Nome NomeUsuario, usuario.Slug SlugUsuario, tipoSit.Nome NomeSituacao, cidade.Nome NomeCidade, uf.Sigla SiglaUF, nfed.Nome NomeNivelFederativo from
 			pedidos pedidos
             join status_pedido	stat on pedidos.CodigoStatusPedido = stat.Codigo
             join status_pedido statInterno on pedidos.CodigoStatusPedidoInterno = statInterno.Codigo

@@ -15256,15 +15256,15 @@ hr {
     max-width: 90%;
 }
 .perfil .box .por {
-    margin: 2% 0;
+    /* margin: 2% 0; */
     width: 100%;
-    float: left;
-    max-width: 25%;
+    /* float: left;
+    max-width: 25%; */
 }
 .perfil .box .em {
-    float: left;
-    width: 60%;
-    margin-top: 2%;
+    /* float: left; */
+    width: 100%;
+    /* margin-top: 2%; */
 }
 .perfil .box .situacao {
     margin: 3% 0 0;

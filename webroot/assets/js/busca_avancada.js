@@ -555,7 +555,7 @@ function montaBoxPedido(item) {
     box += '    <h4 style="margin-bottom:5%">' + titulo + '</h4>';
     box += '    <div class="enviado">Pedido enviado para: <a href="agentes/' + obj.agentes_slug_local + '">' + obj.agentes_nome_local + '</a></div>';
     box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/' + obj.usuarios_slug_local + '">' + obj.usuarios_nome_local + '</a></div>';
-    box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio_local) + '</div>';
+    box += '    <div class="em">Data do pedido LAI: ' + ajustaData(obj.pedidos_data_envio_local) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
     box +=          iconStatusPedido;
@@ -618,7 +618,7 @@ function montaBoxInteracao(item) {
     box += '    <h4 style="margin-bottom:5%">' + titulo + '</h4>';
     box += '    <div class="enviado">Pedido enviado para: <a href="agentes/' + obj.agentes_slug + '">' + obj.agentes_nome + '</a></div>';
     box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/' + obj.usuarios_slug + '">' + obj.usuarios_nome + '</a></div>';
-    box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
+    box += '    <div class="em">Data do pedido LAI: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
     box +=          iconStatusPedido;
@@ -681,7 +681,7 @@ function montaBoxAnexo(item) {
     box += '    <h4 style="margin-bottom:5%">' + titulo + '</h4>';
     box += '    <div class="enviado">Pedido enviado para: <a href="agentes/' + obj.agentes_slug + '">' + obj.agentes_nome + '</a></div>';
     box += '    <div class="por">Pedido disponibilizado por: <a href="usuarios/' + obj.usuarios_slug + '">' + obj.usuarios_nome + '</a></div>';
-    box += '    <div class="em">Em: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
+    box += '    <div class="em">Data do pedido LAI: ' + ajustaData(obj.pedidos_data_envio) + '</div>';
     box += '    <div class="situacao">';
     box += '      <div class="col-md-6 col-sm-6 col-xs-12">';
     box +=          iconStatusPedido;

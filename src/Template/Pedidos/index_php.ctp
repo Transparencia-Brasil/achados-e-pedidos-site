@@ -223,7 +223,7 @@
               <p><?=$descricao?></p>
               <div class="enviado">Pedido enviado para: <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></div>
               <div class="por">Pedido disponibilizado por: <a href="<?=$this->Url->build($slugUsuario)?>"><?=$nomeUsuario?></a></div>
-              <div class="em">Em: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></div>
+              <div class="em">Data do pedido LAI: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></div>
               <div class="situacao">
                 <div class="col-md-4 col-sm-4 col-xs-12">
                   <?=$this->FrontEnd->situacaoPedido($pedido["CodigoTipoPedidoSituacao"])?>

@@ -28,7 +28,7 @@
             <p><span>Pedido enviado para: </span> <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></p>
             <ul class="list">
               <li class="item">Pedido disponibilizado por: <span>Mim</span></li>
-              <li class="item">Data do pedido LAI: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></li>
+              <li class="item">Pedido LAI realizado em: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></li>
             </ul>
             <div class="col-md-6">
               <div class="resposta-pedido">

@@ -23,24 +23,7 @@ class PedidosController extends AppController
     }
 
     public function index(){
-    
-        $pedido = new Pedido();
-
-        if ($this->request->is('post')) {
-
-            $data = $this->request->data;
-            if (!empty($data["pagina"])) {
-
-                $pedidosTotal = $pedido->FiltrarPedidos($data, 1, 0);
-                $pedidos = $pedido->FiltrarPedidos($data, $pagina);
-            }
-
-        }else{
-            
-            $total = $pedido->TotalPedidosModerados();
-        	$pedidos = $pedido->ListarModerados();
-        }
-
+        
     }
 
     public function buscaAvancada(){

@@ -335,8 +335,9 @@
           <!-- // Visualização 4 -->
           <!-- Visualização 2 -->
           <div id="cabecalho-resultados" style="display:none">
-            <h4>Resultado para: <span class="termo-display"></span></h4>
-            <h5>Foram encontrados <span class="hits-total-display"></span> pedidos - Mostrando <span class="paginacao-de"></span> de <span class="paginacao-ate"></span>.</h5>
+          <h4>Encontramos <span class="hits-total-display"></span> pedidos contendo o(s) termo(s): <i><span class="termo-display"></span></i></h4>
+            <h5>Mostrando <span class="paginacao-de"></span> de <span class="paginacao-ate"></span>, ordenados por data do pedido LAI mais recente.</h5>
+            
             <h5 id="erro-resultado" style="color:red;"></h5>
           </div>
           <div class="row" id="boxes-resultados">

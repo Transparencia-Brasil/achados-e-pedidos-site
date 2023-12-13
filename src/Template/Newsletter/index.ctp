@@ -21,7 +21,7 @@
             <img src="<?=BASE_URL?>assets/images/newsletter-achados.png" alt="newsletter Achados e Pedidos" style="width:100%;">
             <p style="text-align:left!important;margin-bottom:10px;">Preencha o formulário para receber a Achados, a newsletter do projeto <strong>Achados e Pedidos</strong>, realizado pela Associação Brasileira de Jornalismo Investigativo (Abraji) e pela Transparência Brasil.</p>
             <p style="text-align:left!important;margin-bottom:10px;">O boletim quinzenal compartilha pedidos feitos via Lei de Acesso à Informação (LAI) sobre assuntos em alta, dicas de como realizar solicitações de informação e notícias sobre a transparência pública no país.</p>
-            <p style="text-align:left!important;margin-bottom:20px;margin-left:0px;">Quer dar uma espiada antes de assinar? <a href="https://us8.campaign-archive.com/home/?u=3a2d727753f3d085d23587074&id=ee44c5b97f" target="_blank">Confira as edições anteriores</a>.</p>
+            <p style="text-align:left!important;margin-bottom:20px;margin-left:0px;">Quer dar uma espiada antes de assinar? <a href="/newsletter/arquivo">Confira as edições anteriores</a>.</p>
         </div>
         <div style="width:50%;margin: 0 auto;">
             <div id="mc_embed_shell">

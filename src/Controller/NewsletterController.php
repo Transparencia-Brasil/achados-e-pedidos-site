@@ -12,6 +12,12 @@ class NewsletterController extends AppController
 
         $this->set('title', 'Newsletter');
     }
+
+	public function arquivo()
+    {
+
+        $this->set('title', 'Newsletter / Arquivo');
+    }    
 }
 
 ?>

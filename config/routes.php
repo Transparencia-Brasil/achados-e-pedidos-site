@@ -96,6 +96,7 @@ Router::connect('/politica-de-privacidade', array('controller' => 'Institucional
 Router::connect('/na-midia', array('controller' => 'NaMidia', 'action' => 'index'));
 Router::connect('/dados', array('controller' => 'Dados', 'action' => 'index'));
 Router::connect('/newsletter', array('controller' => 'Newsletter', 'action' => 'index'));
+Router::connect('/newsletter/arquivo', array('controller' => 'Newsletter', 'action' => 'arquivo'));
 Router::connect('/termos', array('controller' => 'Institucional', 'action' => 'termos'));
 Router::connect('/login', array('controller' => 'Login', 'action' => 'Logar', 'prefix' => 'minhaconta'));
 

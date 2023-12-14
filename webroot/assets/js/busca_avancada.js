@@ -404,6 +404,7 @@ function getData(page) {
         "chkExecutivo": $('#chkExecutivo').is(':checked'),
         "chkJudiciario": $('#chkJudiciario').is(':checked'),
         "chkMinisterio": $('#chkMinisterio').is(':checked'),
+        "chkPedidoAnexo": $('#chkPedidoAnexo').is(':checked'),
         "scope_search": setAPIScope()
     };
 

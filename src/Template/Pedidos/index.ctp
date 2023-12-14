@@ -123,6 +123,28 @@
       <div class="col-md-3 filtro">
         <h1>Filtrar por:</h1>
          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+         <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingSix">
+                    <h4 class="panel-title" data-toggle="tooltip" data-placement="right" title="Apenas pedidos com anexos.">
+                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                            <i class="more-less glyphicon glyphicon-chevron-down"></i>
+                            Pedidos com anexos:
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseSix" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSix">
+                    <div class="panel-body">
+                        <form action="" method="post" data-parsley-validate data-parsley-errors-messages-disabled>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkPedidoAnexo" class="regular-checkbox">
+                            <label for="chkPedidoAnexo">Selecionar apenas pedidos com anexos</label>
+                          </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <div class="panel panel-default">
                 <div class="panel-heading data" role="tab" id="headingA">
                     <h4 class="panel-title" data-toggle="tooltip" data-placement="right" title="Órgão para o qual o pedido foi enviado.">
@@ -233,7 +255,7 @@
                 <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
                     <div class="panel-body">
                         <form action="" method="post" data-parsley-validate data-parsley-errors-messages-disabled>
-                         <div class="form-group bgCheckbox">
+                          <div class="form-group bgCheckbox">
                             <input type="checkbox" id="chkAtendido" class="regular-checkbox">
                             <label for="chkAtendido">Atendido</label>
                           </div>
@@ -299,6 +321,7 @@
                         </form>
                     </div>
                 </div>
+                
                 <div class="col-md-12">
                   <div class="form-group">
                       <input type="reset" class="form-control" value="Limpar Filtros">

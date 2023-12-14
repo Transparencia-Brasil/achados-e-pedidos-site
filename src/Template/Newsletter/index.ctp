@@ -14,7 +14,7 @@
 <section class="contato">
   <div class="container">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="col-md-12 col-sm-12 col-xs-12" style="margin-bottom:30px;">
         <h1>Newsletter</h1>
         <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="Como Funciona">
         <div style="width:50%;margin: 0 auto;">

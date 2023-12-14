@@ -24,11 +24,15 @@
           </p>
         </div>
         
-        <div style="width:50%;margin: 0 auto 50px auto;">
+        <div id="newsletter_archive">
           <style type="text/css">
           <!--
           .display_archive {font-family: arial,verdana; font-size: 12px;}
-          .campaign {line-height: 125%; margin: 5px;}
+          .campaign {line-height: 125%; margin: 4px 0px 10px 0px;}
+          #newsletter_archive {width:50%;margin: 0 auto 50px auto;}
+          @media only screen and (max-width: 390px) {
+            #newsletter_archive {width:100% !important;}
+          }
           //-->
           </style>
           <script language="javascript" src="//abraji.us8.list-manage.com/generate-js/?u=3a2d727753f3d085d23587074&fid=7&show=10000" type="text/javascript"></script>

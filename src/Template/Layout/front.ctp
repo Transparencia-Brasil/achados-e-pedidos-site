@@ -288,7 +288,7 @@ $blipchat_key = Configure::read("BlipChat.Key");
     </script>
 
     <!--// line modal -->
-    <script type="text/javascript" src="assets/js/busca_avancada.js" ></script>
+    <script type="text/javascript" src="assets/js/busca_avancada.js?no-cache=7" ></script>
 
     <!-- Deferred JavaScript -->
     <script type="text/javascript" src="<?=BASE_URL?>assets/js/wow/wow.min.js"></script>

@@ -123,6 +123,28 @@
       <div class="col-md-3 filtro">
         <h1>Filtrar por:</h1>
          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+         <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingSix">
+                    <h4 class="panel-title" data-toggle="tooltip" data-placement="right" title="Apenas pedidos com anexos.">
+                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                            <i class="more-less glyphicon glyphicon-chevron-down"></i>
+                            Pedidos com anexos:
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseSix" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSix">
+                    <div class="panel-body">
+                        <form action="" method="post" data-parsley-validate data-parsley-errors-messages-disabled>
+                          <div class="form-group bgCheckbox">
+                            <input type="checkbox" id="chkPedidoAnexo" class="regular-checkbox">
+                            <label for="chkPedidoAnexo">Selecionar apenas pedidos com anexos</label>
+                          </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <div class="panel panel-default">
                 <div class="panel-heading data" role="tab" id="headingA">
                     <h4 class="panel-title" data-toggle="tooltip" data-placement="right" title="Órgão para o qual o pedido foi enviado.">
@@ -233,7 +255,7 @@
                 <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
                     <div class="panel-body">
                         <form action="" method="post" data-parsley-validate data-parsley-errors-messages-disabled>
-                         <div class="form-group bgCheckbox">
+                          <div class="form-group bgCheckbox">
                             <input type="checkbox" id="chkAtendido" class="regular-checkbox">
                             <label for="chkAtendido">Atendido</label>
                           </div>
@@ -299,6 +321,7 @@
                         </form>
                     </div>
                 </div>
+                
                 <div class="col-md-12">
                   <div class="form-group">
                       <input type="reset" class="form-control" value="Limpar Filtros">
@@ -335,8 +358,9 @@
           <!-- // Visualização 4 -->
           <!-- Visualização 2 -->
           <div id="cabecalho-resultados" style="display:none">
-            <h4>Resultado para: <span class="termo-display"></span></h4>
-            <h5>Foram encontrados <span class="hits-total-display"></span> pedidos - Mostrando <span class="paginacao-de"></span> de <span class="paginacao-ate"></span>.</h5>
+          <h4>Encontramos <span class="hits-total-display"></span> pedidos contendo o(s) termo(s): <i><span class="termo-display"></span></i></h4>
+            <h5>Mostrando <span class="paginacao-de"></span> de <span class="paginacao-ate"></span>, ordenados por data do pedido LAI mais recente.</h5>
+            
             <h5 id="erro-resultado" style="color:red;"></h5>
           </div>
           <div class="row" id="boxes-resultados">

@@ -114,7 +114,7 @@
               </p>
               <div class="enviado">Pedido enviado para: <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></div>
               <div class="porr">Pedido disponibilizado por: <a href="<?=$this->Url->build('/usuarios/' . $pedido["SlugUsuario"])?>"><?=$pedido["NomeUsuario"]?></a></div>
-              <div class="em">Em: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></div>
+              <div class="em">Pedido LAI realizado em: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></div>
               <div class="situacao">
                 <div class="col-md-8 col-sm-8 col-xs-12">
                    <?php

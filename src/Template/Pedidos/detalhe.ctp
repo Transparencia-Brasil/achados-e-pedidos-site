@@ -41,7 +41,7 @@
             </p>
             <ul class="list">
               <li class="item"> Pedido disponibilizado por: <span><?=$pedido["Anonimo"] == 1 ? "Anônimo" : $pedido["NomeUsuario"]?></span></li>
-              <li class="item">Em: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></li>
+              <li class="item">Pedido LAI realizado em: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></li>
             </ul>
             <div class="col-md-6">
               <div class="resposta-pedido">

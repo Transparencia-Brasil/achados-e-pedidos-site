@@ -161,6 +161,7 @@ var temfiltro = false;
 
 var scopeSearch = ['pedidos', 'interacoes', 'anexos'];
 var scopeSearchOnlyPedidos = ['pedidos'];
+var scopeSearchOnlyAnexos = ['anexos'];
 
 //INICIALIZAÇÃO
 $(document).ready(function() {
@@ -947,8 +948,10 @@ function limparBusca() {
 }
 
 function setAPIScope() {
-    if (inputBuscaAvancada.val() != undefined && inputBuscaAvancada.val().length > 0) {
+    if (inputBuscaAvancada.val() != undefined && inputBuscaAvancada.val().length > 0 && $('#chkPedidoAnexo').is(':checked') == false) {
         return scopeSearch;
+    } else if ($('#chkPedidoAnexo').is(':checked')) {
+        return scopeSearchOnlyAnexos;
     } else {
         return scopeSearchOnlyPedidos;
     }

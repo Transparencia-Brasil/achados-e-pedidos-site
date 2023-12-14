@@ -123,6 +123,7 @@ $blipchat_key = Configure::read("BlipChat.Key");
                       </ul>
                     </li>
                     <li><a href="<?=$this->Url->build(["controller" => "Pedidos","action" => "index", "prefix" => false]); ?>">Pedidos</a></li>
+                    <li><a href="<?=$this->Url->build(["controller" => "Newsletter","action" => "index", "prefix" => false]); ?>">Newsletter</a></li>
                     <li><a href="<?=$this->Url->build(["controller" => "Publicacoes","action" => "index", "prefix" => false]); ?>">Publicações</a></li>
                     <li><a href="<?=$this->Url->build(["controller" => "Dados","action" => "index", "prefix" => false])?>">Dados</a></li>
                     <li><a href="#" class="menuLast toogle-chat">Quer ajuda?</a></li>
@@ -144,7 +145,7 @@ $blipchat_key = Configure::read("BlipChat.Key");
                     <form class="navbar-form navbar-right" role="search" id="frmBusca" action="<?=BASE_URL?>pedidos" method="get">
                       <div id="custom-search-input">
                           <div class="input-group col-md-12 col-xs-12">
-                              <input type="text" list="fieldList" name="buscaFixa" id="buscaFixa" class="form-control input-lg" placeholder="Digite aqui sua busca">
+                              <input type="text" list="fieldList" name="buscaFixa" id="buscaFixa" class="form-control input-sm" placeholder="Digite aqui sua busca">
                               <span class="input-group-btn">
                                   <button class="btn btn-info btn-lg" type="button" onclick="$('#frmBusca').submit()" attr="busca_pedido">
                                       <i class="glyphicon glyphicon-search"></i>
@@ -288,7 +289,7 @@ $blipchat_key = Configure::read("BlipChat.Key");
     </script>
 
     <!--// line modal -->
-    <script type="text/javascript" src="assets/js/busca_avancada.js" ></script>
+    <script type="text/javascript" src="assets/js/busca_avancada.js?no-cache=3" ></script>
 
     <!-- Deferred JavaScript -->
     <script type="text/javascript" src="<?=BASE_URL?>assets/js/wow/wow.min.js"></script>

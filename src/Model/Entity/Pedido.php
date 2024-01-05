@@ -354,6 +354,29 @@ class Pedido extends Entity{
 		return $this->TotalPedidosModerados($filtro,$moderar);
 	}
 
+	public function PedidosRecentes($qtd) {
+		$connection = ConnectionManager::get('default');
+		$query = "select distinct pedidos.Codigo, 
+		pedidos.Slug, 
+		pedidos.CodigoUsuario, 
+		pedidos.CodigoAgente,
+		pedidos.Titulo,
+		pedidos.DataEnvio,
+		pedidos.Criacao,
+		agente.Nome NomeAgente, 
+		agente.Slug SlugAgente, 
+		usuario.Nome NomeUsuario,
+		usuario.Slug SlugUsuario
+		from pedidos pedidos
+		join moderacoes b on pedidos.Codigo = b.CodigoObjeto and b.CodigoTipoObjeto = 1
+		join agentes agente on pedidos.CodigoAgente = agente.Codigo    
+		join usuarios usuario on pedidos.CodigoUsuario = usuario.Codigo 
+		where b.CodigoStatusModeracao = 2 and agente.Ativo = 1 and pedidos.Ativo = 1 
+		order by pedidos.Criacao desc limit " . $qtd . ";";
+
+		return $connection->execute($query)->fetchAll("assoc");
+	}
+
 	public function FiltrarPedidos($data, $pagina = 1, $qtd = 10, $fixaDestaquesHome="")
 	{
 

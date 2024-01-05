@@ -12,6 +12,38 @@ use Cake\Datasource\ConnectionManager;
 
 class Dados extends Entity{
 
+    public function TotalPedidosRespondidos() {
+        $connection = ConnectionManager::get('default');
+
+        $query = "SELECT (CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) as pedidosNoPrazo FROM v_pedidos_count_dias_resposta";
+        $total = $connection->execute($query)->fetchAll('assoc');
+        $pedidosTotal = 0;
+
+        foreach ($total as $key => $value) {
+            $pedidosTotal += floatval($value["pedidosNoPrazo"]);
+        }
+
+        $pedidosTotal = ($pedidosTotal / count($total));
+
+        return $pedidosTotal;
+    }
+
+    public function TempoMedioPrimeiraResposta() {
+        $connection = ConnectionManager::get('default');
+
+        $query = "SELECT DATEDIFF(DataResposta, DataEnvio) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta";
+        $tempoMedioPrimeiraRespostaRes = $connection->execute($query)->fetchAll('assoc');
+        $tempoMedioPrimeiraResposta = 0;
+        if(count($tempoMedioPrimeiraRespostaRes) > 0) {
+            foreach ($tempoMedioPrimeiraRespostaRes as $iItem => $item) {
+                $tempoMedioPrimeiraResposta += floatval($item["MediaDiasResposta"]);
+            }
+
+            $tempoMedioPrimeiraResposta = ($tempoMedioPrimeiraResposta / count($tempoMedioPrimeiraRespostaRes));
+        }
+        
+        return $tempoMedioPrimeiraResposta;
+    }
 
     /* -------------------------------------------------------------*/
     /* -------------------------------------------------------------*/
@@ -32,7 +64,13 @@ class Dados extends Entity{
         $connection = ConnectionManager::get('default');
         
 
-        $query = "select p.Ativo, count(p.Codigo) as QuantidadePedido, sp.Nome as StatusPedido from pedidos as p left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) group by sp.Nome having Ativo = 1";
+        $query = "SELECT p.Ativo,  COUNT(p.Codigo) as QuantidadePedido, sp.Nome as StatusPedido
+            FROM pedidos as p
+            INNER JOIN status_pedido as sp 
+            ON p.CodigoStatusPedido = sp.Codigo
+            WHERE p.Ativo = 1
+            GROUP BY sp.Nome;
+            ";
         
         $totalPedido_array = $connection->execute($query)->fetchAll('assoc');
         $totalCount = array_sum(array_column($totalPedido_array,'QuantidadePedido'));
@@ -48,15 +86,12 @@ class Dados extends Entity{
         //Tempo médios de primeira resposta (em dias)
         //  "SELECT AVG(DATEDIFF(DataResposta, DataEnvio)) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta;"
         //Total de pedidos na base de dados
-        $query = "SELECT AVG(DATEDIFF(DataResposta, DataEnvio)) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta";
-        $tempoMedioPrimeiraResposta = $connection->execute($query)->fetchAll('assoc');
-        $tempoMedioPrimeiraResposta = floatval($tempoMedioPrimeiraResposta[0]["MediaDiasResposta"]);
+        $tempoMedioPrimeiraResposta = $this->TempoMedioPrimeiraResposta();
         
         //Total de pedidos respondidos em até 20 dias
-        //  "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta;"
-        $query = "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta";
-        $totalPedidosRespondidosEmAteVinteDias = $connection->execute($query)->fetchAll('assoc');
-        $totalPedidosRespondidosEmAteVinteDias = floatval($totalPedidosRespondidosEmAteVinteDias[0]["PedidosNoPrazo"]) * 100;
+        //  "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta;"        
+        $totalPedidosRespondidosEmAteVinteDias = $this->total
+    
 
         //Total de pedidos com recurso
         $query3 = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta IN (4,5,6,7,8,9,10,11) AND Pedidos.Ativo = 1']);

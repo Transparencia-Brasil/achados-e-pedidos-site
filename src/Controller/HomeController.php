@@ -34,7 +34,7 @@ class HomeController extends AppController
         $destaques2 = $destaqueBU->Listar();
         $destaques3 = $destaqueBU->Listar();
 
-        $viewModel["UltimosPedidos"] = $ultimosPedidos;
+        //$viewModel["UltimosPedidos"] = $ultimosPedidos;
         $this->set("viewModel", $viewModel);
         $this->set("destaques", $destaques);
         $this->set("destaques2", $destaques2);

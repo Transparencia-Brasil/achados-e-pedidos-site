@@ -541,34 +541,6 @@ class Pedido extends Entity{
 
 	//2017-02-05 Paulo Campos: colocando join de moderacao da query
 	//2017-01-24 Paulo Campos: tirando join de moderacao da query
-	public function RelatorioTotal(){
-		$connection = ConnectionManager::get('default');
-
-		$query = 'select distinct
-					count(pedido.Codigo) Total,
-					sum(if(pedido.CodigoStatusPedido = 1, 1, 0)) TotalAtendidos,
-					sum(if(pedido.CodigoStatusPedido = 2, 1, 0)) TotalNaoAtendidos
-				from
-					pedidos pedido join
-					moderacoes m on pedido.Codigo = m.CodigoObjeto
-					and m.CodigoTipoObjeto = 1 and m.CodigoStatusModeracao = 2
-				';
-
-			// $query = 'select distinct
-			// 		count(pedido.Codigo) Total,
-			// 		sum(if(pedido.CodigoStatusPedido = 1, 1, 0)) TotalAtendidos,
-			// 		sum(if(pedido.CodigoStatusPedido = 2, 1, 0)) TotalNaoAtendidos
-			// 	from
-			// 		pedidos pedido
-			// 	';
-
-		$results = $connection->execute($query)->fetchAll('assoc');
-
-    	return $results[0];
-	}
-
-	//2017-02-05 Paulo Campos: colocando join de moderacao da query
-	//2017-01-24 Paulo Campos: tirando join de moderacao da query
 	public function RelatorioPorEstado()
 	{
 		$connection = ConnectionManager::get('default');

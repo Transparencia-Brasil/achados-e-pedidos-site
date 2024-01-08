@@ -77,9 +77,9 @@
                     <p class="title">
                       <?=$pedido["Titulo"]?>
                     </p>
-                    <div class="enviado">xPedido enviado para: <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></div>
+                    <div class="enviado">Pedido enviado para: <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></div>
                     <div class="por">Pedido disponibilizado por: <a href="<?=$this->Url->build($slugUsuario)?>"><?=$nomeUsuario?></a></div>
-                    <div class="em">Em: <?=$pedido["DataEnvio"]?></div>
+                    <div class="em">Pedido LAI realizado em: <?=date_format(new DateTime($pedido["DataEnvio"]), "d/m/Y")?></div>
                     <div class="situacao">
                       <div class="col-md-6 col-sm-6 col-xs-12">
                         <?=$this->FrontEnd->situacaoPedido($pedido["CodigoTipoPedidoSituacao"])?>

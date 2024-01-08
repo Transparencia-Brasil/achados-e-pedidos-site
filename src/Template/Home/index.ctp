@@ -100,50 +100,6 @@
     </div>
   </section>
 
-   <!--Pedidos Recentes-->
-  <section class="pedidosRecentes">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12 text-center">
-          <h1>PEDIDOS RECENTES</h1>
-          <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="Como Funciona">
-        </div>
-        <?php
-        $ultimosPedidos = $viewModel["UltimosPedidos"];
-        $contador = 0;
-
-        foreach ($ultimosPedidos as $pedido) {
-          $nomeUsuario = $pedido["Anonimo"] == 1 ? "Anônimo" : $pedido["NomeUsuario"];
-          $slugUsuario = $pedido["Anonimo"] == 1 ? "javascript:void(0);" : "/usuarios/" . $pedido["SlugUsuario"];
-
-          $slide = $contador % 2 == 0 ? "slideInLeft" : "slideInRight";
-          ?>
-          <div class="col-md-6 col-sm-6 col-xs-12 box wow <?=$slide?> animated animated" data-wow-delay="300ms" data-wow-duration="2s" style="min-height:340px;visibility: visible; animation-duration: 2s; animation-delay: 300ms; animation-name: <?=$slide?>;">
-            <p>
-              <?=truncate($pedido["Titulo"],200)?>
-            </p>
-            <div class="enviado">Pedido enviado para: <a href="<?=$this->Url->build('/agentes/' . $pedido["SlugAgente"])?>"><?=$pedido["NomeAgente"]?></a></div>
-            <div class="porr">Pedido disponibilizado por: <a href="<?=$this->Url->build($slugUsuario)?>"><?=$nomeUsuario?></a></div>
-            <div class="em">Em: <?=$pedido["DataEnvio"]?></div>
-            <div class="btnVerMais btn-size-small pull-right">
-              <a href="<?=$this->Url->build('/pedidos/' . $pedido["Slug"])?>">Ver
-                <div class="seta seta-direita"></div>
-              </a>
-            </div>
-          </div>
-        <?php
-          $contador++;
-        }
-        ?>
-      </div>
-        <div class="col-md-12 col-sm-6 col-xs-12 text-center">
-          <div class="bntVer"><a href="<?=$this->Url->build('/pedidos')?>">Ver mais</a></div>
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
-
 <script>
   cor1 = "#fe9301";cor2 = "#cccc00";cor3 = "#00ccff";cor4 = "#3366ff";
 

@@ -29,7 +29,7 @@ class HomeController extends AppController
         $destaqueBU = new DestaqueHome();
 
         $viewModel = [];
-        $ultimosPedidos = $pedidoBU->PedidosRecentes(4);
+        //$ultimosPedidos = $pedidoBU->PedidosRecentes(4);
         $destaques = $destaqueBU->Listar();
         $destaques2 = $destaqueBU->Listar();
         $destaques3 = $destaqueBU->Listar();

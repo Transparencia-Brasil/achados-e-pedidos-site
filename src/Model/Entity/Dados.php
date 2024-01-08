@@ -90,7 +90,7 @@ class Dados extends Entity{
         
         //Total de pedidos respondidos em até 20 dias
         //  "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta;"        
-        $totalPedidosRespondidosEmAteVinteDias = $this->total
+        $totalPedidosRespondidosEmAteVinteDias = $this->TotalPedidosRespondidos();
     
 
         //Total de pedidos com recurso

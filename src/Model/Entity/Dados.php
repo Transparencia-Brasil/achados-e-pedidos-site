@@ -159,18 +159,6 @@ class Dados extends Entity{
         return json_encode($atendimentoPedidosPorAno_arr);        
     }
 
-    public function AtendimentoPedidosPorAnoETipo() {
-
-        $connection = ConnectionManager::get('default');
-        
-        //Total de pedidos na base de dados
-        $query = "SELECT DATE_FORMAT(DataEnvio, '%Y') as ano, count(*) as qtd, StatusResposta as status  FROM v_pedidos_ativos_status_resposta where DATE_FORMAT(DataEnvio, '%Y') >= 2012 AND Ativo = 1 group by ano, status";
-        
-        $atendimentoPedidosPorAno_arr = $connection->execute($query)->fetchAll('assoc');
-        // $totalPedidos = $totalPedido_array[0]["total"];
-        return json_encode($atendimentoPedidosPorAno_arr);
-    }
-
     public function PedidosAtendimentoPorAno() {
         $connection = ConnectionManager::get('default');
         

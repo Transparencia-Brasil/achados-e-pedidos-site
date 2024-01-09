@@ -78,7 +78,6 @@ Router::scope('/', function ($routes) {
 Router::connect('/api/v2/PedidosAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'PedidosAtendimentoPorAno_V2'));
 
 // -
-//Router::connect('/api/atendimentoPedidosPorAnoETipo', array('controller' => 'Dados', 'action' => 'AtendimentoPedidosPorAnoETipo'));
 //Router::connect('/api/pedidosPorUFPoderENivel', array('controller' => 'Dados', 'action' => 'PedidosPorUFPoderENivel'));
 Router::connect('/api/pedidosPorUFPoderENivelEStatus', array('controller' => 'Dados', 'action' => 'PedidosPorUFPoderENivelEStatus'));
 Router::connect('/api/PedidosAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'PedidosAtendimentoPorAno'));

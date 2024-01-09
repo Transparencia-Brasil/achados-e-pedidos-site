@@ -73,13 +73,11 @@ Router::scope('/', function ($routes) {
     $routes->fallbacks('InflectedRoute');
 });
 
-Router::connect('/api/taxaDeAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'TaxaDeAtendimentoPorAno'));
+//Router::connect('/api/taxaDeAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'TaxaDeAtendimentoPorAno'));
 // Versão 2.0 dos Dados para o Atendimento de Pedidos por Ano
 Router::connect('/api/v2/PedidosAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'PedidosAtendimentoPorAno_V2'));
 
 // -
-Router::connect('/api/atendimentoPedidosPorAnoETipo', array('controller' => 'Dados', 'action' => 'AtendimentoPedidosPorAnoETipo'));
-Router::connect('/api/pedidosPorUFPoderENivel', array('controller' => 'Dados', 'action' => 'PedidosPorUFPoderENivel'));
 Router::connect('/api/pedidosPorUFPoderENivelEStatus', array('controller' => 'Dados', 'action' => 'PedidosPorUFPoderENivelEStatus'));
 Router::connect('/api/PedidosAtendimentoPorAno', array('controller' => 'Dados', 'action' => 'PedidosAtendimentoPorAno'));
 Router::connect('/api/sumario', array('controller' => 'Dados', 'action' => 'Sumario'));

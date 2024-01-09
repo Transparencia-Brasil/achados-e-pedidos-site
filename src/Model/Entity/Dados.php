@@ -12,6 +12,38 @@ use Cake\Datasource\ConnectionManager;
 
 class Dados extends Entity{
 
+    public function TotalPedidosRespondidos() {
+        $connection = ConnectionManager::get('default');
+
+        $query = "SELECT (CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) as pedidosNoPrazo FROM v_pedidos_count_dias_resposta";
+        $total = $connection->execute($query)->fetchAll('assoc');
+        $pedidosTotal = 0;
+
+        foreach ($total as $key => $value) {
+            $pedidosTotal += floatval($value["pedidosNoPrazo"]);
+        }
+
+        $pedidosTotal = ($pedidosTotal / count($total));
+
+        return $pedidosTotal;
+    }
+
+    public function TempoMedioPrimeiraResposta() {
+        $connection = ConnectionManager::get('default');
+
+        $query = "SELECT DATEDIFF(DataResposta, DataEnvio) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta";
+        $tempoMedioPrimeiraRespostaRes = $connection->execute($query)->fetchAll('assoc');
+        $tempoMedioPrimeiraResposta = 0;
+        if(count($tempoMedioPrimeiraRespostaRes) > 0) {
+            foreach ($tempoMedioPrimeiraRespostaRes as $iItem => $item) {
+                $tempoMedioPrimeiraResposta += floatval($item["MediaDiasResposta"]);
+            }
+
+            $tempoMedioPrimeiraResposta = ($tempoMedioPrimeiraResposta / count($tempoMedioPrimeiraRespostaRes));
+        }
+        
+        return $tempoMedioPrimeiraResposta;
+    }
 
     /* -------------------------------------------------------------*/
     /* -------------------------------------------------------------*/
@@ -32,7 +64,13 @@ class Dados extends Entity{
         $connection = ConnectionManager::get('default');
         
 
-        $query = "select p.Ativo, count(p.Codigo) as QuantidadePedido, sp.Nome as StatusPedido from pedidos as p left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) group by sp.Nome having Ativo = 1";
+        $query = "SELECT p.Ativo,  COUNT(p.Codigo) as QuantidadePedido, sp.Nome as StatusPedido
+            FROM pedidos as p
+            INNER JOIN status_pedido as sp 
+            ON p.CodigoStatusPedido = sp.Codigo
+            WHERE p.Ativo = 1
+            GROUP BY sp.Nome;
+            ";
         
         $totalPedido_array = $connection->execute($query)->fetchAll('assoc');
         $totalCount = array_sum(array_column($totalPedido_array,'QuantidadePedido'));
@@ -48,15 +86,12 @@ class Dados extends Entity{
         //Tempo médios de primeira resposta (em dias)
         //  "SELECT AVG(DATEDIFF(DataResposta, DataEnvio)) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta;"
         //Total de pedidos na base de dados
-        $query = "SELECT AVG(DATEDIFF(DataResposta, DataEnvio)) AS MediaDiasResposta FROM v_pedidos_count_dias_resposta";
-        $tempoMedioPrimeiraResposta = $connection->execute($query)->fetchAll('assoc');
-        $tempoMedioPrimeiraResposta = floatval($tempoMedioPrimeiraResposta[0]["MediaDiasResposta"]);
+        $tempoMedioPrimeiraResposta = $this->TempoMedioPrimeiraResposta();
         
         //Total de pedidos respondidos em até 20 dias
-        //  "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta;"
-        $query = "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta";
-        $totalPedidosRespondidosEmAteVinteDias = $connection->execute($query)->fetchAll('assoc');
-        $totalPedidosRespondidosEmAteVinteDias = floatval($totalPedidosRespondidosEmAteVinteDias[0]["PedidosNoPrazo"]) * 100;
+        //  "SELECT SUM(CASE WHEN (DATEDIFF(DataResposta, DataEnvio) <= 20) THEN 1 ELSE 0 END) / COUNT(CodigoPedido) AS PedidosNoPrazo FROM v_pedidos_count_dias_resposta;"        
+        $totalPedidosRespondidosEmAteVinteDias = $this->TotalPedidosRespondidos();
+    
 
         //Total de pedidos com recurso
         $query3 = $pedidos->find()->where(['PedidosInteracoes.CodigoTipoPedidoResposta IN (4,5,6,7,8,9,10,11) AND Pedidos.Ativo = 1']);
@@ -119,21 +154,9 @@ class Dados extends Entity{
     
     public function TaxaDeAtendimentoPorAno() {
         $connection = ConnectionManager::get('default');
-        $query = "select p.Ativo,count(p.Codigo) as QuantidadePedido,year(p.DataEnvio) as AnoEnvio,sp.Nome as NomeStatusPedido from pedidos as p left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) group by sp.Nome, year(p.DataEnvio) having Ativo = 1";
+        $query = "select p.Ativo,count(p.Codigo) as QuantidadePedido,year(p.DataEnvio) as AnoEnvio,sp.Nome as NomeStatusPedido from pedidos as p inner join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) AND Ativo = 1 group by sp.Nome, year(p.DataEnvio)";
         $atendimentoPedidosPorAno_arr = $connection->execute($query)->fetchAll('assoc');
         return json_encode($atendimentoPedidosPorAno_arr);        
-    }
-
-    public function AtendimentoPedidosPorAnoETipo() {
-
-        $connection = ConnectionManager::get('default');
-        
-        //Total de pedidos na base de dados
-        $query = "SELECT DATE_FORMAT(DataEnvio, '%Y') as ano, count(*) as qtd, StatusResposta as status  FROM v_pedidos_ativos_status_resposta where DATE_FORMAT(DataEnvio, '%Y') >= 2012 AND Ativo = 1 group by ano, status";
-        
-        $atendimentoPedidosPorAno_arr = $connection->execute($query)->fetchAll('assoc');
-        // $totalPedidos = $totalPedido_array[0]["total"];
-        return json_encode($atendimentoPedidosPorAno_arr);
     }
 
     public function PedidosAtendimentoPorAno() {
@@ -198,35 +221,6 @@ class Dados extends Entity{
     //         "qtd" : 69
     //     },{...}
     // ]
-    public function PedidosPorUFPoderENivel() {
-        $connection = ConnectionManager::get('default');
-        
-        $connection->execute("call sp_count_total()")->execute();
-
-        //Total de pedidos na base de dados
-        $query = "select m.SiglaUf,
-                    m.NomeNivelFederativo,
-                    m.NomePoder,
-                    v.TotalPedidos as NaoRespondido,
-                    v2.TotalPedidos Respondido
-                    from maps as m
-                    left join v_count_total_nao_respondido as v
-                    on (m.NomeNivelFederativo = v.NomeNivelFederativo and m.NomePoder = v.NomePoder and v.SiglaUf = m.SiglaUf)
-                    left join v_count_total_respondido as v2
-                    on (m.NomeNivelFederativo = v2.NomeNivelFederativo and m.NomePoder = v2.NomePoder and v2.SiglaUf = m.SiglaUf)
-                    where m.SiglaUF is not null";
-
-        // {StatusResposta: "Não respondido", SiglaUF: "AC", TotalPedidos: "2", TotalPedidosPoder: "103513"}
-
-        // {"Não respondido":111, "Respondido":111, SiglaUF: "AC", TotalPedidos: "2"}
-
-
-        $pedidos = $connection->execute($query)->fetchAll('assoc');
-        // print_r($query);
-        // die();
-        return json_encode($pedidos);
-    }
-
     public function PedidosPorUFPoderENivelEStatus() {
         $connection = ConnectionManager::get('default');
         

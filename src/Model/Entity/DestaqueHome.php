@@ -13,9 +13,11 @@ class DestaqueHome extends Entity{
 		$elementos = "";
 
 		//$elementos = $conn->find('all')->where(['Ativo' => 1, 'Inicio <= current_timestamp', 'Termino >= current_timestamp']);
-		$elementos = $conn->find('all')->where(['Ativo = 1 AND (Inicio <="'.date("Y-m-d H:i:s").'" OR Inicio is Null) AND (Termino >="'.date("Y-m-d H:i:s").'" OR Termino is Null)']);
-		//die(debug($elementos));
-
+		$elementos = $conn->find('all', [
+			'fields' => ['CodigoTipoDestaqueHome', 'Link', 'Imagem', 'Nome', 'Resumo']
+		])
+			->where(['Ativo = 1 AND (Inicio <="'.date("Y-m-d H:i:s").'" OR Inicio is Null) AND (Termino >="'.date("Y-m-d H:i:s").'" OR Termino is Null)']);
+		
 		return $elementos;
 	}
 }

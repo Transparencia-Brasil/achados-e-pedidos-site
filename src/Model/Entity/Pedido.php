@@ -354,6 +354,29 @@ class Pedido extends Entity{
 		return $this->TotalPedidosModerados($filtro,$moderar);
 	}
 
+	public function PedidosRecentes($qtd) {
+		$connection = ConnectionManager::get('default');
+		$query = "select distinct pedidos.Codigo, 
+		pedidos.Slug, 
+		pedidos.CodigoUsuario, 
+		pedidos.CodigoAgente,
+		pedidos.Titulo,
+		pedidos.DataEnvio,
+		pedidos.Criacao,
+		agente.Nome NomeAgente, 
+		agente.Slug SlugAgente, 
+		usuario.Nome NomeUsuario,
+		usuario.Slug SlugUsuario
+		from pedidos pedidos
+		join moderacoes b on pedidos.Codigo = b.CodigoObjeto and b.CodigoTipoObjeto = 1
+		join agentes agente on pedidos.CodigoAgente = agente.Codigo    
+		join usuarios usuario on pedidos.CodigoUsuario = usuario.Codigo 
+		where b.CodigoStatusModeracao = 2 and agente.Ativo = 1 and pedidos.Ativo = 1 
+		order by pedidos.Criacao desc limit " . $qtd . ";";
+
+		return $connection->execute($query)->fetchAll("assoc");
+	}
+
 	public function FiltrarPedidos($data, $pagina = 1, $qtd = 10, $fixaDestaquesHome="")
 	{
 
@@ -515,34 +538,6 @@ class Pedido extends Entity{
 		return false;
 	}
 
-
-	//2017-02-05 Paulo Campos: colocando join de moderacao da query
-	//2017-01-24 Paulo Campos: tirando join de moderacao da query
-	public function RelatorioTotal(){
-		$connection = ConnectionManager::get('default');
-
-		$query = 'select distinct
-					count(pedido.Codigo) Total,
-					sum(if(pedido.CodigoStatusPedido = 1, 1, 0)) TotalAtendidos,
-					sum(if(pedido.CodigoStatusPedido = 2, 1, 0)) TotalNaoAtendidos
-				from
-					pedidos pedido join
-					moderacoes m on pedido.Codigo = m.CodigoObjeto
-					and m.CodigoTipoObjeto = 1 and m.CodigoStatusModeracao = 2
-				';
-
-			// $query = 'select distinct
-			// 		count(pedido.Codigo) Total,
-			// 		sum(if(pedido.CodigoStatusPedido = 1, 1, 0)) TotalAtendidos,
-			// 		sum(if(pedido.CodigoStatusPedido = 2, 1, 0)) TotalNaoAtendidos
-			// 	from
-			// 		pedidos pedido
-			// 	';
-
-		$results = $connection->execute($query)->fetchAll('assoc');
-
-    	return $results[0];
-	}
 
 	//2017-02-05 Paulo Campos: colocando join de moderacao da query
 	//2017-01-24 Paulo Campos: tirando join de moderacao da query

@@ -154,7 +154,7 @@ class Dados extends Entity{
     
     public function TaxaDeAtendimentoPorAno() {
         $connection = ConnectionManager::get('default');
-        $query = "select p.Ativo,count(p.Codigo) as QuantidadePedido,year(p.DataEnvio) as AnoEnvio,sp.Nome as NomeStatusPedido from pedidos as p left join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) group by sp.Nome, year(p.DataEnvio) having Ativo = 1";
+        $query = "select p.Ativo,count(p.Codigo) as QuantidadePedido,year(p.DataEnvio) as AnoEnvio,sp.Nome as NomeStatusPedido from pedidos as p inner join status_pedido as sp on (p.CodigoStatusPedido = sp.Codigo) AND Ativo = 1 group by sp.Nome, year(p.DataEnvio)";
         $atendimentoPedidosPorAno_arr = $connection->execute($query)->fetchAll('assoc');
         return json_encode($atendimentoPedidosPorAno_arr);        
     }

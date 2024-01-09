@@ -221,35 +221,6 @@ class Dados extends Entity{
     //         "qtd" : 69
     //     },{...}
     // ]
-    public function PedidosPorUFPoderENivel() {
-        $connection = ConnectionManager::get('default');
-        
-        $connection->execute("call sp_count_total()")->execute();
-
-        //Total de pedidos na base de dados
-        $query = "select m.SiglaUf,
-                    m.NomeNivelFederativo,
-                    m.NomePoder,
-                    v.TotalPedidos as NaoRespondido,
-                    v2.TotalPedidos Respondido
-                    from maps as m
-                    left join v_count_total_nao_respondido as v
-                    on (m.NomeNivelFederativo = v.NomeNivelFederativo and m.NomePoder = v.NomePoder and v.SiglaUf = m.SiglaUf)
-                    left join v_count_total_respondido as v2
-                    on (m.NomeNivelFederativo = v2.NomeNivelFederativo and m.NomePoder = v2.NomePoder and v2.SiglaUf = m.SiglaUf)
-                    where m.SiglaUF is not null";
-
-        // {StatusResposta: "Não respondido", SiglaUF: "AC", TotalPedidos: "2", TotalPedidosPoder: "103513"}
-
-        // {"Não respondido":111, "Respondido":111, SiglaUF: "AC", TotalPedidos: "2"}
-
-
-        $pedidos = $connection->execute($query)->fetchAll('assoc');
-        // print_r($query);
-        // die();
-        return json_encode($pedidos);
-    }
-
     public function PedidosPorUFPoderENivelEStatus() {
         $connection = ConnectionManager::get('default');
         

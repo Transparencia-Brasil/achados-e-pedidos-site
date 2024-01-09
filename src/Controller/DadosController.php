@@ -37,14 +37,6 @@ class DadosController extends AppController
 
     }
 
-    public function PedidosPorUFPoderENivel() {
-        $record = new Dados();
-        $result = $record->PedidosPorUFPoderENivel();
-        echo($result);
-        $this->autoRender = false;
-
-    }
-
     public function PedidosAtendimentoPorAno_V2() {
         $record = new Dados();
         $result = $record->PedidosAtendimentoPorAno_V2();

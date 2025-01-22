@@ -13,6 +13,7 @@ use App\Model\Entity\Moderacao;
 use App\Model\Entity\PedidoInteracao;
 use App\Model\Entity\PedidoAnexo;
 use App\Model\Entity\TipoPedidoResposta;
+use Cake\Log\Log;
 
 class PedidosController extends AppController
 {

@@ -11,7 +11,8 @@ if (!isset($_SERVER['PHP_AUTH_USER'])) {
         strcmp($_SERVER['PHP_AUTH_USER'] , INTEGRATION_USER) == 0&&
         strcmp($_SERVER['PHP_AUTH_PW'] , INTEGRATION_PWD) == 0)
     {
-        $logName = $_GET["name"];
+        $logName = str_replace("/", "", $_GET["name"]);
+        $logName = str_replace("..", "", $logName);
         $file = __DIR__ . "/../logs/$logName.log";
 
         if(file_exists($file)) {

@@ -191,21 +191,27 @@ class Pedido extends Entity{
 	}
 
 	public function Salvar() {
-		$conn_pedido = TableRegistry::get("Pedidos");
+		Log::debug("[PedidoModel] Salvar", "pedidos");
 
+		$conn_pedido = TableRegistry::get("Pedidos");
 		$novoElemento = $conn_pedido->newEntity();
+
+		Log::debug("[PedidoModel] Conexão iniciada", "pedidos");
 
 		$this->CodigoStatusPedidoInterno = 4; // não classificado
 		//$this->CodigoStatusPedido = 4;
 		$this->FoiProrrogado = false;
 		$this->DataEnvio = UDataComponent::ConverterMySQL($this->DataEnvio);
 		$this->Slug = substr(UStringComponent::Slugfy($this->Titulo), 0, 200);
+		
+		Log::debug("[PedidoModel] Validando o slug", "pedidos");
 		//2017-01-24 Paulo Campos: Valida Slug Unico e grante integridade nos Slugs.
 		$codigoPedido = $this->validaSlugUnico($this->Slug);
 		if ($codigoPedido > 0) {
 			$this->Slug = $this->Slug . "-" . $codigoPedido;
 		}
-		//die(debug($this));
+		
+		Log::debug("[PedidoModel] Salvando", "pedidos");
 		return $conn_pedido->save($this);
 	}
 

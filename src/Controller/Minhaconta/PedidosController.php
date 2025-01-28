@@ -13,6 +13,7 @@ use App\Model\Entity\Moderacao;
 use App\Model\Entity\PedidoInteracao;
 use App\Model\Entity\PedidoAnexo;
 use App\Model\Entity\TipoPedidoResposta;
+use Cake\Log\Log;
 
 class PedidosController extends AppController
 {
@@ -47,12 +48,16 @@ class PedidosController extends AppController
         $nomeAgente = "";
 
         if ($this->request->is('post') || $this->request->is('put')) {
+            
+            Log::debug("[0] Novo Pedido", "pedidos");
 
             $conn = TableRegistry::get("Pedidos");
 
             $conn->patchEntity($pedido, $this->request->data);
 
             $codigoAgente = $this->UNumero->ValidarNumero($pedido->CodigoAgente);
+
+            Log::debug("[1] Agente: $codigoAgente", "pedidos");
 
             if ($codigoAgente > 0) {
                 $agenteBU = new Agente();
@@ -63,25 +68,34 @@ class PedidosController extends AppController
                     $nomeAgente = $agente->Nome;
                 }
             }
+
             $erros = $pedido->ValidarNovoPedido();
 
+            Log::debug("[2] Validação do Pedido resulton em: " . count($erros) . " erros", "pedidos");
+
             if (count($erros) == 0) {
+
+                Log::debug("[3] Preparando o pedido para a base", "pedidos");
 
                 $pedido->CodigoTipoOrigem = 1;
                 //$pedido->CodigoStatusPedido= 4; // não classificado
                 $pedido->CodigoStatusPedidoInterno = 4; // não classificado
                 $pedido->CodigoUsuario = $this->USessao->GetUsuarioFrontID($this->request);
 
+                Log::debug("[4] Salvando o pedido", "pedidos");
                 $sucesso = $pedido->Salvar();
+                Log::debug("[5] Resultou em: $sucesso", "pedidos");
 
                 if ($sucesso) {
-
                     //Joga os pedidos em moderação
                     $moderacao = new Moderacao();
+
+                    Log::debug("[6] Abrindo moderação para o pedido", "pedidos");
                     //2017-01-05 Paulo Campos: Coloca todos os pedidos deste fluxo de cadastro em moderação.
                     //TODO - Moderação inteligente: Usuários aprovados não precisam de moderação nos pedidos
                     $moderacao->InserirPedidosNaoModerados($sucesso->Codigo);
                     // atualiza os dados no elastic search
+                    Log::debug("[7] Moderação aberta para o pedido", "pedidos");
 
                     //2017-01-05 Paulo Campos: Nessa primeira fase, todos os pedidos inseridos pelo fluxo de cadastro vão cair em moderação.
                     //A moderação irá inserir o pedido no ES.
@@ -90,17 +104,23 @@ class PedidosController extends AppController
                     //die();
 
                     // envia e-mail de pedido cadastrado
+                    Log::debug("[8] Preparando o e-mail de pedido cadastrado para o usuário", "pedidos");
                     $usuario = $this->USessao->GetUsuarioFront($this->request);
+                    Log::debug("[9] Envia o e-mail de pedido cadastrado para o usuário", "pedidos");
                     $this->UEmail->EnviarEmailPedidoCadastrado($usuario->Email, $usuario->Nome, $pedido->Titulo, BASE_URL . 'minhaconta/pedidos/editar/' . $pedido->Slug);
+                    Log::debug("[10] E-mail de pedido cadastrado para o usuário enviado", "pedidos");
 
                     // encaminhar para interação de pedido
                     if ($this->request->data['CodigoStatusPedido'] == 4) {
+                        Log::debug("[11] Redirecionando", "pedidos");
                         $this->redirect('/minhaconta/pedidos/sucesso/' . $pedido->Slug);
                     } else {
+                        Log::debug("[11] Redirecionando para os pedidos", "pedidos");
                         $this->redirect(array('controller' => 'Pedidos', 'action' => 'pedidointeracao', 'prefix' => 'minhaconta', $pedido->Slug));
                     }
                     return;
                 } else {
+                    Log::debug("[11] Erro ao salvar o pedido", "pedidos");
                     $erros["ErroInterno"] = "Não foi possível salvar seu pedido. Por favor, tente novamente mais tarde.";
                 }
             }

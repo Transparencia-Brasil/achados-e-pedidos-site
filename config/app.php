@@ -282,6 +282,13 @@ return [
             'file' => 'debug',
             'levels' => ['notice', 'info', 'debug'],
         ],
+        'pedidos' => [
+            'className' => 'Cake\Log\Engine\FileLog',
+            'path' => LOGS,
+            'file' => 'pedidos',
+            'levels' => [],
+            'scopes' => ['pedidos']
+        ],
         'error' => [
             'className' => 'Cake\Log\Engine\FileLog',
             'path' => LOGS,

@@ -17,16 +17,15 @@ services:
       - "APP_URL=http://localhost:8080/"
       - "API_URL=https://endp.achadosepedidos.org.br/api/"
       - "SECURITY_SALT=dasfewrvuiofngfdsadsadsadasavunquy32r7831287413"
-      - "MYSQL_HOST=transparencia-db.mysql.database.azure.com"
-      - "MYSQL_USERNAME=achadosepedidos@transparencia-db.mysql.database.azure.com"
-      - "MYSQL_PASSWORD=sheiNe3aek2eeN1ahchoghaphaiGhox6"
-      - "MYSQL_DATABASE=achadosepedidos"
+      - "MYSQL_HOST=database"
+      - "MYSQL_USERNAME=root"
+      - "MYSQL_PASSWORD=secret"
+      - "MYSQL_DATABASE=tblai"
       - "MAIL_DRIVER=Smtp"
       - "MAIL_HOST="
       - "MAIL_USERNAME="
       - "MAIL_PASSWORD="   
-      - "MYSQL_ATTR_SSL_CA=/var/www/DigiCertGlobalRootG2.crt.pem"
-
+      - "MYSQL_ATTR_SSL_CA="
   # The Web Server
   web:
     build:

@@ -1,9 +1,12 @@
 <?php
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * @license     MIT License https://github.com/serbanghita/Mobile-Detect/blob/master/LICENSE.txt
  * @link        http://mobiledetect.net
  */
-class UserAgentTest extends PHPUnit_Framework_TestCase
+class UserAgentTest extends TestCase
 {
     protected $detect;
     protected static $ualist = array();
@@ -160,10 +163,10 @@ class UserAgentTest extends PHPUnit_Framework_TestCase
         $this->detect->setUserAgent($userAgent);
 
         //is mobile?
-        $this->assertEquals($this->detect->isMobile(), $isMobile);
+        $this->assertEquals($isMobile, $this->detect->isMobile());
 
         //is tablet?
-        $this->assertEquals($this->detect->isTablet(), $isTablet, 'FAILED: ' . $userAgent . ' isTablet: ' . $isTablet);
+        $this->assertEquals($isTablet, $this->detect->isTablet(), 'FAILED: ' . $userAgent . ' isTablet: ' . $isTablet);
 
         if (isset($version)) {
             foreach ($version as $condition => $assertion) {

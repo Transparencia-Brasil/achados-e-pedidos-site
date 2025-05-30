@@ -12,43 +12,40 @@
  */
 namespace DebugKit\Controller;
 
-use Cake\Controller\Controller;
-use Cake\Core\Configure;
 use Cake\Event\Event;
-use Cake\Network\Exception\NotFoundException;
+use Cake\Http\Exception\NotFoundException;
 
 /**
  * Provides access to panel data.
+ *
+ * @property \DebugKit\Model\Table\PanelsTable $Panels
  */
-class PanelsController extends Controller
+class PanelsController extends DebugKitController
 {
-
     /**
      * components
      *
      * @var array
      */
-    public $components = ['RequestHandler'];
+    public $components = ['RequestHandler', 'Cookie'];
 
     /**
-     * Layout property.
-     *
-     * @var string
-     */
-    public $layout = 'DebugKit.panel';
-
-    /**
-     * Before filter handler.
+     * Before render handler.
      *
      * @param \Cake\Event\Event $event The event.
      * @return void
-     * @throws \Cake\Network\Exception\NotFoundException
      */
-    public function beforeFilter(Event $event)
+    public function beforeRender(Event $event)
     {
-        // TODO add config override.
-        if (!Configure::read('debug')) {
-            throw new NotFoundException();
+        $this->viewBuilder()
+            ->setHelpers([
+                'Form', 'Html', 'Number', 'Url', 'DebugKit.Toolbar',
+                'DebugKit.Credentials', 'DebugKit.SimpleGraph',
+            ])
+            ->setLayout('DebugKit.toolbar');
+
+        if (!$this->request->is('json')) {
+            $this->viewBuilder()->setClassName('DebugKit.Ajax');
         }
     }
 
@@ -57,7 +54,7 @@ class PanelsController extends Controller
      *
      * @param string $requestId Request id
      * @return void
-     * @throws \Cake\Network\Exception\NotFoundException
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     public function index($requestId = null)
     {
@@ -68,7 +65,7 @@ class PanelsController extends Controller
         }
         $this->set([
             '_serialize' => ['panels'],
-            'panels' => $panels
+            'panels' => $panels,
         ]);
     }
 
@@ -80,8 +77,13 @@ class PanelsController extends Controller
      */
     public function view($id = null)
     {
+        $this->Cookie->configKey('debugKit_sort', 'encryption', false);
+        $this->set('sort', $this->Cookie->read('debugKit_sort'));
         $panel = $this->Panels->get($id);
+
         $this->set('panel', $panel);
-        $this->set(unserialize($panel->content));
+        // @codingStandardsIgnoreStart
+        $this->set(@unserialize($panel->content));
+        // @codingStandardsIgnoreEnd
     }
 }

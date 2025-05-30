@@ -8,22 +8,23 @@
  *
  * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  * @link          http://cakephp.org CakePHP(tm) Project
- * @since         DebugKit 0.1
+ * @since         0.1
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace DebugKit\View\Helper;
 
-use Cake\Cache\Cache;
-use Cake\Datasource\ConnectionManager;
-use Cake\Event\Event;
+use ArrayAccess;
 use Cake\View\Helper;
-use DebugKit\DebugKitDebugger;
+use Closure;
+use Iterator;
 
 /**
  * Provides Base methods for content specific debug toolbar helpers.
  * Acts as a facade for other toolbars helpers as well.
  *
- * @since         DebugKit 0.1
+ * @property \Cake\View\Helper\HtmlHelper $Html
+ * @property \Cake\View\Helper\FormHelper $Form
+ * @property \Cake\View\Helper\UrlHelper $Url
  */
 class ToolbarHelper extends Helper
 {
@@ -34,6 +35,24 @@ class ToolbarHelper extends Helper
      * @var array
      */
     public $helpers = ['Html', 'Form', 'Url'];
+
+    /**
+     * Whether or not the top level keys should be sorted.
+     *
+     * @var bool
+     */
+    protected $sort = false;
+
+    /**
+     * set sorting of values
+     *
+     * @param bool $sort Whether or not sort values by key
+     * @return void
+     */
+    public function setSort($sort)
+    {
+        $this->sort = $sort;
+    }
 
     /**
      * Recursively goes through an array and makes neat HTML out of it.
@@ -77,12 +96,15 @@ class ToolbarHelper extends Helper
         if (empty($values)) {
             $values[] = '(empty)';
         }
+        if ($this->sort && is_array($values) && $currentDepth === 0) {
+            ksort($values);
+        }
         foreach ($values as $key => $value) {
-            $out .= '<li><strong>' . $key . '</strong>';
+            $out .= '<li><strong>' . h($key, $doubleEncode) . '</strong> ';
             if (is_array($value) && count($value) > 0) {
                 $out .= '(array)';
             } elseif (is_object($value)) {
-                $out .= '(object)';
+                $out .= '(' . (get_class($value) ?: 'object') . ')';
             }
             if ($value === null) {
                 $value = '(null)';
@@ -106,7 +128,8 @@ class ToolbarHelper extends Helper
                 $value = ' - recursion';
             }
 
-            if ((
+            if (
+                (
                 $value instanceof ArrayAccess ||
                 $value instanceof Iterator ||
                 is_array($value) ||
@@ -120,6 +143,7 @@ class ToolbarHelper extends Helper
             $out .= '</li>';
         }
         $out .= '</ul>';
+
         return $out;
     }
 }

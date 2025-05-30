@@ -1,23 +1,23 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\ORM\Association;
 
 use Cake\Database\Expression\IdentifierExpression;
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\Association;
-use Cake\ORM\Association\SelectableAssociationTrait;
+use Cake\ORM\Association\Loader\SelectLoader;
 use Cake\ORM\Table;
 use Cake\Utility\Inflector;
 use RuntimeException;
@@ -30,32 +30,28 @@ use RuntimeException;
  */
 class BelongsTo extends Association
 {
-
-    use SelectableAssociationTrait;
-
     /**
      * Valid strategies for this type of association
      *
-     * @var array
+     * @var string[]
      */
-    protected $_validStrategies = [self::STRATEGY_JOIN, self::STRATEGY_SELECT];
+    protected $_validStrategies = [
+        self::STRATEGY_JOIN,
+        self::STRATEGY_SELECT,
+    ];
 
     /**
-     * Sets the name of the field representing the foreign key to the target table.
-     * If no parameters are passed current field is returned
+     * Gets the name of the field representing the foreign key to the target table.
      *
-     * @param string|null $key the key to be used to link both tables together
-     * @return string
+     * @return string|string[]
      */
-    public function foreignKey($key = null)
+    public function getForeignKey()
     {
-        if ($key === null) {
-            if ($this->_foreignKey === null) {
-                $this->_foreignKey = $this->_modelKey($this->target()->alias());
-            }
-            return $this->_foreignKey;
+        if ($this->_foreignKey === null) {
+            $this->_foreignKey = $this->_modelKey($this->getTarget()->getAlias());
         }
-        return parent::foreignKey($key);
+
+        return $this->_foreignKey;
     }
 
     /**
@@ -73,23 +69,15 @@ class BelongsTo extends Association
     }
 
     /**
-     * Sets the property name that should be filled with data from the target table
-     * in the source table record.
-     * If no arguments are passed, currently configured type is returned.
+     * Returns default property name based on association name.
      *
-     * @param string|null $name The property name, use null to read the current property.
      * @return string
      */
-    public function property($name = null)
+    protected function _propertyName()
     {
-        if ($name !== null) {
-            return parent::property($name);
-        }
-        if ($name === null && !$this->_propertyName) {
-            list(, $name) = pluginSplit($this->_name);
-            $this->_propertyName = Inflector::underscore(Inflector::singularize($name));
-        }
-        return $this->_propertyName;
+        list(, $name) = pluginSplit($this->_name);
+
+        return Inflector::underscore(Inflector::singularize($name));
     }
 
     /**
@@ -102,7 +90,7 @@ class BelongsTo extends Association
      */
     public function isOwningSide(Table $side)
     {
-        return $side === $this->target();
+        return $side === $this->getTarget();
     }
 
     /**
@@ -122,30 +110,30 @@ class BelongsTo extends Association
      * `$options`
      *
      * @param \Cake\Datasource\EntityInterface $entity an entity from the source table
-     * @param array|\ArrayObject $options options to be passed to the save method in
-     * the target table
-     * @return bool|\Cake\Datasource\EntityInterface false if $entity could not be saved, otherwise it returns
+     * @param array $options options to be passed to the save method in the target table
+     * @return \Cake\Datasource\EntityInterface|false False if $entity could not be saved, otherwise it returns
      * the saved entity
-     * @see Table::save()
+     * @see \Cake\ORM\Table::save()
      */
     public function saveAssociated(EntityInterface $entity, array $options = [])
     {
-        $targetEntity = $entity->get($this->property());
+        $targetEntity = $entity->get($this->getProperty());
         if (empty($targetEntity) || !($targetEntity instanceof EntityInterface)) {
             return $entity;
         }
 
-        $table = $this->target();
+        $table = $this->getTarget();
         $targetEntity = $table->save($targetEntity, $options);
         if (!$targetEntity) {
             return false;
         }
 
         $properties = array_combine(
-            (array)$this->foreignKey(),
-            $targetEntity->extract((array)$table->primaryKey())
+            (array)$this->getForeignKey(),
+            $targetEntity->extract((array)$this->getBindingKey())
         );
         $entity->set($properties, ['guard' => false]);
+
         return $entity;
     }
 
@@ -154,30 +142,35 @@ class BelongsTo extends Association
      * clause for getting the results on the target table.
      *
      * @param array $options list of options passed to attachTo method
-     * @return array
+     * @return \Cake\Database\Expression\IdentifierExpression[]
      * @throws \RuntimeException if the number of columns in the foreignKey do not
      * match the number of columns in the target table primaryKey
      */
     protected function _joinCondition($options)
     {
         $conditions = [];
-        $tAlias = $this->target()->alias();
-        $sAlias = $this->_sourceTable->alias();
+        $tAlias = $this->_name;
+        $sAlias = $this->_sourceTable->getAlias();
         $foreignKey = (array)$options['foreignKey'];
-        $primaryKey = (array)$this->_targetTable->primaryKey();
+        $bindingKey = (array)$this->getBindingKey();
 
-        if (count($foreignKey) !== count($primaryKey)) {
+        if (count($foreignKey) !== count($bindingKey)) {
+            if (empty($bindingKey)) {
+                $msg = 'The "%s" table does not define a primary key. Please set one.';
+                throw new RuntimeException(sprintf($msg, $this->getTarget()->getTable()));
+            }
+
             $msg = 'Cannot match provided foreignKey for "%s", got "(%s)" but expected foreign key for "(%s)"';
             throw new RuntimeException(sprintf(
                 $msg,
                 $this->_name,
                 implode(', ', $foreignKey),
-                implode(', ', $primaryKey)
+                implode(', ', $bindingKey)
             ));
         }
 
         foreach ($foreignKey as $k => $f) {
-            $field = sprintf('%s.%s', $tAlias, $primaryKey[$k]);
+            $field = sprintf('%s.%s', $tAlias, $bindingKey[$k]);
             $value = new IdentifierExpression(sprintf('%s.%s', $sAlias, $f));
             $conditions[$field] = $value;
         }
@@ -187,38 +180,22 @@ class BelongsTo extends Association
 
     /**
      * {@inheritDoc}
+     *
+     * @return \Closure
      */
-    protected function _linkField($options)
+    public function eagerLoader(array $options)
     {
-        $links = [];
-        $name = $this->alias();
+        $loader = new SelectLoader([
+            'alias' => $this->getAlias(),
+            'sourceAlias' => $this->getSource()->getAlias(),
+            'targetAlias' => $this->getTarget()->getAlias(),
+            'foreignKey' => $this->getForeignKey(),
+            'bindingKey' => $this->getBindingKey(),
+            'strategy' => $this->getStrategy(),
+            'associationType' => $this->type(),
+            'finder' => [$this, 'find'],
+        ]);
 
-        foreach ((array)$this->target()->primaryKey() as $key) {
-            $links[] = sprintf('%s.%s', $name, $key);
-        }
-
-        if (count($links) === 1) {
-            return $links[0];
-        }
-
-        return $links;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function _buildResultMap($fetchQuery, $options)
-    {
-        $resultMap = [];
-        $key = (array)$this->target()->primaryKey();
-
-        foreach ($fetchQuery->all() as $result) {
-            $values = [];
-            foreach ($key as $k) {
-                $values[] = $result[$k];
-            }
-            $resultMap[implode(';', $values)] = $result;
-        }
-        return $resultMap;
+        return $loader->buildEagerLoader($options);
     }
 }

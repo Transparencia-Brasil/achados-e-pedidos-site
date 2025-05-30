@@ -12,16 +12,25 @@
  */
 namespace DebugKit\Model\Table;
 
+use Cake\Core\Configure;
+use Cake\Database\Driver\Sqlite;
 use Cake\ORM\Query;
 use Cake\ORM\Table;
-use DebugKit\Model\Table\LazyTableTrait;
+use DebugKit\Model\Entity\Request;
 
 /**
  * The requests table tracks basic information about each request.
+ *
+ * @method Request get($primaryKey, $options = [])
+ * @method Request newEntity($data = null, array $options = [])
+ * @method Request[] newEntities(array $data, array $options = [])
+ * @method Request save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method Request patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
+ * @method Request[] patchEntities($entities, array $data, array $options = [])
+ * @method Request findOrCreate($search, callable $callback = null)
  */
 class RequestsTable extends Table
 {
-
     use LazyTableTrait;
 
     /**
@@ -33,12 +42,12 @@ class RequestsTable extends Table
     public function initialize(array $config)
     {
         $this->hasMany('DebugKit.Panels', [
-            'sort' => 'Panels.title ASC',
+            'sort' => ['Panels.title' => 'ASC'],
         ]);
         $this->addBehavior('Timestamp', [
             'events' => [
-                'Model.beforeSave' => ['requested_at' => 'new']
-            ]
+                'Model.beforeSave' => ['requested_at' => 'new'],
+            ],
         ]);
         $this->ensureTables(['DebugKit.Requests', 'DebugKit.Panels']);
     }
@@ -56,7 +65,7 @@ class RequestsTable extends Table
     /**
      * Finder method to get recent requests as a simple array
      *
-     * @param Cake\ORM\Query $query The query
+     * @param \Cake\ORM\Query $query The query
      * @param array $options The options
      * @return Query The query.
      */
@@ -67,30 +76,53 @@ class RequestsTable extends Table
     }
 
     /**
+     * Check if garbage collection should be run
+     *
+     * @return bool
+     */
+    protected function shouldGc()
+    {
+        return rand(1, 100) === 100;
+    }
+
+    /**
      * Garbage collect old request data.
      *
-     * Delete request data that is older than 2 weeks old.
+     * Delete request data that is older than latest 20 requests.
+     * You can use the `DebugKit.requestCount` config to change this limit.
      * This method will only trigger periodically.
      *
      * @return void
      */
     public function gc()
     {
-        if (time() % 100 !== 0) {
+        if (!$this->shouldGc()) {
             return;
         }
-        $query = $this->query()
-            ->delete()
-            ->where(['requested_at <=' => new \DateTime('-2 weeks')]);
-        $statement = $query->execute();
-        $statement->closeCursor();
-
-        $existing = $this->find()->select(['id']);
+        $noPurge = $this->find()
+            ->select(['id'])
+            ->enableHydration(false)
+            ->order(['requested_at' => 'desc'])
+            ->limit(Configure::read('DebugKit.requestCount') ?: 20)
+            ->extract('id')
+            ->toArray();
 
         $query = $this->Panels->query()
             ->delete()
-            ->where(['request_id NOT IN' => $existing]);
+            ->where(['request_id NOT IN' => $noPurge]);
         $statement = $query->execute();
         $statement->closeCursor();
+
+        $query = $this->query()
+            ->delete()
+            ->where(['id NOT IN' => $noPurge]);
+
+        $statement = $query->execute();
+        $statement->closeCursor();
+
+        $conn = $this->getConnection();
+        if ($conn->getDriver() instanceof Sqlite) {
+            $conn->execute('VACUUM;');
+        }
     }
 }

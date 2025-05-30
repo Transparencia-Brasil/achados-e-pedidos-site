@@ -49,6 +49,15 @@ return array(
         'Mozilla/5.0 (Linux; Android 4.0.3; Maxwell Lite Build/v1.0.0.ICS.maxwell.20120920) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Safari/535.19' => array('isMobile' => true, 'isTablet' => true),
         'Mozilla/5.0 (Linux; U; Android 4.0.4; zh-tw; bq Maxwell Plus Build/1.0.0 20120913-10:39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true),
         'Mozilla/5.0 (Linux; Android 4.4.2; Aquaris E10 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.93 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+        'Mozilla/5.0 (Linux; Android 5.1; Aquaris M10 Build/LMY47I) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+        'Mozilla/5.0 (Linux; Android 6.0; Aquaris M10 FHD Build/MRA58K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.83 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+        'Mozilla/5.0 (Linux; Android 6.0; Aquaris M8 Build/MRA58K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.116 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+        'Mozilla/5.0 (Linux; Android 4.4.4; Aquaris E5 Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.132 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 5.0; Aquaris E5 HD Build/LRX21M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.91 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 6.0; Aquaris_M4.5 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/51.0.2704.81 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 6.0.1; Aquaris X5 Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.91 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 4.4.2; Aquaris E4 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.98 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 5.0.2; Aquaris M5 Build/LRX22G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.98 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
         ),
 
     'Captiva' => array(
@@ -186,7 +195,9 @@ return array(
         'Mozilla/5.0 (Linux; U; Android 2.3.3; pt-br; X1 Build/HCL ME Tablet X1) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'   => array('isMobile' => true, 'isTablet' => true),
         ),
 
-
+    'Hisense' => array(
+        'Mozilla/5.0 (Linux; Android 4.4.4; F5281 Build/KTU84Q) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/260.1985.135 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+    ),
 
     'Hudl'  => array(
         'Mozilla/5.0 (Linux; Android 4.2.2; Hudl HT7S3 Build/JDQ39) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.82 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
@@ -235,6 +246,10 @@ return array(
         'Mozilla/5.0 (Linux; Android 4.1.1; ST10 Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19' => array('isMobile' => true, 'isTablet' => true),
         ),
 
+    'KRAMER' => array(
+        'Mozilla/5.0 (Linux; Android 6.0; KT107 Build/LMY47I) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.137 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+    ),
+
     'Kobo' => array(
             'Mozilla/5.0 (Linux; U; Android 2.0; en-us;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1 (Kobo Touch)' => array('isMobile' => true, 'isTablet' => true, 'version' => array('Android' => '2.0', 'Webkit' => '533.1', 'Safari' => '4.0') ),
         ),
@@ -243,6 +258,12 @@ return array(
         'Mozilla/5.0 (Linux; U; Android 2.3.5; ru-ru; MegaFon V9 Build/GINGERBREAD) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1' => array('isMobile' => true, 'isTablet' => true),
         'Mozilla/5.0 (Linux; Android 4.1.1; MT7A Build/JRO03C) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.58 Safari/537.31' => array('isMobile' => true, 'isTablet' => true),
         ),
+
+    // http://www.mediacomeurope.it/tablet/
+    'Mediacom' => array(
+        'Mozilla/5.0 (Linux; Android 6.0.1; M-MPI10C3G Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.137 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+        'Mozilla/5.0 (Linux; Android 6.0; M-SP10HXAH Build/MRA58K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+    ),
 
     'MediaTek' => array(
         'Mozilla/5.0 (Linux; U; Android 4.1.1; fr-fr; MT8377 Build/JRO03C) AppleWebKit/534.30 (KHTML like Gecko) Version/4.0 Safari/534.30/4.05d.1002.m7' => array('isMobile' => true, 'isTablet' => true),
@@ -296,6 +317,10 @@ return array(
     'Oneplus' => array(
         'Mozilla/5.0 (Linux; Android 4.3; A0001 Build/JLS36C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.141 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
         'Mozilla/5.0 (Linux; U; Android 4.3; xx-xx; A0001 Build/JLS36C) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 7.1.1; ONEPLUS A5000 Build/NMF26X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/60.0.3112.116 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 8.1.0; ONEPLUS A5010 Build/OPM1.171019.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/66.0.3359.126 Mobile Safari/537.36 [FB_IAB/Orca-Android;FBAV/164.0.0.24.95;]' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 7.1.1; ONEPLUS A3010) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.185 Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 12; KB2003) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
         ),
 
     'Odys' => array(
@@ -336,6 +361,7 @@ return array(
     'OverMax' => array(
             'OV-SteelCore(B) Mozilla/5.0 (iPad; CPU OS 5_0_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A405 Safari/7534.48.3' => array('isMobile' => true, 'isTablet' => true),
             'Mozilla/5.0 (Linux; U; Android 4.0.4; pl-pl; OV-SteelCore Build/ICS.g08refem611.20121010) AppleWebKit/534.30 (KHTML like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true),
+            'Mozilla/5.0 (Linux; Android 7.0.99; Qualcore 1027 4G Build/LMY47D) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.116 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
         ),
 
     'YONESTablet' => array(
@@ -376,12 +402,14 @@ return array(
         'Mozilla/5.0 (Linux; U; Android 4.1.1; en-us; POV_TAB-PROTAB30-IPS10 Build/JRO03H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true),
         ),
 
-    'Prestigio' => array(
-        'Mozilla/5.0 (Linux; U; Android 4.2.2; en-gb; PMP5297C_QUAD Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true),
-        'Mozilla/5.0 (Linux; U; Android 4.0.4; sk-sk; PMP7100D3G Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true, 'version' => array('Android' => '4.0.4', 'Build' => 'IMM76D', 'Webkit' => '534.30', 'Safari' => '4.0'), 'model' => 'PMP7100D3G' ),
-        'Mozilla/5.0 (Linux; U; Android 4.1.2; sk-sk; PMP7280C3G Build/JZO54K) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 MobilSafari/534.30' => array('isMobile' => true, 'isTablet' => true),
-        ),
+    'Polaroid' => array(
+        'Mozilla/5.0 (Linux; Android 5.1.1; MID4X10 Build/LMY47V) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.95 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+    ),
 
+    'Praktica' => array(
+        'Mozilla/5.0 (Linux; Android 4.0.4; TP750 3GGSM Build/IMM76I) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.93 Safari/537.36' => array('isMobile' => true, 'isTablet' => true)
+    ),
+    
     'PROSCAN' => array(
         'Mozilla/5.0 (Linux; U; Android 4.1.1; en-us; PLT8088 Build/JRO03H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true, 'version' => array('Android' => '4.1.1', 'Build' => 'JRO03H', 'Webkit' => '534.30', 'Safari' => '4.0') ),
         ),
@@ -390,6 +418,10 @@ return array(
         'Mozilla/5.0 (Linux; Android 4.0.4; PTBL92BC Build/IMM76D) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.59 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => true, 'version' => array('Android' => '4.0.4', 'Build' => 'IMM76D', 'Webkit' => '537.36', 'Chrome' => '31.0.1650.59')),
 
         ),
+
+    'Realme' => array(
+        'Mozilla/5.0 (Linux; U; Android 10; en-us; RMX1919 Build/QKQ1.200209.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 HeyTapBrowser/45.7.1.9' => array('isMobile' => true, 'isTablet' => false),
+    ),
 
     'RockChip' => array(
         'Mozilla/5.0 (Linux; U; Android 2.2.1; hu-hu; RK2818, Build/MASTER) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'                   => array('isMobile' => true, 'isTablet' => true),
@@ -428,9 +460,11 @@ return array(
         'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; A70H Build/JDQ39) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 UCBrowser/9.8.0.435 U3/0.8.0 Mobile Safari/533.1' => array('isMobile' => true, 'isTablet' => true),
         ),
 
+    // http://www.tecno-mobile.com/tablets/product-list/#/
     'Tecno' => array(
-        'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; TECNO P9 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true)
-        ),
+        'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; TECNO P9 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true),
+        'Mozilla/5.0 (Linux; Android 5.1; TECNO DP8D Build/LMY47D) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.91 Safari/537.36' => array('isMobile' => true, 'isTablet' => true)
+    ),
 
     'Telstra' => array(
         'Mozilla/5.0 (Linux; U; Android 2.3.7; en-au; T-Hub2 Build/TVA301TELBG3) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1' => array('isMobile' => true, 'isTablet' => true),
@@ -467,9 +501,18 @@ return array(
         ),
     ),
 
+    'Tsmine' => array(
+        'Mozilla/5.0 (Linux; Android 4.4.2; TM1088 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.126 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+    ),
+
     'Ubislate' => array(
             'Mozilla/5.0 (Linux; U; Android 4.0.4; en-us; UBISLATE7C+ Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30' => array('isMobile' => true, 'isTablet' => true)
         ),
+
+    // https://www.handsetdetection.com/device-detection-database/devices/wevool/
+    'WeVool' => array(
+        'Mozilla/5.0 (Linux; Android 5.0; WVT101 Build/LRX21M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.126 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+    ),
 
     'Visture' => array(
 
@@ -480,6 +523,10 @@ return array(
         'Mozilla/5.0 (Linux; U; Android 4.1.1; ru-ru; Visture V10 Build/JRO03H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30'          => array('isMobile' => true, 'isTablet' => true),
         ),
 
+    'Vivo' => array(
+        'Mozilla/5.0 (Linux; Android 11; vivo 1951) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+    ),
+
     'Versus' => array(
         'Mozilla/5.0 (Linux; Android 4.0.4; VS-TOUCHPAD 9 Build/IMM76D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19'                                                                                                                 => array('isMobile' => true, 'isTablet' => true),
         'Mozilla/5.0 (Linux; U; Android 4.0.4; en-gb; Versus Touchpad 9.7 Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30'                                                                                                                 => array('isMobile' => true, 'isTablet' => true),
@@ -488,6 +535,7 @@ return array(
         'OneBrowser/3.5/Mozilla/5.0 (Linux; U; Android 4.0.4; en-gb; TOUCHPAD 7 Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'                                                                                                    => array('isMobile' => true, 'isTablet' => true),
         'Mozilla/5.0 (Linux; U; Android 4.1.1; en-gb; TOUCHTAB Build/JRO03H) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30'                                                                                                                            => array('isMobile' => true, 'isTablet' => true, 'version' => array('Android' => '4.1.1', 'Build' => 'JRO03H', 'Webkit' => '534.30', 'Safari' => '4.0') ),
         ),
+
 
     'Viewsonic' => array(
         'Mozilla/5.0 (Linux; U; Android 4.0.3; de-de; ViewPad 10e Build/IML74K) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30' => array('isMobile' => true, 'isTablet' => true),
@@ -524,10 +572,21 @@ return array(
             'Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0; ZTE; N880e_Dawoer_Fulllock; China Telecom)'               => array('isMobile' => true, 'isTablet' => false),
             'Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0; ZTE; V965W)'                                              => array('isMobile' => true, 'isTablet' => false),
             'Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0; ZTE; Windows Phone - Internet 7; SFR)'                    => array('isMobile' => true, 'isTablet' => false),
+            'Mozilla/5.0 (Linux; Android 6.0.1; NX549J Build/MMB29M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.141 Mobile Safari/537.36 OPR/45.1.2246.125351' => array('isMobile' => true, 'isTablet' => false),
         ),
 
     'Zync' => array(
             'Mozilla/5.0 (Linux; U; Android 2.3.3; en-us ; Z909 Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1/UCBrowser/8.4.1.204/145/444' => array('isMobile' => true, 'isTablet' => true)
-        )
+        ),
+
+    'Xiaomi' => array(
+        'Mozilla/5.0 (Linux; U; Android 11; zh-cn; Mi 10 Build/RKQ1.200826.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/89.0.4389.116 Mobile Safari/537.36 XiaoMi/MiuiBrowser/15.8.6' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 8.1.0; Redmi 5A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; U; Android 11; zh-cn; M2012K11C Build/RKQ1.201112.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/89.0.4389.116 Mobile Safari/537.36 XiaoMi/MiuiBrowser/15.7.20' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 10; Redmi Note 7 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.74 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 11; 21051182G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36' => array('isMobile' => true, 'isTablet' => true),
+        'Mozilla/5.0 (Linux; Android 11; 21081111RG) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 12; M2007J1SC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.48 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+    )
 
 );

@@ -29,11 +29,12 @@
 namespace Phinx\Console\Command;
 
 use Phinx\Migration\CreationInterface;
-use Phinx\Migration\Util;
+use Phinx\Util\Util;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Create extends AbstractCommand
@@ -52,7 +53,7 @@ class Create extends AbstractCommand
 
         $this->setName('create')
             ->setDescription('Create a new migration')
-            ->addArgument('name', InputArgument::REQUIRED, 'What is the name of the migration?')
+            ->addArgument('name', InputArgument::REQUIRED, 'What is the name of the migration (in CamelCase)?')
             ->setHelp(sprintf(
                 '%sCreates a new database migration%s',
                 PHP_EOL,
@@ -65,6 +66,9 @@ class Create extends AbstractCommand
         // A classname to be used to gain access to the template content as well as the ability to
         // have a callback once the migration file has been created.
         $this->addOption('class', 'l', InputOption::VALUE_REQUIRED, 'Use a class implementing "' . self::CREATION_INTERFACE . '" to generate the template');
+
+        // Allow the migration path to be chosen non-interactively.
+        $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Specify the path in which to create this migration');
     }
 
     /**
@@ -79,7 +83,64 @@ class Create extends AbstractCommand
     }
 
     /**
-     * Migrate the database.
+     * Get the question that allows the user to select which migration path to use.
+     *
+     * @param string[] $paths
+     * @return ChoiceQuestion
+     */
+    protected function getSelectMigrationPathQuestion(array $paths)
+    {
+        return new ChoiceQuestion('Which migrations path would you like to use?', $paths, 0);
+    }
+
+    /**
+     * Returns the migration path to create the migration in.
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function getMigrationPath(InputInterface $input, OutputInterface $output)
+    {
+        // First, try the non-interactive option:
+        $path = $input->getOption('path');
+
+        if (!empty($path)) {
+            return $path;
+        }
+
+        $paths = $this->getConfig()->getMigrationPaths();
+
+        // No paths? That's a problem.
+        if (empty($paths)) {
+            throw new \Exception('No migration paths set in your Phinx configuration file.');
+        }
+
+        $paths = Util::globAll($paths);
+
+        if (empty($paths)) {
+            throw new \Exception(
+                'You probably used curly braces to define migration path in your Phinx configuration file, ' .
+                'but no directories have been matched using this pattern. ' .
+                'You need to create a migration directory manually.'
+            );
+        }
+
+        // Only one path set, so select that:
+        if (1 === count($paths)) {
+            return array_shift($paths);
+        }
+
+        // Ask the user which of their defined paths they'd like to use:
+        $helper = $this->getHelper('question');
+        $question = $this->getSelectMigrationPathQuestion($paths);
+
+        return $helper->ask($input, $output, $question);
+    }
+
+    /**
+     * Create the new migration.
      *
      * @param InputInterface $input
      * @param OutputInterface $output
@@ -92,7 +153,7 @@ class Create extends AbstractCommand
         $this->bootstrap($input, $output);
 
         // get the migration path from the config
-        $path = $this->getConfig()->getMigrationPath();
+        $path = $this->getMigrationPath($input, $output);
 
         if (!file_exists($path)) {
             $helper   = $this->getHelper('question');
@@ -108,9 +169,16 @@ class Create extends AbstractCommand
         $path = realpath($path);
         $className = $input->getArgument('name');
 
-        if (!Util::isValidMigrationClassName($className)) {
+        if (!Util::isValidPhinxClassName($className)) {
             throw new \InvalidArgumentException(sprintf(
                 'The migration class name "%s" is invalid. Please use CamelCase format.',
+                $className
+            ));
+        }
+
+        if (!Util::isUniqueMigrationClassName($className, $path)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The migration class name "%s" already exists',
                 $className
             ));
         }
@@ -126,11 +194,24 @@ class Create extends AbstractCommand
             ));
         }
 
-        // Get the alternative template and static class options, but only allow one of them.
+        // Get the alternative template and static class options from the config, but only allow one of them.
+        $defaultAltTemplate = $this->getConfig()->getTemplateFile();
+        $defaultCreationClassName = $this->getConfig()->getTemplateClass();
+        if ($defaultAltTemplate && $defaultCreationClassName){
+            throw new \InvalidArgumentException('Cannot define template:class and template:file at the same time');
+        }
+
+        // Get the alternative template and static class options from the command line, but only allow one of them.
         $altTemplate = $input->getOption('template');
         $creationClassName = $input->getOption('class');
         if ($altTemplate && $creationClassName) {
             throw new \InvalidArgumentException('Cannot use --template and --class at the same time');
+        }
+
+        // If no commandline options then use the defaults.
+        if (!$altTemplate && !$creationClassName){
+            $altTemplate = $defaultAltTemplate;
+            $creationClassName = $defaultCreationClassName;
         }
 
         // Verify the alternative template file's existence.
@@ -141,27 +222,50 @@ class Create extends AbstractCommand
             ));
         }
 
-        // Verify the static class exists and that it implements the required interface.
+        // Verify that the template creation class (or the aliased class) exists and that it implements the required interface.
+        $aliasedClassName  = null;
         if ($creationClassName) {
+            // Supplied class does not exist, is it aliased?
             if (!class_exists($creationClassName)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'The class "%s" does not exist',
-                    $creationClassName
-                ));
+                $aliasedClassName = $this->getConfig()->getAlias($creationClassName);
+                if ($aliasedClassName && !class_exists($aliasedClassName)) {
+                    throw new \InvalidArgumentException(sprintf(
+                        'The class "%s" via the alias "%s" does not exist',
+                        $aliasedClassName,
+                        $creationClassName
+                    ));
+                } elseif (!$aliasedClassName) {
+                    throw new \InvalidArgumentException(sprintf(
+                        'The class "%s" does not exist',
+                        $creationClassName
+                    ));
+                }
             }
-            if (!is_subclass_of($creationClassName, self::CREATION_INTERFACE)) {
+
+            // Does the class implement the required interface?
+            if (!$aliasedClassName && !is_subclass_of($creationClassName, self::CREATION_INTERFACE)) {
                 throw new \InvalidArgumentException(sprintf(
                     'The class "%s" does not implement the required interface "%s"',
+                    $creationClassName,
+                    self::CREATION_INTERFACE
+                ));
+            } elseif ($aliasedClassName && !is_subclass_of($aliasedClassName, self::CREATION_INTERFACE)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'The class "%s" via the alias "%s" does not implement the required interface "%s"',
+                    $aliasedClassName,
                     $creationClassName,
                     self::CREATION_INTERFACE
                 ));
             }
         }
 
+        // Use the aliased class.
+        $creationClassName = $aliasedClassName ?: $creationClassName;
+
         // Determine the appropriate mechanism to get the template
         if ($creationClassName) {
             // Get the template from the creation class
-            $creationClass = new $creationClassName();
+            $creationClass = new $creationClassName($input, $output);
             $contents = $creationClass->getMigrationTemplate();
         } else {
             // Load the alternative template if it is defined.
@@ -172,6 +276,7 @@ class Create extends AbstractCommand
         $classes = array(
             '$useClassName'  => $this->getConfig()->getMigrationBaseClassName(false),
             '$className'     => $className,
+            '$version'       => Util::getVersionFromFileName($fileName),
             '$baseClassName' => $this->getConfig()->getMigrationBaseClassName(true),
         );
         $contents = strtr($contents, $classes);
@@ -184,7 +289,7 @@ class Create extends AbstractCommand
         }
 
         // Do we need to do the post creation call to the creation class?
-        if ($creationClassName) {
+        if (isset($creationClass)) {
             $creationClass->postMigrationCreation($filePath, $className, $this->getConfig()->getMigrationBaseClassName());
         }
 
@@ -198,6 +303,6 @@ class Create extends AbstractCommand
             $output->writeln('<info>using default template</info>');
         }
 
-        $output->writeln('<info>created</info> .' . str_replace(getcwd(), '', $filePath));
+        $output->writeln('<info>created</info> ' . str_replace(getcwd() . DIRECTORY_SEPARATOR, '', $filePath));
     }
 }

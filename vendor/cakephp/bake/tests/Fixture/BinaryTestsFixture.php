@@ -1,6 +1,6 @@
 <?php
 /**
- * CakePHP(tm) Tests <http://book.cakephp.org/2.0/en/development/testing.html>
+ * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
  *
  * Licensed under The MIT License
@@ -8,7 +8,7 @@
  * Redistributions of files must retain the above copyright notice
  *
  * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://book.cakephp.org/2.0/en/development/testing.html CakePHP(tm) Tests
+ * @link          http://cakephp.org CakePHP(tm) Project
  * @since         0.1.0
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
@@ -21,7 +21,6 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class BinaryTestsFixture extends TestFixture
 {
-
     /**
      * fields property
      *
@@ -29,8 +28,9 @@ class BinaryTestsFixture extends TestFixture
      */
     public $fields = [
         'id' => ['type' => 'integer'],
+        'byte' => ['type' => 'binary', 'length' => 1],
         'data' => ['type' => 'binary', 'length' => 300],
-        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]]
+        '_constraints' => ['primary' => ['type' => 'primary', 'columns' => ['id']]],
     ];
 
     /**

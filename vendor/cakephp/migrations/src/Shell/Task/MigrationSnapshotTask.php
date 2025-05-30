@@ -17,29 +17,21 @@ use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
-use Cake\Core\Plugin;
-use Cake\Filesystem\File;
-use Cake\Utility\Inflector;
-use Migrations\Shell\Task\SimpleMigrationTask;
+use Migrations\TableFinderTrait;
+use Migrations\Util\UtilTrait;
 
 /**
  * Task class for generating migration snapshot files.
+ *
+ * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
+ * @property \Bake\Shell\Task\TestTask $Test
  */
 class MigrationSnapshotTask extends SimpleMigrationTask
 {
-    /**
-     * Tables to skip
-     *
-     * @var array
-     */
-    public $skipTables = ['i18n', 'phinxlog'];
 
-    /**
-     * Regex of Table name to skip
-     *
-     * @var string
-     */
-    public $skipTablesRegex = '_phinxlog';
+    use SnapshotTrait;
+    use TableFinderTrait;
+    use UtilTrait;
 
     /**
      * {@inheritDoc}
@@ -48,7 +40,7 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     {
         $collection = $this->getCollection($this->connection);
         EventManager::instance()->on('Bake.initialize', function (Event $event) use ($collection) {
-            $event->subject->loadHelper('Migrations.Migration', [
+            $event->getSubject()->loadHelper('Migrations.Migration', [
                 'collection' => $collection
             ]);
         });
@@ -69,92 +61,65 @@ class MigrationSnapshotTask extends SimpleMigrationTask
      */
     public function templateData()
     {
-        $ns = Configure::read('App.namespace');
+        $namespace = Configure::read('App.namespace');
         $pluginPath = '';
         if ($this->plugin) {
-            $ns = $this->plugin;
+            $namespace = $this->_pluginNamespace($this->plugin);
             $pluginPath = $this->plugin . '.';
         }
 
         $collection = $this->getCollection($this->connection);
+        $options = [
+            'require-table' => $this->params['require-table'],
+            'plugin' => $this->plugin
+        ];
+        $tables = $this->getTablesToBake($collection, $options);
 
-        $tables = $collection->listTables();
-        foreach ($tables as $num => $table) {
-            if ((in_array($table, $this->skipTables)) || (strpos($table, $this->skipTablesRegex) !== false)) {
-                unset($tables[$num]);
-                continue;
-            }
+        sort($tables, SORT_NATURAL);
 
-            if (!$this->tableToAdd($table, $this->plugin)) {
-                unset($tables[$num]);
-                continue;
-            }
+        $tables = array_combine($tables, $tables);
+
+        $autoId = true;
+        if (isset($this->params['disable-autoid'])) {
+            $autoId = !$this->params['disable-autoid'];
         }
 
         return [
             'plugin' => $this->plugin,
             'pluginPath' => $pluginPath,
-            'namespace' => $ns,
+            'namespace' => $namespace,
             'collection' => $collection,
             'tables' => $tables,
             'action' => 'create_table',
             'name' => $this->BakeTemplate->viewVars['name'],
+            'autoId' => $autoId
         ];
     }
 
     /**
      * Get a collection from a database
      *
-     * @param string $connection : database connection name
-     * @return obj schemaCollection
+     * @param string $connection Database connection name.
+     * @return \Cake\Database\Schema\Collection
      */
     public function getCollection($connection)
     {
         $connection = ConnectionManager::get($connection);
-        return $connection->schemaCollection();
+
+        return $connection->getSchemaCollection();
     }
 
     /**
      * To check if a Table Model is to be added in the migration file
      *
-     * @param string $tableName Table name in underscore case
-     * @param string $pluginName Plugin name if exists
-     * @return bool true if the model is to be added
+     * @param string $tableName Table name in underscore case.
+     * @param string|null $pluginName Plugin name if exists.
+     * @deprecated Will be removed in the next version
+     * @return bool True if the model is to be added.
      */
     public function tableToAdd($tableName, $pluginName = null)
     {
-        if ($this->params['require-table'] === true) {
-            return $this->tableExists(Inflector::camelize($tableName), $pluginName);
-        }
-
         return true;
-    }
-
-    /**
-     * To check if a Table Model exists in the path of model
-     *
-     * @param string $tableName Table name in underscore case
-     * @param string $pluginName Plugin name if exists
-     * @return bool
-     */
-    public function tableExists($tableName, $pluginName = null)
-    {
-        $file = new File($this->getModelPath($pluginName) . $tableName . 'Table.php');
-        return $file->exists();
-    }
-
-    /**
-     * Path for Table folder
-     *
-     * @param string $pluginName Plugin name if exists
-     * @return string : path to Table Folder. Default to App Table Path
-     */
-    public function getModelPath($pluginName = null)
-    {
-        if (!is_null($pluginName) && Plugin::loaded($pluginName)) {
-            return Plugin::classPath($pluginName) . 'Model' . DS . 'Table' . DS;
-        }
-        return APP . 'Model' . DS . 'Table' . DS;
     }
 
     /**
@@ -166,12 +131,24 @@ class MigrationSnapshotTask extends SimpleMigrationTask
     {
         $parser = parent::getOptionParser();
 
-        $parser->description(
+        $parser->setDescription(
             'Bake migration snapshot class.'
-        )->addOption('require-table', [
+        )->addArgument('name', [
+            'help' => 'Name of the migration to bake. Can use Plugin.name to bake migration files into plugins.',
+            'required' => true
+        ])
+        ->addOption('require-table', [
             'boolean' => true,
             'default' => false,
             'help' => 'If require-table is set to true, check also that the table class exists.'
+        ])->addOption('disable-autoid', [
+            'boolean' => true,
+            'default' => false,
+            'help' => 'Disable phinx behavior of automatically adding an id field.'
+        ])
+        ->addOption('no-lock', [
+            'help' => 'If present, no lock file will be generated after baking',
+            'boolean' => true
         ]);
 
         return $parser;

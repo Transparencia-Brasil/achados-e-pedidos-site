@@ -16,14 +16,13 @@ namespace Bake\Utility\Model;
 
 use Cake\ORM\Table;
 use Cake\Utility\Inflector;
+use Exception;
 
 /**
  * Utility class to filter Model Table associations
- *
  */
 class AssociationFilter
 {
-
     /**
      * Detect existing belongsToMany associations and cleanup the hasMany aliases based on existing
      * belongsToMany associations provided
@@ -35,6 +34,7 @@ class AssociationFilter
     public function filterHasManyAssociationsAliases(Table $table, array $aliases)
     {
         $belongsToManyJunctionsAliases = $this->belongsToManyJunctionAliases($table);
+
         return array_values(array_diff($aliases, $belongsToManyJunctionsAliases));
     }
 
@@ -47,9 +47,10 @@ class AssociationFilter
     public function belongsToManyJunctionAliases(Table $table)
     {
         $extractor = function ($val) {
-            return $val->junction()->alias();
+            return $val->junction()->getAlias();
         };
-        return array_map($extractor, $table->associations()->type('BelongsToMany'));
+
+        return array_map($extractor, $table->associations()->getByType('BelongsToMany'));
     }
 
     /**
@@ -66,10 +67,10 @@ class AssociationFilter
         $associations = [];
 
         foreach ($keys as $type) {
-            foreach ($model->associations()->type($type) as $assoc) {
-                $target = $assoc->target();
-                $assocName = $assoc->name();
-                $alias = $target->alias();
+            foreach ($model->associations()->getByType($type) as $assoc) {
+                $target = $assoc->getTarget();
+                $assocName = $assoc->getName();
+                $alias = $target->getAlias();
                 //filter existing HasMany
                 if ($type === 'HasMany' && in_array($alias, $belongsToManyJunctionsAliases)) {
                     continue;
@@ -77,9 +78,10 @@ class AssociationFilter
                 $targetClass = get_class($target);
                 list(, $className) = namespaceSplit($targetClass);
 
+                $navLink = true;
                 $modelClass = get_class($model);
-                if ($modelClass !== 'Cake\ORM\Table' && $targetClass === $modelClass) {
-                    continue;
+                if ($modelClass !== Table::class && $targetClass === $modelClass) {
+                    $navLink = false;
                 }
 
                 $className = preg_replace('/(.*)Table$/', '\1', $className);
@@ -87,18 +89,24 @@ class AssociationFilter
                     $className = $alias;
                 }
 
-                $associations[$type][$assocName] = [
-                    'property' => $assoc->property(),
-                    'variable' => Inflector::variable($assocName),
-                    'primaryKey' => (array)$target->primaryKey(),
-                    'displayField' => $target->displayField(),
-                    'foreignKey' => $assoc->foreignKey(),
-                    'alias' => $alias,
-                    'controller' => $className,
-                    'fields' => $target->schema()->columns(),
-                ];
+                try {
+                    $associations[$type][$assocName] = [
+                        'property' => $assoc->getProperty(),
+                        'variable' => Inflector::variable($assocName),
+                        'primaryKey' => (array)$target->getPrimaryKey(),
+                        'displayField' => $target->getDisplayField(),
+                        'foreignKey' => $assoc->getForeignKey(),
+                        'alias' => $alias,
+                        'controller' => $className,
+                        'fields' => $target->getSchema()->columns(),
+                        'navLink' => $navLink,
+                    ];
+                } catch (Exception $e) {
+                    // Do nothing it could be a bogus association name.
+                }
             }
         }
+
         return $associations;
     }
 }

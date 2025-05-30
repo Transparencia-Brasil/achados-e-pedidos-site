@@ -1,30 +1,29 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\I18n\Parser;
 
 use RuntimeException;
 
 /**
- * Parses file in PO format
+ * Parses file in MO format
  *
  * @copyright Copyright (c) 2010, Union of RAD http://union-of-rad.org (http://lithify.me/)
  * @copyright Copyright (c) 2014, Fabien Potencier https://github.com/symfony/Translation/blob/master/LICENSE
  */
 class MoFileParser
 {
-
     /**
      * Magic used for validating the format of a MO file as well as
      * detecting if the machine used to create that file was little endian.
@@ -44,7 +43,7 @@ class MoFileParser
     /**
      * The size of the header of a MO file in bytes.
      *
-     * @var int Number of bytes.
+     * @var int
      */
     const MO_HEADER_SIZE = 28;
 
@@ -53,28 +52,27 @@ class MoFileParser
      * was created on. Both 32bit and 64bit systems are supported.
      *
      * @param resource $resource The file to be parsed.
-     *
      * @return array List of messages extracted from the file
      * @throws \RuntimeException If stream content has an invalid format.
      */
     public function parse($resource)
     {
-        $stream = fopen($resource, 'r');
+        $stream = fopen($resource, 'rb');
 
         $stat = fstat($stream);
 
         if ($stat['size'] < self::MO_HEADER_SIZE) {
-            throw new RuntimeException("Invalid format for MO translations file");
+            throw new RuntimeException('Invalid format for MO translations file');
         }
         $magic = unpack('V1', fread($stream, 4));
         $magic = hexdec(substr(dechex(current($magic)), -8));
 
-        if ($magic == self::MO_LITTLE_ENDIAN_MAGIC) {
+        if ($magic === self::MO_LITTLE_ENDIAN_MAGIC) {
             $isBigEndian = false;
-        } elseif ($magic == self::MO_BIG_ENDIAN_MAGIC) {
+        } elseif ($magic === self::MO_BIG_ENDIAN_MAGIC) {
             $isBigEndian = true;
         } else {
-            throw new RuntimeException("Invalid format for MO translations file");
+            throw new RuntimeException('Invalid format for MO translations file');
         }
 
         // offset formatRevision
@@ -90,7 +88,6 @@ class MoFileParser
 
         for ($i = 0; $i < $count; $i++) {
             $pluralId = null;
-            $translated = null;
             $context = null;
             $plurals = null;
 
@@ -120,13 +117,13 @@ class MoFileParser
             fseek($stream, $offset);
             $translated = fread($stream, $length);
 
-            if (strpos($translated, "\000") !== false) {
+            if ($pluralId !== null || strpos($translated, "\000") !== false) {
                 $translated = explode("\000", $translated);
-                $plurals = $pluralId !== null ? array_map('stripcslashes', $translated) : null;
+                $plurals = $pluralId !== null ? $translated : null;
                 $translated = $translated[0];
             }
 
-            $singular = stripcslashes($translated);
+            $singular = $translated;
             if ($context !== null) {
                 $messages[$singularId]['_context'][$context] = $singular;
                 if ($pluralId !== null) {
@@ -135,13 +132,14 @@ class MoFileParser
                 continue;
             }
 
-            $messages[$singularId] = $singular;
+            $messages[$singularId]['_context'][''] = $singular;
             if ($pluralId !== null) {
-                $messages[$pluralId] = $plurals;
+                $messages[$pluralId]['_context'][''] = $plurals;
             }
         }
 
         fclose($stream);
+
         return $messages;
     }
 
@@ -157,6 +155,6 @@ class MoFileParser
         $result = unpack($isBigEndian ? 'N1' : 'V1', fread($stream, 4));
         $result = current($result);
 
-        return (int)substr($result, -8);
+        return (int)substr((string)$result, -8);
     }
 }

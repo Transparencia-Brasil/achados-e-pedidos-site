@@ -1,24 +1,25 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\ORM;
 
-use Cake\ORM\Association;
-use Cake\ORM\AssociationsNormalizerTrait;
-use Cake\ORM\Entity;
-use Cake\ORM\Table;
+use ArrayIterator;
+use Cake\Datasource\EntityInterface;
+use Cake\ORM\Locator\LocatorAwareTrait;
+use Cake\ORM\Locator\LocatorInterface;
 use InvalidArgumentException;
+use IteratorAggregate;
 
 /**
  * A container/collection for association classes.
@@ -26,17 +27,32 @@ use InvalidArgumentException;
  * Contains methods for managing associations, and
  * ordering operations around saving and deleting.
  */
-class AssociationCollection
+class AssociationCollection implements IteratorAggregate
 {
-
     use AssociationsNormalizerTrait;
+    use LocatorAwareTrait;
 
     /**
      * Stored associations
      *
-     * @var array
+     * @var \Cake\ORM\Association[]
      */
     protected $_items = [];
+
+    /**
+     * Constructor.
+     *
+     * Sets the default table locator for associations.
+     * If no locator is provided, the global one will be used.
+     *
+     * @param \Cake\ORM\Locator\LocatorInterface|null $tableLocator Table locator instance.
+     */
+    public function __construct(LocatorInterface $tableLocator = null)
+    {
+        if ($tableLocator !== null) {
+            $this->_tableLocator = $tableLocator;
+        }
+    }
 
     /**
      * Add an association to the collection
@@ -51,7 +67,32 @@ class AssociationCollection
     public function add($alias, Association $association)
     {
         list(, $alias) = pluginSplit($alias);
+
         return $this->_items[strtolower($alias)] = $association;
+    }
+
+    /**
+     * Creates and adds the Association object to this collection.
+     *
+     * @param string $className The name of association class.
+     * @param string $associated The alias for the target table.
+     * @param array $options List of options to configure the association definition.
+     * @return \Cake\ORM\Association
+     * @throws \InvalidArgumentException
+     */
+    public function load($className, $associated, array $options = [])
+    {
+        $options += [
+            'tableLocator' => $this->getTableLocator(),
+        ];
+
+        $association = new $className($associated, $options);
+        if (!$association instanceof Association) {
+            $message = sprintf('The association must extend `%s` class, `%s` given.', Association::class, get_class($association));
+            throw new InvalidArgumentException($message);
+        }
+
+        return $this->add($association->getName(), $association);
     }
 
     /**
@@ -66,6 +107,7 @@ class AssociationCollection
         if (isset($this->_items[$alias])) {
             return $this->_items[$alias];
         }
+
         return null;
     }
 
@@ -78,10 +120,11 @@ class AssociationCollection
     public function getByProperty($prop)
     {
         foreach ($this->_items as $assoc) {
-            if ($assoc->property() === $prop) {
+            if ($assoc->getProperty() === $prop) {
                 return $assoc;
             }
         }
+
         return null;
     }
 
@@ -99,7 +142,7 @@ class AssociationCollection
     /**
      * Get the names of all the associations in the collection.
      *
-     * @return array
+     * @return string[]
      */
     public function keys()
     {
@@ -109,15 +152,39 @@ class AssociationCollection
     /**
      * Get an array of associations matching a specific type.
      *
-     * @param string $class The type of associations you want. For example 'BelongsTo'
+     * @param string|array $class The type of associations you want.
+     *   For example 'BelongsTo' or array like ['BelongsTo', 'HasOne']
      * @return array An array of Association objects.
+     * @deprecated 3.5.3 Use getByType() instead.
      */
     public function type($class)
     {
+        deprecationWarning(
+            'AssociationCollection::type() is deprecated. ' .
+            'Use getByType() instead.'
+        );
+
+        return $this->getByType($class);
+    }
+
+    /**
+     * Get an array of associations matching a specific type.
+     *
+     * @param string|string[] $class The type of associations you want.
+     *   For example 'BelongsTo' or array like ['BelongsTo', 'HasOne']
+     * @return array An array of Association objects.
+     * @since 3.5.3
+     */
+    public function getByType($class)
+    {
+        $class = array_map('strtolower', (array)$class);
+
         $out = array_filter($this->_items, function ($assoc) use ($class) {
             list(, $name) = namespaceSplit(get_class($assoc));
-            return $class === $name;
+
+            return in_array(strtolower($name), $class, true);
         });
+
         return array_values($out);
     }
 
@@ -155,17 +222,18 @@ class AssociationCollection
      * is the owning side.
      *
      * @param \Cake\ORM\Table $table The table entity is for.
-     * @param \Cake\ORM\Entity $entity The entity to save associated data for.
+     * @param \Cake\Datasource\EntityInterface $entity The entity to save associated data for.
      * @param array $associations The list of associations to save parents from.
      *   associations not in this list will not be saved.
      * @param array $options The options for the save operation.
      * @return bool Success
      */
-    public function saveParents(Table $table, Entity $entity, $associations, array $options = [])
+    public function saveParents(Table $table, EntityInterface $entity, $associations, array $options = [])
     {
         if (empty($associations)) {
             return true;
         }
+
         return $this->_saveAssociations($table, $entity, $associations, $options, false);
     }
 
@@ -176,17 +244,18 @@ class AssociationCollection
      * is not the owning side.
      *
      * @param \Cake\ORM\Table $table The table entity is for.
-     * @param \Cake\ORM\Entity $entity The entity to save associated data for.
+     * @param \Cake\Datasource\EntityInterface $entity The entity to save associated data for.
      * @param array $associations The list of associations to save children from.
      *   associations not in this list will not be saved.
      * @param array $options The options for the save operation.
      * @return bool Success
      */
-    public function saveChildren(Table $table, Entity $entity, array $associations, array $options)
+    public function saveChildren(Table $table, EntityInterface $entity, array $associations, array $options)
     {
         if (empty($associations)) {
             return true;
         }
+
         return $this->_saveAssociations($table, $entity, $associations, $options, true);
     }
 
@@ -194,7 +263,7 @@ class AssociationCollection
      * Helper method for saving an association's data.
      *
      * @param \Cake\ORM\Table $table The table the save is currently operating on
-     * @param \Cake\ORM\Entity $entity The entity to save
+     * @param \Cake\Datasource\EntityInterface $entity The entity to save
      * @param array $associations Array of associations to save.
      * @param array $options Original options
      * @param bool $owningSide Compared with association classes'
@@ -215,7 +284,7 @@ class AssociationCollection
                 $msg = sprintf(
                     'Cannot save %s, it is not associated to %s',
                     $alias,
-                    $table->alias()
+                    $table->getAlias()
                 );
                 throw new InvalidArgumentException($msg);
             }
@@ -226,6 +295,7 @@ class AssociationCollection
                 return false;
             }
         }
+
         return true;
     }
 
@@ -233,34 +303,58 @@ class AssociationCollection
      * Helper method for saving an association's data.
      *
      * @param \Cake\ORM\Association $association The association object to save with.
-     * @param \Cake\ORM\Entity $entity The entity to save
+     * @param \Cake\Datasource\EntityInterface $entity The entity to save
      * @param array $nested Options for deeper associations
      * @param array $options Original options
      * @return bool Success
      */
     protected function _save($association, $entity, $nested, $options)
     {
-        if (!$entity->dirty($association->property())) {
+        if (!$entity->isDirty($association->getProperty())) {
             return true;
         }
         if (!empty($nested)) {
             $options = (array)$nested + $options;
         }
+
         return (bool)$association->saveAssociated($entity, $options);
     }
 
     /**
      * Cascade a delete across the various associations.
+     * Cascade first across associations for which cascadeCallbacks is true.
      *
-     * @param \Cake\ORM\Entity $entity The entity to delete associations for.
+     * @param \Cake\Datasource\EntityInterface $entity The entity to delete associations for.
      * @param array $options The options used in the delete operation.
      * @return void
      */
-    public function cascadeDelete(Entity $entity, array $options)
+    public function cascadeDelete(EntityInterface $entity, array $options)
     {
-        foreach ($this->_items as $assoc) {
+        $noCascade = $this->_getNoCascadeItems($entity, $options);
+        foreach ($noCascade as $assoc) {
             $assoc->cascadeDelete($entity, $options);
         }
+    }
+
+    /**
+     * Returns items that have no cascade callback.
+     *
+     * @param \Cake\Datasource\EntityInterface $entity The entity to delete associations for.
+     * @param array $options The options used in the delete operation.
+     * @return \Cake\ORM\Association[]
+     */
+    protected function _getNoCascadeItems($entity, $options)
+    {
+        $noCascade = [];
+        foreach ($this->_items as $assoc) {
+            if (!$assoc->getCascadeCallbacks()) {
+                $noCascade[] = $assoc;
+                continue;
+            }
+            $assoc->cascadeDelete($entity, $options);
+        }
+
+        return $noCascade;
     }
 
     /**
@@ -282,5 +376,15 @@ class AssociationCollection
         }
 
         return $this->_normalizeAssociations($keys);
+    }
+
+    /**
+     * Allow looping through the associations
+     *
+     * @return \ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->_items);
     }
 }

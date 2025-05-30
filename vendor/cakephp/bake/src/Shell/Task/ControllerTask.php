@@ -21,6 +21,9 @@ use Cake\ORM\TableRegistry;
 /**
  * Task class for creating and updating controller files.
  *
+ * @property \Bake\Shell\Task\ModelTask $Model
+ * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
+ * @property \Bake\Shell\Task\TestTask $Test
  */
 class ControllerTask extends BakeTask
 {
@@ -32,7 +35,7 @@ class ControllerTask extends BakeTask
     public $tasks = [
         'Bake.Model',
         'Bake.BakeTemplate',
-        'Bake.Test'
+        'Bake.Test',
     ];
 
     /**
@@ -46,7 +49,7 @@ class ControllerTask extends BakeTask
      * Execution method always used for tasks
      *
      * @param string|null $name The name of the controller to bake.
-     * @return void
+     * @return null|bool
      */
     public function main($name = null)
     {
@@ -58,6 +61,7 @@ class ControllerTask extends BakeTask
             foreach ($this->listAll() as $table) {
                 $this->out('- ' . $this->_camelize($table));
             }
+
             return true;
         }
 
@@ -72,8 +76,9 @@ class ControllerTask extends BakeTask
      */
     public function all()
     {
-        foreach ($this->listAll() as $table) {
-            TableRegistry::clear();
+        $tables = $this->listAll();
+        foreach ($tables as $table) {
+            TableRegistry::getTableLocator()->clear();
             $this->main($table);
         }
     }
@@ -89,16 +94,20 @@ class ControllerTask extends BakeTask
         $this->out("\n" . sprintf('Baking controller class for %s...', $controllerName), 1, Shell::QUIET);
 
         $actions = [];
-        if (empty($this->params['no-actions'])) {
+        if (!$this->param('no-actions') && !$this->param('actions')) {
             $actions = ['index', 'view', 'add', 'edit', 'delete'];
+        }
+        if ($this->param('actions')) {
+            $actions = array_map('trim', explode(',', $this->param('actions')));
+            $actions = array_filter($actions);
         }
 
         $helpers = $this->getHelpers();
         $components = $this->getComponents();
 
-        $prefix = '';
-        if (isset($this->params['prefix'])) {
-            $prefix = '\\' . $this->_camelize($this->params['prefix']);
+        $prefix = $this->_getPrefix();
+        if ($prefix) {
+            $prefix = '\\' . str_replace('/', '\\', $prefix);
         }
 
         $namespace = Configure::read('App.namespace');
@@ -112,18 +121,31 @@ class ControllerTask extends BakeTask
             $plugin .= '.';
         }
 
-        $modelObj = TableRegistry::get($currentModelName);
+        if (TableRegistry::getTableLocator()->exists($plugin . $currentModelName)) {
+            $modelObj = TableRegistry::getTableLocator()->get($plugin . $currentModelName);
+        } else {
+            $modelObj = TableRegistry::getTableLocator()->get($plugin . $currentModelName, [
+                'connectionName' => $this->connection,
+            ]);
+        }
 
         $pluralName = $this->_variableName($currentModelName);
         $singularName = $this->_singularName($currentModelName);
         $singularHumanName = $this->_singularHumanName($controllerName);
         $pluralHumanName = $this->_variableName($controllerName);
 
+        $defaultModel = sprintf('%s\Model\Table\%sTable', $namespace, $controllerName);
+        if (!class_exists($defaultModel)) {
+            $defaultModel = null;
+        }
+        $entityClassName = $this->_entityName($modelObj->getAlias());
+
         $data = compact(
             'actions',
-            'admin',
             'components',
             'currentModelName',
+            'defaultModel',
+            'entityClassName',
             'helpers',
             'modelObj',
             'namespace',
@@ -138,6 +160,7 @@ class ControllerTask extends BakeTask
 
         $out = $this->bakeController($controllerName, $data);
         $this->bakeTest($controllerName);
+
         return $out;
     }
 
@@ -168,40 +191,25 @@ class ControllerTask extends BakeTask
         $path = $this->getPath();
         $filename = $path . $controllerName . 'Controller.php';
         $this->createFile($filename, $contents);
-        return $contents;
-    }
 
-    /**
-     * Gets the path for output. Checks the plugin property
-     * and returns the correct path.
-     *
-     * @return string Path to output.
-     */
-    public function getPath()
-    {
-        $path = parent::getPath();
-        if (!empty($this->params['prefix'])) {
-            $path .= $this->_camelize($this->params['prefix']) . DS;
-        }
-        return $path;
+        return $contents;
     }
 
     /**
      * Assembles and writes a unit test file
      *
      * @param string $className Controller class name
-     * @return string Baked test
+     * @return string|false Baked test
      */
     public function bakeTest($className)
     {
         if (!empty($this->params['no-test'])) {
-            return;
+            return false;
         }
         $this->Test->plugin = $this->plugin;
         $this->Test->connection = $this->connection;
-        if (!empty($this->params['prefix'])) {
-            $className = $this->_camelize($this->params['prefix']) . '\\' . $className;
-        }
+        $this->Test->interactive = $this->interactive;
+
         return $this->Test->bake('Controller', $className);
     }
 
@@ -217,6 +225,7 @@ class ControllerTask extends BakeTask
             $components = explode(',', $this->params['components']);
             $components = array_values(array_filter(array_map('trim', $components)));
         }
+
         return $components;
     }
 
@@ -232,6 +241,7 @@ class ControllerTask extends BakeTask
             $helpers = explode(',', $this->params['helpers']);
             $helpers = array_values(array_filter(array_map('trim', $helpers)));
         }
+
         return $helpers;
     }
 
@@ -243,7 +253,8 @@ class ControllerTask extends BakeTask
     public function listAll()
     {
         $this->Model->connection = $this->connection;
-        return $this->Model->listAll();
+
+        return $this->Model->listUnskipped();
     }
 
     /**
@@ -254,24 +265,28 @@ class ControllerTask extends BakeTask
     public function getOptionParser()
     {
         $parser = parent::getOptionParser();
-        $parser->description(
+        $parser->setDescription(
             'Bake a controller skeleton.'
         )->addArgument('name', [
-            'help' => 'Name of the controller to bake. Can use Plugin.name to bake controllers into plugins.'
+            'help' => 'Name of the controller to bake (without the `Controller` suffix). ' .
+                'You can use Plugin.name to bake controllers into plugins.',
         ])->addOption('components', [
-            'help' => 'The comma separated list of components to use.'
+            'help' => 'The comma separated list of components to use.',
         ])->addOption('helpers', [
-            'help' => 'The comma separated list of helpers to use.'
+            'help' => 'The comma separated list of helpers to use.',
         ])->addOption('prefix', [
-            'help' => 'The namespace/routing prefix to use.'
+            'help' => 'The namespace/routing prefix to use.',
+        ])->addOption('actions', [
+            'help' => 'The comma separated list of actions to generate. ' .
+                      'You can include custom methods provided by your template set here.',
         ])->addOption('no-test', [
             'boolean' => true,
-            'help' => 'Do not generate a test skeleton.'
+            'help' => 'Do not generate a test skeleton.',
         ])->addOption('no-actions', [
             'boolean' => true,
-            'help' => 'Do not generate basic CRUD action methods.'
+            'help' => 'Do not generate basic CRUD action methods.',
         ])->addSubcommand('all', [
-            'help' => 'Bake all controllers with CRUD methods.'
+            'help' => 'Bake all controllers with CRUD methods.',
         ]);
 
         return $parser;

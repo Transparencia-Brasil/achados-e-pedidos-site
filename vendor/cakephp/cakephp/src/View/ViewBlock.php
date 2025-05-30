@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         2.1.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\View;
 
@@ -21,10 +21,15 @@ use Cake\Core\Exception\Exception;
  * Slots or blocks are combined with extending views and layouts to afford slots
  * of content that are present in a layout or parent view, but are defined by the child
  * view or elements used in the view.
- *
  */
 class ViewBlock
 {
+    /**
+     * Override content
+     *
+     * @var string
+     */
+    const OVERRIDE = 'override';
 
     /**
      * Append content
@@ -43,7 +48,7 @@ class ViewBlock
     /**
      * Block content. An array of blocks indexed by name.
      *
-     * @var array
+     * @var string[]
      */
     protected $_blocks = [];
 
@@ -57,9 +62,8 @@ class ViewBlock
     /**
      * Should the currently captured content be discarded on ViewBlock::end()
      *
+     * @see \Cake\View\ViewBlock::end()
      * @var bool
-     * @see ViewBlock::end()
-     * @see ViewBlock::startIfEmpty()
      */
     protected $_discardActiveBufferOnEnd = false;
 
@@ -73,15 +77,18 @@ class ViewBlock
      * using View::get();
      *
      * @param string $name The name of the block to capture for.
+     * @param string $mode If ViewBlock::OVERRIDE existing content will be overridden by new content.
+     *   If ViewBlock::APPEND content will be appended to existing content.
+     *   If ViewBlock::PREPEND it will be prepended.
      * @throws \Cake\Core\Exception\Exception When starting a block twice
      * @return void
      */
-    public function start($name)
+    public function start($name, $mode = ViewBlock::OVERRIDE)
     {
-        if (in_array($name, $this->_active)) {
+        if (array_key_exists($name, $this->_active)) {
             throw new Exception(sprintf("A view block with the name '%s' is already/still open.", $name));
         }
-        $this->_active[] = $name;
+        $this->_active[$name] = $mode;
         ob_start();
     }
 
@@ -89,19 +96,25 @@ class ViewBlock
      * End a capturing block. The compliment to ViewBlock::start()
      *
      * @return void
-     * @see ViewBlock::start()
+     * @see \Cake\View\ViewBlock::start()
      */
     public function end()
     {
         if ($this->_discardActiveBufferOnEnd) {
             $this->_discardActiveBufferOnEnd = false;
             ob_end_clean();
+
             return;
         }
-        if (!empty($this->_active)) {
-            $active = end($this->_active);
+        if ($this->_active) {
+            $mode = end($this->_active);
+            $active = key($this->_active);
             $content = ob_get_clean();
-            $this->_blocks[$active] = $content;
+            if ($mode === ViewBlock::OVERRIDE) {
+                $this->_blocks[$active] = (string)$content;
+            } else {
+                $this->concat($active, $content, $mode);
+            }
             array_pop($this->_active);
         }
     }
@@ -115,13 +128,20 @@ class ViewBlock
      * of the new capturing context will be added to the existing block context.
      *
      * @param string $name Name of the block
-     * @param mixed $value The content for the block
+     * @param mixed $value The content for the block. Value will be type cast
+     *   to string.
      * @param string $mode If ViewBlock::APPEND content will be appended to existing content.
      *   If ViewBlock::PREPEND it will be prepended.
      * @return void
      */
-    public function concat($name, $value, $mode = ViewBlock::APPEND)
+    public function concat($name, $value = null, $mode = ViewBlock::APPEND)
     {
+        if ($value === null) {
+            $this->start($name, $mode);
+
+            return;
+        }
+
         if (!isset($this->_blocks[$name])) {
             $this->_blocks[$name] = '';
         }
@@ -137,7 +157,8 @@ class ViewBlock
      * existing content.
      *
      * @param string $name Name of the block
-     * @param mixed $value The content for the block.
+     * @param mixed $value The content for the block. Value will be type cast
+     *   to string.
      * @return void
      */
     public function set($name, $value)
@@ -157,6 +178,7 @@ class ViewBlock
         if (!isset($this->_blocks[$name])) {
             return $default;
         }
+
         return $this->_blocks[$name];
     }
 
@@ -174,7 +196,7 @@ class ViewBlock
     /**
      * Get the names of all the existing blocks.
      *
-     * @return array An array containing the blocks.
+     * @return string[] An array containing the blocks.
      */
     public function keys()
     {
@@ -184,17 +206,19 @@ class ViewBlock
     /**
      * Get the name of the currently open block.
      *
-     * @return mixed Either null or the name of the last open block.
+     * @return string|null Either null or the name of the last open block.
      */
     public function active()
     {
-        return end($this->_active);
+        end($this->_active);
+
+        return key($this->_active);
     }
 
     /**
-     * Get the names of the unclosed/active blocks.
+     * Get the unclosed/active blocks. Key is name, value is mode.
      *
-     * @return array An array of unclosed blocks.
+     * @return string[] An array of unclosed blocks.
      */
     public function unclosed()
     {

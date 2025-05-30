@@ -1,32 +1,32 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Routing;
 
 use Cake\Core\Configure;
-use Cake\Network\Request;
-use Cake\Network\Response;
-use Cake\Network\Session;
-use Cake\Routing\DispatcherFactory;
-use Cake\Routing\Router;
+use Cake\Http\Response;
+use Cake\Http\ServerRequest;
+use Cake\Http\Session;
+use Cake\Routing\Filter\ControllerFactoryFilter;
+use Cake\Routing\Filter\RoutingFilter;
 
 /**
  * Provides the requestAction() method for doing sub-requests
  *
+ * @deprecated 3.3.0 Use view cells instead.
  */
 trait RequestActionTrait
 {
-
     /**
      * Calls a controller's method from any location. Can be used to connect controllers together
      * or tie plugins into a main application. requestAction can be used to return rendered views
@@ -96,16 +96,22 @@ trait RequestActionTrait
      *    also be used to submit GET/POST data, and passed arguments.
      * @return mixed Boolean true or false on success/failure, or contents
      *    of rendered action if 'return' is set in $extra.
+     * @deprecated 3.3.0 You should refactor your code to use View Cells instead of this method.
      */
     public function requestAction($url, array $extra = [])
     {
+        deprecationWarning(
+            'RequestActionTrait::requestAction() is deprecated. ' .
+            'You should refactor to use View Cells or Components instead.'
+        );
         if (empty($url)) {
             return false;
         }
-        if (($index = array_search('return', $extra)) !== false) {
+        $isReturn = array_search('return', $extra, true);
+        if ($isReturn !== false) {
             $extra['return'] = 0;
             $extra['autoRender'] = 1;
-            unset($extra[$index]);
+            unset($extra[$isReturn]);
         }
         $extra += ['autoRender' => 0, 'return' => 1, 'bare' => 1, 'requested' => 1];
 
@@ -115,17 +121,23 @@ trait RequestActionTrait
         }
         if (is_string($url)) {
             $params = [
-                'url' => $url
+                'url' => $url,
             ];
         } elseif (is_array($url)) {
+            $defaultParams = ['plugin' => null, 'controller' => null, 'action' => null];
             $params = [
-                'params' => $url,
+                'params' => $url + $defaultParams,
                 'base' => false,
-                'url' => Router::reverse($url)
+                'url' => Router::reverse($url),
             ];
             if (empty($params['params']['pass'])) {
                 $params['params']['pass'] = [];
             }
+        }
+        $current = Router::getRequest();
+        if ($current) {
+            $params['base'] = $current->getAttribute('base');
+            $params['webroot'] = $current->getAttribute('webroot');
         }
 
         $params['post'] = $params['query'] = [];
@@ -135,6 +147,9 @@ trait RequestActionTrait
         if (isset($extra['query'])) {
             $params['query'] = $extra['query'];
         }
+        if (isset($extra['cookies'])) {
+            $params['cookies'] = $extra['cookies'];
+        }
         if (isset($extra['environment'])) {
             $params['environment'] = $extra['environment'] + $_SERVER + $_ENV;
         }
@@ -142,11 +157,30 @@ trait RequestActionTrait
 
         $params['session'] = isset($extra['session']) ? $extra['session'] : new Session();
 
-        $request = new Request($params);
+        $request = new ServerRequest($params);
         $request->addParams($extra);
         $dispatcher = DispatcherFactory::create();
+
+        // If an application is using PSR7 middleware,
+        // we need to 'fix' their missing dispatcher filters.
+        $needed = [
+            'routing' => RoutingFilter::class,
+            'controller' => ControllerFactoryFilter::class,
+        ];
+        foreach ($dispatcher->filters() as $filter) {
+            if ($filter instanceof RoutingFilter) {
+                unset($needed['routing']);
+            }
+            if ($filter instanceof ControllerFactoryFilter) {
+                unset($needed['controller']);
+            }
+        }
+        foreach ($needed as $class) {
+            $dispatcher->addFilter(new $class());
+        }
         $result = $dispatcher->dispatch($request, new Response());
         Router::popRequest();
+
         return $result;
     }
 }

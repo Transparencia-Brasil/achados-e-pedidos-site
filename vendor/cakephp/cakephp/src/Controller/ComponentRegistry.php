@@ -1,62 +1,77 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         2.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Controller;
 
 use Cake\Controller\Exception\MissingComponentException;
 use Cake\Core\App;
 use Cake\Core\ObjectRegistry;
-use Cake\Event\EventManagerTrait;
+use Cake\Event\EventDispatcherInterface;
+use Cake\Event\EventDispatcherTrait;
 
 /**
  * ComponentRegistry is a registry for loaded components
  *
  * Handles loading, constructing and binding events for component class objects.
+ *
+ * @extends \Cake\Core\ObjectRegistry<\Cake\Controller\Component>
  */
-class ComponentRegistry extends ObjectRegistry
+class ComponentRegistry extends ObjectRegistry implements EventDispatcherInterface
 {
-
-    use EventManagerTrait;
+    use EventDispatcherTrait;
 
     /**
      * The controller that this collection was initialized with.
      *
-     * @var \Cake\Controller\Controller
+     * @var \Cake\Controller\Controller|null
      */
-    protected $_Controller = null;
+    protected $_Controller;
 
     /**
      * Constructor.
      *
-     * @param \Cake\Controller\Controller $Controller Controller instance.
+     * @param \Cake\Controller\Controller|null $controller Controller instance.
      */
-    public function __construct(Controller $Controller = null)
+    public function __construct(Controller $controller = null)
     {
-        if ($Controller) {
-            $this->_Controller = $Controller;
-            $this->eventManager($Controller->eventManager());
+        if ($controller) {
+            $this->setController($controller);
         }
     }
 
     /**
      * Get the controller associated with the collection.
      *
-     * @return Controller Controller instance
+     * @return \Cake\Controller\Controller|null Controller instance or null if not set.
      */
     public function getController()
     {
         return $this->_Controller;
+    }
+
+    /**
+     * Set the controller associated with the collection.
+     *
+     * @param \Cake\Controller\Controller $controller Controller instance.
+     * @return $this
+     */
+    public function setController(Controller $controller)
+    {
+        $this->_Controller = $controller;
+        $this->setEventManager($controller->getEventManager());
+
+        return $this;
     }
 
     /**
@@ -76,9 +91,10 @@ class ComponentRegistry extends ObjectRegistry
      * Throws an exception when a component is missing.
      *
      * Part of the template method for Cake\Core\ObjectRegistry::load()
+     * and Cake\Core\ObjectRegistry::unload()
      *
      * @param string $class The classname that is missing.
-     * @param string $plugin The plugin the component is missing in.
+     * @param string|null $plugin The plugin the component is missing in.
      * @return void
      * @throws \Cake\Controller\Exception\MissingComponentException
      */
@@ -86,7 +102,7 @@ class ComponentRegistry extends ObjectRegistry
     {
         throw new MissingComponentException([
             'class' => $class . 'Component',
-            'plugin' => $plugin
+            'plugin' => $plugin,
         ]);
     }
 
@@ -106,8 +122,9 @@ class ComponentRegistry extends ObjectRegistry
         $instance = new $class($this, $config);
         $enable = isset($config['enabled']) ? $config['enabled'] : true;
         if ($enable) {
-            $this->eventManager()->on($instance);
+            $this->getEventManager()->on($instance);
         }
+
         return $instance;
     }
 }

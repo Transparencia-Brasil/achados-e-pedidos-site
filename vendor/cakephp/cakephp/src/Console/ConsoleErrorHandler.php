@@ -1,21 +1,23 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         2.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Console;
 
 use Cake\Error\BaseErrorHandler;
 use Cake\Error\FatalErrorException;
+use Cake\Error\PHP7ErrorException;
+use Exception;
 
 /**
  * Error Handler for Cake console. Does simple printing of the
@@ -23,11 +25,10 @@ use Cake\Error\FatalErrorException;
  */
 class ConsoleErrorHandler extends BaseErrorHandler
 {
-
     /**
      * Standard error stream.
      *
-     * @var ConsoleOutput
+     * @var \Cake\Console\ConsoleOutput
      */
     protected $_stderr;
 
@@ -59,9 +60,9 @@ class ConsoleErrorHandler extends BaseErrorHandler
      * @param \Exception $exception Exception instance.
      * @return void
      * @throws \Exception When renderer class not found
-     * @see http://php.net/manual/en/function.set-exception-handler.php
+     * @see https://secure.php.net/manual/en/function.set-exception-handler.php
      */
-    public function handleException(\Exception $exception)
+    public function handleException(Exception $exception)
     {
         $this->_displayException($exception);
         $this->_logException($exception);
@@ -82,8 +83,13 @@ class ConsoleErrorHandler extends BaseErrorHandler
         if ($exception instanceof FatalErrorException) {
             $errorName = 'Fatal Error:';
         }
+
+        if ($exception instanceof PHP7ErrorException) {
+            $exception = $exception->getError();
+        }
+
         $message = sprintf(
-            "<error>%s</error> %s in [%s, line %s]",
+            '<error>%s</error> %s in [%s, line %s]',
             $errorName,
             $exception->getMessage(),
             $exception->getFile(),

@@ -14,7 +14,15 @@
  * @link          http://cakephp.org CakePHP(tm) Project
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-use Cake\Utility\Inflector;
+use Cake\Error\Debugger;
+
+/**
+ * @var \DebugKit\View\AjaxView $this
+ * @var array $app
+ * @var array $cake
+ * @var array $php
+ * @var array $hidef
+ */
 ?>
 
 <h2><?= __d('debug_kit', 'Application Constants') ?></h2>
@@ -23,15 +31,15 @@ use Cake\Utility\Inflector;
 <table cellspacing="0" cellpadding="0" class="debug-table">
     <thead>
         <tr>
-            <th>Constant</th>
-            <th>Value</th>
+            <th><?= __d('debug_kit', 'Constant') ?></th>
+            <th><?= __d('debug_kit', 'Value') ?></th>
         </tr>
     </thead>
     <tbody>
         <?php foreach ($app as $key => $val): ?>
         <tr>
             <td><?= h($key) ?></td>
-            <td><?= h($val) ?></td>
+            <td><?= h(Debugger::exportVar($val)) ?></td>
         </tr>
         <?php endforeach; ?>
     </tbody>
@@ -48,15 +56,15 @@ use Cake\Utility\Inflector;
 <table cellspacing="0" cellpadding="0" class="debug-table">
     <thead>
         <tr>
-            <th>Constant</th>
-            <th>Value</th>
+            <th><?= __d('debug_kit', 'Constant') ?></th>
+            <th><?= __d('debug_kit', 'Value') ?></th>
         </tr>
     </thead>
     <tbody>
         <?php foreach ($cake as $key => $val): ?>
         <tr>
             <td><?= h($key) ?></td>
-            <td><?= h($val) ?></td>
+            <td><?= h(Debugger::exportVar($val)) ?></td>
         </tr>
         <?php endforeach; ?>
     </tbody>
@@ -67,21 +75,46 @@ use Cake\Utility\Inflector;
 </div>
 <?php endif; ?>
 
+<h2><?= __d('debug_kit', 'INI Environment') ?></h2>
+
+<?php if (!empty($ini)): ?>
+<table cellspacing="0" cellpadding="0" class="debug-table">
+    <thead>
+        <tr>
+            <th>INI Variable</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($ini as $key => $val): ?>
+        <tr>
+            <td><?= h($key) ?></td>
+            <td><?= $this->Credentials->filter($val) ?></td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+<?php else: ?>
+<div class="warning">
+    <?= __d('debug_kit', 'ini environment unavailable.'); ?>
+</div>
+<?php endif; ?>
+
 <h2><?= __d('debug_kit', 'PHP Environment') ?></h2>
 
 <?php if (!empty($php)): ?>
 <table cellspacing="0" cellpadding="0" class="debug-table">
     <thead>
         <tr>
-            <th>Environment Variable</th>
-            <th>Value</th>
+            <th><?= __d('debug_kit', 'Environment Variable') ?></th>
+            <th><?= __d('debug_kit', 'Value') ?></th>
         </tr>
     </thead>
     <tbody>
         <?php foreach ($php as $key => $val): ?>
         <tr>
             <td><?= h($key) ?></td>
-            <td><?= h($val) ?></td>
+            <td><?= $this->Credentials->filter($val) ?></td>
         </tr>
         <?php endforeach; ?>
     </tbody>
@@ -99,15 +132,15 @@ use Cake\Utility\Inflector;
     <table cellspacing="0" cellpadding="0" class="debug-table">
         <thead>
             <tr>
-                <th>Constant</th>
-                <th>Value</th>
+                <th><?= __d('debug_kit', 'Constant') ?></th>
+                <th><?= __d('debug_kit', 'Value') ?></th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($hidef as $key => $val): ?>
             <tr>
                 <td><?= h($key) ?></td>
-                <td><?= h($val) ?></td>
+                <td><?= h(Debugger::exportVar($val)) ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>

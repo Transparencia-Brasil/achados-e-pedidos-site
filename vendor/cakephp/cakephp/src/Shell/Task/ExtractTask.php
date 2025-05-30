@@ -1,21 +1,22 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         1.2.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Shell\Task;
 
 use Cake\Console\Shell;
 use Cake\Core\App;
+use Cake\Core\Exception\MissingPluginException;
 use Cake\Core\Plugin;
 use Cake\Filesystem\File;
 use Cake\Filesystem\Folder;
@@ -23,11 +24,9 @@ use Cake\Utility\Inflector;
 
 /**
  * Language string extractor
- *
  */
 class ExtractTask extends Shell
 {
-
     /**
      * Paths to use when looking for strings
      *
@@ -50,11 +49,18 @@ class ExtractTask extends Shell
     protected $_merge = false;
 
     /**
+     * Use relative paths in the pot files rather than full path
+     *
+     * @var bool
+     */
+    protected $_relativePaths = false;
+
+    /**
      * Current file being processed
      *
-     * @var string
+     * @var string|null
      */
-    protected $_file = null;
+    protected $_file;
 
     /**
      * Contains all content waiting to be write
@@ -80,9 +86,9 @@ class ExtractTask extends Shell
     /**
      * Destination path
      *
-     * @var string
+     * @var string|null
      */
-    protected $_output = null;
+    protected $_output;
 
     /**
      * An array of directories to exclude.
@@ -94,7 +100,7 @@ class ExtractTask extends Shell
     /**
      * Holds the validation string domain to use for validation messages when extracting
      *
-     * @var bool
+     * @var string
      */
     protected $_validationDomain = 'default';
 
@@ -104,6 +110,29 @@ class ExtractTask extends Shell
      * @var bool
      */
     protected $_extractCore = false;
+
+    /**
+     * Displays marker error(s) if true
+     *
+     * @var bool
+     */
+    protected $_markerError;
+
+    /**
+     * Count number of marker errors found
+     *
+     * @var bool
+     */
+    protected $_countMarkerError = 0;
+
+    /**
+     * No welcome message.
+     *
+     * @return void
+     */
+    protected function _welcome()
+    {
+    }
 
     /**
      * Method to interact with the User and get path selections.
@@ -123,12 +152,16 @@ class ExtractTask extends Shell
             if (strtoupper($response) === 'Q') {
                 $this->err('Extract Aborted');
                 $this->_stop();
+
                 return;
-            } elseif (strtoupper($response) === 'D' && count($this->_paths)) {
+            }
+            if (strtoupper($response) === 'D' && count($this->_paths)) {
                 $this->out();
+
                 return;
-            } elseif (strtoupper($response) === 'D') {
-                $this->err('<warning>No directories selected.</warning> Please choose a directory.');
+            }
+            if (strtoupper($response) === 'D') {
+                $this->warn('No directories selected. Please choose a directory.');
             } elseif (is_dir($response)) {
                 $this->_paths[] = $response;
                 $defaultPath = 'D';
@@ -156,8 +189,8 @@ class ExtractTask extends Shell
             $this->_paths = explode(',', $this->params['paths']);
         } elseif (isset($this->params['plugin'])) {
             $plugin = Inflector::camelize($this->params['plugin']);
-            if (!Plugin::loaded($plugin)) {
-                Plugin::load($plugin);
+            if (!Plugin::isLoaded($plugin)) {
+                throw new MissingPluginException(['plugin' => $plugin]);
             }
             $this->_paths = [Plugin::classPath($plugin)];
             $this->params['plugin'] = $plugin;
@@ -182,34 +215,32 @@ class ExtractTask extends Shell
 
         if ($this->_extractCore) {
             $this->_paths[] = CAKE;
-            $this->_exclude = array_merge($this->_exclude, [
-                CAKE . 'Test',
-                CAKE . 'Console' . DS . 'Templates'
-            ]);
         }
 
         if (isset($this->params['output'])) {
             $this->_output = $this->params['output'];
         } elseif (isset($this->params['plugin'])) {
-            $this->_output = $this->_paths[0] . DS . 'Locale';
+            $this->_output = $this->_paths[0] . 'Locale';
         } else {
             $message = "What is the path you would like to output?\n[Q]uit";
             while (true) {
-                $response = $this->in($message, null, rtrim($this->_paths[0], DS) . DS . 'Locale');
+                $response = $this->in($message, null, rtrim($this->_paths[0], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'Locale');
                 if (strtoupper($response) === 'Q') {
                     $this->err('Extract Aborted');
                     $this->_stop();
+
                     return;
-                } elseif ($this->_isPathUsable($response)) {
-                    $this->_output = $response . DS;
-                    break;
-                } else {
-                    $this->err('');
-                    $this->err(
-                        '<error>The directory path you supplied was ' .
-                        'not found. Please try again.</error>'
-                    );
                 }
+                if ($this->_isPathUsable($response)) {
+                    $this->_output = $response . DIRECTORY_SEPARATOR;
+                    break;
+                }
+
+                $this->err('');
+                $this->err(
+                    '<error>The directory path you supplied was ' .
+                    'not found. Please try again.</error>'
+                );
                 $this->out();
             }
         }
@@ -222,14 +253,18 @@ class ExtractTask extends Shell
             $this->_merge = strtolower($response) === 'y';
         }
 
+        $this->_markerError = $this->param('marker-error');
+        $this->_relativePaths = $this->param('relative-paths');
+
         if (empty($this->_files)) {
             $this->_searchFiles();
         }
 
-        $this->_output = rtrim($this->_output, DS) . DS;
+        $this->_output = rtrim($this->_output, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         if (!$this->_isPathUsable($this->_output)) {
             $this->err(sprintf('The output directory %s was not found or writable.', $this->_output));
             $this->_stop();
+
             return;
         }
 
@@ -243,31 +278,26 @@ class ExtractTask extends Shell
      *
      * @param string $domain The domain
      * @param string $msgid The message string
-     * @param array $details The file and line references
+     * @param array $details Context and plural form if any, file and line references
      * @return void
      */
     protected function _addTranslation($domain, $msgid, $details = [])
     {
-        if (empty($this->_translations[$domain][$msgid])) {
-            $this->_translations[$domain][$msgid] = [
+        $context = isset($details['msgctxt']) ? $details['msgctxt'] : '';
+
+        if (empty($this->_translations[$domain][$msgid][$context])) {
+            $this->_translations[$domain][$msgid][$context] = [
                 'msgid_plural' => false,
-                'msgctxt' => ''
             ];
         }
 
         if (isset($details['msgid_plural'])) {
-            $this->_translations[$domain][$msgid]['msgid_plural'] = $details['msgid_plural'];
-        }
-        if (isset($details['msgctxt'])) {
-            $this->_translations[$domain][$msgid]['msgctxt'] = $details['msgctxt'];
+            $this->_translations[$domain][$msgid][$context]['msgid_plural'] = $details['msgid_plural'];
         }
 
         if (isset($details['file'])) {
-            $line = 0;
-            if (isset($details['line'])) {
-                $line = $details['line'];
-            }
-            $this->_translations[$domain][$msgid]['references'][$details['file']][] = $line;
+            $line = isset($details['line']) ? $details['line'] : 0;
+            $this->_translations[$domain][$msgid][$context]['references'][$details['file']][] = $line;
         }
     }
 
@@ -294,6 +324,11 @@ class ExtractTask extends Shell
         $this->_paths = $this->_files = $this->_storage = [];
         $this->_translations = $this->_tokens = [];
         $this->out();
+        if ($this->_countMarkerError) {
+            $this->err("{$this->_countMarkerError} marker error(s) detected.");
+            $this->err(" => Use the --marker-error option to display errors.");
+        }
+
         $this->out('Done.');
     }
 
@@ -305,43 +340,56 @@ class ExtractTask extends Shell
     public function getOptionParser()
     {
         $parser = parent::getOptionParser();
-        $parser->description(
+        $parser->setDescription(
             'CakePHP Language String Extraction:'
         )->addOption('app', [
-            'help' => 'Directory where your application is located.'
+            'help' => 'Directory where your application is located.',
         ])->addOption('paths', [
-            'help' => 'Comma separated list of paths.'
+            'help' => 'Comma separated list of paths.',
         ])->addOption('merge', [
             'help' => 'Merge all domain strings into the default.po file.',
-            'choices' => ['yes', 'no']
+            'choices' => ['yes', 'no'],
+        ])->addOption('relative-paths', [
+            'help' => 'Use relative paths in the .pot file',
+            'boolean' => true,
+            'default' => false,
         ])->addOption('output', [
-            'help' => 'Full path to output directory.'
+            'help' => 'Full path to output directory.',
         ])->addOption('files', [
-            'help' => 'Comma separated list of files.'
+            'help' => 'Comma separated list of files.',
         ])->addOption('exclude-plugins', [
             'boolean' => true,
             'default' => true,
-            'help' => 'Ignores all files in plugins if this command is run inside from the same app directory.'
+            'help' => 'Ignores all files in plugins if this command is run inside from the same app directory.',
         ])->addOption('plugin', [
-            'help' => 'Extracts tokens only from the plugin specified and puts the result in the plugin\'s Locale directory.'
+            'help' => 'Extracts tokens only from the plugin specified and puts the result in the plugin\'s Locale directory.',
+            'short' => 'p',
         ])->addOption('ignore-model-validation', [
             'boolean' => true,
             'default' => false,
             'help' => 'Ignores validation messages in the $validate property.' .
                 ' If this flag is not set and the command is run from the same app directory,' .
-                ' all messages in model validation rules will be extracted as tokens.'
+                ' all messages in model validation rules will be extracted as tokens.',
         ])->addOption('validation-domain', [
-            'help' => 'If set to a value, the localization domain to be used for model validation messages.'
+            'help' => 'If set to a value, the localization domain to be used for model validation messages.',
         ])->addOption('exclude', [
             'help' => 'Comma separated list of directories to exclude.' .
-                ' Any path containing a path segment with the provided values will be skipped. E.g. test,vendors'
+                ' Any path containing a path segment with the provided values will be skipped. E.g. test,vendors',
         ])->addOption('overwrite', [
             'boolean' => true,
             'default' => false,
-            'help' => 'Always overwrite existing .pot files.'
+            'help' => 'Always overwrite existing .pot files.',
         ])->addOption('extract-core', [
             'help' => 'Extract messages from the CakePHP core libs.',
-            'choices' => ['yes', 'no']
+            'choices' => ['yes', 'no'],
+        ])->addOption('no-location', [
+            'boolean' => true,
+            'default' => false,
+            'help' => 'Do not write file locations for each extracted message.',
+        ])->addOption('marker-error', [
+            'boolean' => true,
+            'default' => false,
+            'help' => 'Do not display marker error.',
         ]);
 
         return $parser;
@@ -354,29 +402,51 @@ class ExtractTask extends Shell
      */
     protected function _extractTokens()
     {
+        /** @var \Cake\Shell\Helper\ProgressHelper $progress */
+        $progress = $this->helper('progress');
+        $progress->init(['total' => count($this->_files)]);
+        $isVerbose = $this->param('verbose');
+
+        $functions = [
+            '__' => ['singular'],
+            '__n' => ['singular', 'plural'],
+            '__d' => ['domain', 'singular'],
+            '__dn' => ['domain', 'singular', 'plural'],
+            '__x' => ['context', 'singular'],
+            '__xn' => ['context', 'singular', 'plural'],
+            '__dx' => ['domain', 'context', 'singular'],
+            '__dxn' => ['domain', 'context', 'singular', 'plural'],
+        ];
+        $pattern = '/(' . implode('|', array_keys($functions)) . ')\s*\(/';
+
         foreach ($this->_files as $file) {
             $this->_file = $file;
-            $this->out(sprintf('Processing %s...', $file), 1, Shell::VERBOSE);
+            if ($isVerbose) {
+                $this->out(sprintf('Processing %s...', $file), 1, Shell::VERBOSE);
+            }
 
             $code = file_get_contents($file);
-            $allTokens = token_get_all($code);
 
-            $this->_tokens = [];
-            foreach ($allTokens as $token) {
-                if (!is_array($token) || ($token[0] !== T_WHITESPACE && $token[0] !== T_INLINE_HTML)) {
-                    $this->_tokens[] = $token;
+            if (preg_match($pattern, $code) === 1) {
+                $allTokens = token_get_all($code);
+
+                $this->_tokens = [];
+                foreach ($allTokens as $token) {
+                    if (!is_array($token) || ($token[0] !== T_WHITESPACE && $token[0] !== T_INLINE_HTML)) {
+                        $this->_tokens[] = $token;
+                    }
+                }
+                unset($allTokens);
+
+                foreach ($functions as $functionName => $map) {
+                    $this->_parse($functionName, $map);
                 }
             }
-            unset($allTokens);
-            $this->_parse('__', ['singular']);
-            $this->_parse('__n', ['singular', 'plural']);
-            $this->_parse('__d', ['domain', 'singular']);
-            $this->_parse('__dn', ['domain', 'singular', 'plural']);
-            $this->_parse('__x', ['context', 'singular']);
-            $this->_parse('__xn', ['context', 'singular', 'plural']);
-            $this->_parse('__dx', ['domain', 'context', 'singular']);
-            $this->_parse('__dxn', ['domain', 'context', 'singular', 'plural']);
 
+            if (!$isVerbose) {
+                $progress->increment(1);
+                $progress->draw();
+            }
         }
     }
 
@@ -418,16 +488,25 @@ class ExtractTask extends Shell
                 $strings = $this->_getStrings($position, $mapCount);
 
                 if ($mapCount === count($strings)) {
+                    $singular = $plural = $context = null;
+                    /**
+                     * @var string $singular
+                     * @var string|null $plural
+                     * @var string|null $context
+                     */
                     extract(array_combine($map, $strings));
                     $domain = isset($domain) ? $domain : 'default';
                     $details = [
                         'file' => $this->_file,
                         'line' => $line,
                     ];
-                    if (isset($plural)) {
+                    if ($this->_relativePaths) {
+                        $details['file'] = '.' . str_replace(ROOT, '', $details['file']);
+                    }
+                    if ($plural !== null) {
                         $details['msgid_plural'] = $plural;
                     }
-                    if (isset($context)) {
+                    if ($context !== null) {
                         $details['msgctxt'] = $context;
                     }
                     $this->_addTranslation($domain, $singular, $details);
@@ -447,37 +526,51 @@ class ExtractTask extends Shell
     protected function _buildFiles()
     {
         $paths = $this->_paths;
-        $paths[] = realpath(APP) . DS;
+        $paths[] = realpath(APP) . DIRECTORY_SEPARATOR;
+
+        usort($paths, function ($a, $b) {
+            return strlen($a) - strlen($b);
+        });
+
         foreach ($this->_translations as $domain => $translations) {
-            foreach ($translations as $msgid => $details) {
-                $plural = $details['msgid_plural'];
-                $context = $details['msgctxt'];
-                $files = $details['references'];
-                $occurrences = [];
-                foreach ($files as $file => $lines) {
-                    $lines = array_unique($lines);
-                    $occurrences[] = $file . ':' . implode(';', $lines);
-                }
-                $occurrences = implode("\n#: ", $occurrences);
-                $header = '#: ' . str_replace(DS, '/', str_replace($paths, '', $occurrences)) . "\n";
+            foreach ($translations as $msgid => $contexts) {
+                foreach ($contexts as $context => $details) {
+                    $plural = $details['msgid_plural'];
+                    $files = $details['references'];
+                    $header = '';
 
-                $sentence = '';
-                if ($context) {
-                    $sentence .= "msgctxt \"{$context}\"\n";
-                }
-                if ($plural === false) {
-                    $sentence .= "msgid \"{$msgid}\"\n";
-                    $sentence .= "msgstr \"\"\n\n";
-                } else {
-                    $sentence .= "msgid \"{$msgid}\"\n";
-                    $sentence .= "msgid_plural \"{$plural}\"\n";
-                    $sentence .= "msgstr[0] \"\"\n";
-                    $sentence .= "msgstr[1] \"\"\n\n";
-                }
+                    if (!$this->param('no-location')) {
+                        $occurrences = [];
+                        foreach ($files as $file => $lines) {
+                            $lines = array_unique($lines);
+                            foreach ($lines as $line) {
+                                $occurrences[] = $file . ':' . $line;
+                            }
+                        }
+                        $occurrences = implode("\n#: ", $occurrences);
 
-                $this->_store($domain, $header, $sentence);
-                if ($domain !== 'default' && $this->_merge) {
-                    $this->_store('default', $header, $sentence);
+                        $header = '#: ' . str_replace(DIRECTORY_SEPARATOR, '/', str_replace($paths, '', $occurrences)) . "\n";
+                    }
+
+                    $sentence = '';
+                    if ($context !== '') {
+                        $sentence .= "msgctxt \"{$context}\"\n";
+                    }
+                    if ($plural === false) {
+                        $sentence .= "msgid \"{$msgid}\"\n";
+                        $sentence .= "msgstr \"\"\n\n";
+                    } else {
+                        $sentence .= "msgid \"{$msgid}\"\n";
+                        $sentence .= "msgid_plural \"{$plural}\"\n";
+                        $sentence .= "msgstr[0] \"\"\n";
+                        $sentence .= "msgstr[1] \"\"\n\n";
+                    }
+
+                    if ($domain !== 'default' && $this->_merge) {
+                        $this->_store('default', $header, $sentence);
+                    } else {
+                        $this->_store($domain, $header, $sentence);
+                    }
                 }
             }
         }
@@ -510,18 +603,33 @@ class ExtractTask extends Shell
      */
     protected function _writeFiles()
     {
+        $this->out();
         $overwriteAll = false;
         if (!empty($this->params['overwrite'])) {
             $overwriteAll = true;
         }
         foreach ($this->_storage as $domain => $sentences) {
             $output = $this->_writeHeader();
+            $headerLength = strlen($output);
             foreach ($sentences as $sentence => $header) {
                 $output .= $header . $sentence;
             }
 
-            $filename = $domain . '.pot';
+            // Remove vendor prefix if present.
+            $slashPosition = strpos($domain, '/');
+            if ($slashPosition !== false) {
+                $domain = substr($domain, $slashPosition + 1);
+            }
+
+            $filename = str_replace('/', '_', $domain) . '.pot';
             $File = new File($this->_output . $filename);
+
+            if ($File->exists() && $this->_checkUnchanged($File, $headerLength, $output) === true) {
+                $this->out($filename . ' is unchanged. Skipping.');
+                $File->close();
+                continue;
+            }
+
             $response = '';
             while ($overwriteAll === false && $File->exists() && strtoupper($response) !== 'Y') {
                 $this->out();
@@ -533,7 +641,7 @@ class ExtractTask extends Shell
                 if (strtoupper($response) === 'N') {
                     $response = '';
                     while (!$response) {
-                        $response = $this->in("What would you like to name this file?", null, 'new_' . $filename);
+                        $response = $this->in('What would you like to name this file?', null, 'new_' . $filename);
                         $File = new File($this->_output . $response);
                         $filename = $response;
                     }
@@ -560,7 +668,7 @@ class ExtractTask extends Shell
         $output .= "msgid \"\"\n";
         $output .= "msgstr \"\"\n";
         $output .= "\"Project-Id-Version: PROJECT VERSION\\n\"\n";
-        $output .= "\"POT-Creation-Date: " . date("Y-m-d H:iO") . "\\n\"\n";
+        $output .= '"POT-Creation-Date: ' . date('Y-m-d H:iO') . "\\n\"\n";
         $output .= "\"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\\n\"\n";
         $output .= "\"Last-Translator: NAME <EMAIL@ADDRESS>\\n\"\n";
         $output .= "\"Language-Team: LANGUAGE <EMAIL@ADDRESS>\\n\"\n";
@@ -568,7 +676,28 @@ class ExtractTask extends Shell
         $output .= "\"Content-Type: text/plain; charset=utf-8\\n\"\n";
         $output .= "\"Content-Transfer-Encoding: 8bit\\n\"\n";
         $output .= "\"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n\"\n\n";
+
         return $output;
+    }
+
+    /**
+     * Check whether the old and new output are the same, thus unchanged
+     *
+     * Compares the sha1 hashes of the old and new file without header.
+     *
+     * @param File $oldFile The existing file.
+     * @param int $headerLength The length of the file header in bytes.
+     * @param string $newFileContent The content of the new file.
+     * @return bool Whether or not the old and new file are unchanged.
+     */
+    protected function _checkUnchanged(File $oldFile, $headerLength, $newFileContent)
+    {
+        $oldFileContent = $oldFile->read();
+
+        $oldChecksum = sha1(substr($oldFileContent, $headerLength));
+        $newChecksum = sha1(substr($newFileContent, $headerLength));
+
+        return $oldChecksum === $newChecksum;
     }
 
     /**
@@ -600,6 +729,7 @@ class ExtractTask extends Shell
             }
             $position++;
         }
+
         return $strings;
     }
 
@@ -616,9 +746,10 @@ class ExtractTask extends Shell
         if ($quote === '"') {
             $string = stripcslashes($string);
         } else {
-            $string = strtr($string, ["\\'" => "'", "\\\\" => "\\"]);
+            $string = strtr($string, ["\\'" => "'", '\\\\' => '\\']);
         }
         $string = str_replace("\r\n", "\n", $string);
+
         return addcslashes($string, "\0..\37\\\"");
     }
 
@@ -633,6 +764,14 @@ class ExtractTask extends Shell
      */
     protected function _markerError($file, $line, $marker, $count)
     {
+        if (strpos($this->_file, CAKE_CORE_INCLUDE_PATH) === false) {
+            $this->_countMarkerError++;
+        }
+
+        if (!$this->_markerError) {
+            return;
+        }
+
         $this->err(sprintf("Invalid marker content in %s:%s\n* %s(", $file, $line, $marker));
         $count += 2;
         $tokenCount = count($this->_tokens);
@@ -667,26 +806,24 @@ class ExtractTask extends Shell
         if (!empty($this->_exclude)) {
             $exclude = [];
             foreach ($this->_exclude as $e) {
-                if (DS !== '\\' && $e[0] !== DS) {
-                    $e = DS . $e;
+                if (DIRECTORY_SEPARATOR !== '\\' && $e[0] !== DIRECTORY_SEPARATOR) {
+                    $e = DIRECTORY_SEPARATOR . $e;
                 }
                 $exclude[] = preg_quote($e, '/');
             }
             $pattern = '/' . implode('|', $exclude) . '/';
         }
         foreach ($this->_paths as $path) {
+            $path = realpath($path) . DIRECTORY_SEPARATOR;
             $Folder = new Folder($path);
             $files = $Folder->findRecursive('.*\.(php|ctp|thtml|inc|tpl)', true);
             if (!empty($pattern)) {
-                foreach ($files as $i => $file) {
-                    if (preg_match($pattern, $file)) {
-                        unset($files[$i]);
-                    }
-                }
+                $files = preg_grep($pattern, $files, PREG_GREP_INVERT);
                 $files = array_values($files);
             }
             $this->_files = array_merge($this->_files, $files);
         }
+        $this->_files = array_unique($this->_files);
     }
 
     /**
@@ -708,6 +845,10 @@ class ExtractTask extends Shell
      */
     protected function _isPathUsable($path)
     {
+        if (!is_dir($path)) {
+            mkdir($path, 0770, true);
+        }
+
         return is_dir($path) && is_writable($path);
     }
 }

@@ -14,6 +14,7 @@
  */
 namespace Bake\Shell;
 
+use Bake\Utility\CommonOptionsTrait;
 use Cake\Cache\Cache;
 use Cake\Console\Shell;
 use Cake\Core\Configure;
@@ -29,10 +30,13 @@ use Cake\Utility\Inflector;
  * application development by writing fully functional skeleton controllers,
  * models, and templates. Going further, Bake can also write Unit Tests for you.
  *
- * @link http://book.cakephp.org/3.0/en/console-and-shells/code-generation-with-bake.html
+ * @link https://book.cakephp.org/3.0/en/bake/usage.html
+ *
+ * @property \Bake\Shell\Task\ModelTask $Model
  */
 class BakeShell extends Shell
 {
+    use CommonOptionsTrait;
     use ConventionsTrait;
 
     /**
@@ -52,6 +56,10 @@ class BakeShell extends Shell
         parent::startup();
         Configure::write('debug', true);
         Cache::disable();
+        // Loading WyriHaximus/TwigView Plugin through the Plugin::load() for backward compatibility.
+        if (!Plugin::isLoaded('WyriHaximus/TwigView')) {
+            Plugin::load('WyriHaximus/TwigView', ['bootstrap' => true]);
+        }
 
         $task = $this->_camelize($this->command);
 
@@ -59,16 +67,26 @@ class BakeShell extends Shell
             if (isset($this->params['connection'])) {
                 $this->{$task}->connection = $this->params['connection'];
             }
+            if (isset($this->params['tablePrefix'])) {
+                $this->{$task}->tablePrefix = $this->params['tablePrefix'];
+            }
         }
         if (isset($this->params['connection'])) {
             $this->connection = $this->params['connection'];
+        }
+
+        if ($this->params['quiet']) {
+            $this->interactive = false;
+            if (isset($this->{$task}) && !in_array($task, ['Project'])) {
+                $this->{$task}->interactive = false;
+            }
         }
     }
 
     /**
      * Override main() to handle action
      *
-     * @return mixed
+     * @return bool
      */
     public function main()
     {
@@ -78,7 +96,8 @@ class BakeShell extends Shell
             $args = $this->args;
             array_shift($args);
             $args = implode($args, ' ');
-            $this->out(sprintf('    bin/cake bake template %s', $args), 2);
+            $this->out(sprintf('    <info>`bin/cake bake template %s`</info>', $args), 2);
+
             return false;
         }
 
@@ -86,6 +105,7 @@ class BakeShell extends Shell
         if (empty($connections)) {
             $this->out('Your database configuration was not found.');
             $this->out('Add your database connection information to config/app.php.');
+
             return false;
         }
         $this->out('The following commands can be used to generate skeleton code for your application.', 2);
@@ -102,6 +122,7 @@ class BakeShell extends Shell
         }
         $this->out('');
         $this->out('By using <info>`cake bake [name]`</info> you can invoke a specific bake task.');
+
         return false;
     }
 
@@ -112,27 +133,28 @@ class BakeShell extends Shell
      * Cake\Shell\Task\BakeTask:
      *
      * - Cake/Shell/Task/
-     * - App/Shell/Task/
      * - Shell/Task for each loaded plugin
+     * - App/Shell/Task/
      *
-     * @return void
+     * @return bool
      */
     public function loadTasks()
     {
         $tasks = [];
 
-        $tasks = $this->_findTasks($tasks, APP, Configure::read('App.namespace'));
         foreach (Plugin::loaded() as $plugin) {
             $tasks = $this->_findTasks(
                 $tasks,
                 Plugin::classPath($plugin),
-                $plugin,
+                str_replace('/', '\\', $plugin),
                 $plugin
             );
         }
+        $tasks = $this->_findTasks($tasks, APP, Configure::read('App.namespace'));
 
         $this->tasks = array_values($tasks);
-        parent::loadTasks();
+
+        return parent::loadTasks();
     }
 
     /**
@@ -158,6 +180,7 @@ class BakeShell extends Shell
             $fullName = ($prefix ? $prefix . '.' : '') . $name;
             $tasks[$name] = $fullName;
         }
+
         return $tasks;
     }
 
@@ -179,6 +202,7 @@ class BakeShell extends Shell
             $name = $item->getBasename('.php');
             $candidates[] = $namespace . '\Shell\Task\\' . $name;
         }
+
         return $candidates;
     }
 
@@ -204,6 +228,7 @@ class BakeShell extends Shell
             }
             $classes[] = $className;
         }
+
         return $classes;
     }
 
@@ -211,10 +236,18 @@ class BakeShell extends Shell
      * Quickly bake the MVC
      *
      * @param string|null $name Name.
-     * @return void
+     * @return bool
      */
     public function all($name = null)
     {
+        if (
+            $this->param('connection') && $this->param('everything') &&
+            $this->param('connection') !== 'default'
+        ) {
+            $this->warn('Can only bake everything on default connection');
+
+            return false;
+        }
         $this->out('Bake All');
         $this->hr();
 
@@ -222,27 +255,36 @@ class BakeShell extends Shell
             $this->connection = $this->params['connection'];
         }
 
-        if (empty($name)) {
+        if (empty($name) && !$this->param('everything')) {
             $this->Model->connection = $this->connection;
             $this->out('Possible model names based on your database:');
-            foreach ($this->Model->listAll() as $table) {
+            foreach ($this->Model->listUnskipped() as $table) {
                 $this->out('- ' . $table);
             }
             $this->out('Run <info>`cake bake all [name]`</info> to generate skeleton files.');
+
             return false;
         }
 
-        foreach (['Model', 'Controller', 'Template'] as $task) {
-            $this->{$task}->connection = $this->connection;
+        $allTables = collection([$name]);
+        $filteredTables = $allTables;
+
+        if ($this->param('everything')) {
+            $this->Model->connection = $this->connection;
+            $filteredTables = collection($this->Model->listUnskipped());
         }
 
-        $name = $this->_camelize($name);
-
-        $this->Model->main($name);
-        $this->Controller->main($name);
-        $this->Template->main($name);
+        foreach (['Model', 'Controller', 'Template'] as $task) {
+            $filteredTables->each(function ($tableName) use ($task) {
+                $tableName = $this->_camelize($tableName);
+                $this->{$task}->connection = $this->connection;
+                $this->{$task}->interactive = $this->interactive;
+                $this->{$task}->main($tableName);
+            });
+        }
 
         $this->out('<success>Bake All complete.</success>', 1, Shell::QUIET);
+
         return true;
     }
 
@@ -255,39 +297,33 @@ class BakeShell extends Shell
     {
         $parser = parent::getOptionParser();
 
-        $bakeThemes = [];
-        foreach (Plugin::loaded() as $plugin) {
-            $path = Plugin::classPath($plugin);
-            if (is_dir($path . 'Template' . DS . 'Bake')) {
-                $bakeThemes[] = $plugin;
-            }
-        }
-
-        $parser->description(
+        $parser->setDescription(
             'The Bake script generates controllers, models and template files for your application.' .
             ' If run with no command line arguments, Bake guides the user through the class creation process.' .
             ' You can customize the generation process by telling Bake where different parts of your application' .
             ' are using command line arguments.'
         )->addSubcommand('all', [
             'help' => 'Bake a complete MVC skeleton.',
-        ])->addOption('connection', [
-            'help' => 'Database connection to use in conjunction with `bake all`.',
-            'short' => 'c',
-            'default' => 'default'
-        ])->addOption('plugin', [
-            'short' => 'p',
-            'help' => 'Plugin to bake into.'
-        ])->addOption('theme', [
-            'short' => 't',
-            'help' => 'The theme to use when baking code.',
-            'choices' => $bakeThemes
+        ])->addOption('everything', [
+            'help' => 'Bake a complete MVC skeleton, using all the available tables. ' .
+                'Usage: "bake all --everything"',
+            'default' => false,
+            'boolean' => true,
+        ])->addOption('prefix', [
+            'help' => 'Prefix to bake controllers and templates into.',
+        ])->addOption('tablePrefix', [
+            'help' => 'Table prefix to be used in models.',
+            'default' => null,
         ]);
+
+        $parser = $this->_setCommonOptions($parser);
 
         foreach ($this->_taskMap as $task => $config) {
             $taskParser = $this->{$task}->getOptionParser();
+            $this->{$task}->interactive = $this->interactive;
             $parser->addSubcommand(Inflector::underscore($task), [
-                'help' => $taskParser->description(),
-                'parser' => $taskParser
+                'help' => $taskParser->getDescription(),
+                'parser' => $taskParser,
             ]);
         }
 

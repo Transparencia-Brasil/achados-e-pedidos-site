@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         0.10.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\View\Helper;
 
@@ -24,27 +24,26 @@ use Cake\View\View;
  *
  * Methods to make numbers more readable.
  *
- * @link http://book.cakephp.org/3.0/en/views/helpers/number.html
+ * @link https://book.cakephp.org/3/en/views/helpers/number.html
  * @see \Cake\I18n\Number
  */
 class NumberHelper extends Helper
 {
-
     /**
      * Default config for this class
      *
-     * @var mixed
+     * @var array
      */
     protected $_defaultConfig = [
-        'engine' => 'Cake\I18n\Number'
+        'engine' => 'Cake\I18n\Number',
     ];
 
     /**
-     * Cake\I18n\LocalizedNumber instance
+     * Cake\I18n\Number instance
      *
      * @var \Cake\I18n\Number
      */
-    protected $_engine = null;
+    protected $_engine;
 
     /**
      * Default Constructor
@@ -89,13 +88,14 @@ class NumberHelper extends Helper
      *
      * @param float $number A floating point number.
      * @param int $precision The precision of the returned number.
-     * @return float Formatted float.
+     * @param array $options Additional options.
+     * @return string Formatted float.
      * @see \Cake\I18n\Number::precision()
-     * @link http://book.cakephp.org/3.0/en/views/helpers/number.html#formatting-floating-point-numbers
+     * @link https://book.cakephp.org/3/en/views/helpers/number.html#formatting-floating-point-numbers
      */
-    public function precision($number, $precision = 3)
+    public function precision($number, $precision = 3, array $options = [])
     {
-        return $this->_engine->precision($number, $precision);
+        return $this->_engine->precision($number, $precision, $options);
     }
 
     /**
@@ -104,7 +104,7 @@ class NumberHelper extends Helper
      * @param int $size Size in bytes
      * @return string Human readable size
      * @see \Cake\I18n\Number::toReadableSize()
-     * @link http://book.cakephp.org/3.0/en/views/helpers/number.html#interacting-with-human-readable-values
+     * @link https://book.cakephp.org/3/en/views/helpers/number.html#interacting-with-human-readable-values
      */
     public function toReadableSize($size)
     {
@@ -118,12 +118,12 @@ class NumberHelper extends Helper
      *
      * - `multiply`: Multiply the input value by 100 for decimal percentages.
      *
-     * @param float $number A floating point number
+     * @param float|string $number A floating point number
      * @param int $precision The precision of the returned number
      * @param array $options Options
      * @return string Percentage string
      * @see \Cake\I18n\Number::toPercentage()
-     * @link http://book.cakephp.org/3.0/en/views/helpers/number.html#formatting-percentages
+     * @link https://book.cakephp.org/3/en/views/helpers/number.html#formatting-percentages
      */
     public function toPercentage($number, $precision = 2, array $options = [])
     {
@@ -142,15 +142,16 @@ class NumberHelper extends Helper
      * - `after` - The string to place after decimal numbers, e.g. ']'
      * - `escape` - Whether or not to escape html in resulting string
      *
-     * @param float $number A floating point number.
+     * @param float|string $number A floating point number.
      * @param array $options An array with options.
      * @return string Formatted number
-     * @link http://book.cakephp.org/3.0/en/views/helpers/number.html#formatting-numbers
+     * @link https://book.cakephp.org/3/en/views/helpers/number.html#formatting-numbers
      */
     public function format($number, array $options = [])
     {
         $formatted = $this->_engine->format($number, $options);
         $options += ['escape' => true];
+
         return $options['escape'] ? h($formatted) : $formatted;
     }
 
@@ -168,13 +169,13 @@ class NumberHelper extends Helper
      * - `zero` - The text to use for zero values, can be a string or a number. e.g. 0, 'Free!'
      * - `places` - Number of decimal places to use. e.g. 2
      * - `precision` - Maximum Number of decimal places to use, e.g. 2
-     * - `pattern` - An ICU number pattern to use for formatting the number. e.g #,###.00
+     * - `pattern` - An ICU number pattern to use for formatting the number. e.g #,##0.00
      * - `useIntlCode` - Whether or not to replace the currency symbol with the international
      *   currency code.
      * - `escape` - Whether or not to escape html in resulting string
      *
-     * @param float $number Value to format.
-     * @param string $currency International currency name such as 'USD', 'EUR', 'JPY', 'CAD'
+     * @param float|string $number Value to format.
+     * @param string|null $currency International currency name such as 'USD', 'EUR', 'JPY', 'CAD'
      * @param array $options Options list.
      * @return string Number formatted as a currency.
      */
@@ -182,6 +183,7 @@ class NumberHelper extends Helper
     {
         $formatted = $this->_engine->currency($number, $currency, $options);
         $options += ['escape' => true];
+
         return $options['escape'] ? h($formatted) : $formatted;
     }
 
@@ -197,7 +199,7 @@ class NumberHelper extends Helper
      * - `after` - The string to place after decimal numbers, e.g. ']'
      * - `escape` - Set to false to prevent escaping
      *
-     * @param float $value A floating point number
+     * @param float|string $value A floating point number
      * @param array $options Options list.
      * @return string formatted delta
      */
@@ -205,16 +207,18 @@ class NumberHelper extends Helper
     {
         $formatted = $this->_engine->formatDelta($value, $options);
         $options += ['escape' => true];
+
         return $options['escape'] ? h($formatted) : $formatted;
     }
 
     /**
      * Getter/setter for default currency
      *
-     * @param string|bool $currency Default currency string to be used by currency()
+     * @param string|false|null $currency Default currency string to be used by currency()
      * if $currency argument is not provided. If boolean false is passed, it will clear the
-     * currently stored value
-     * @return string Currency
+     * currently stored value. Null reads the current default.
+     * @return string|null Currency
+     * @deprecated 3.9.0 Use setDefaultCurrency()/getDefaultCurrency() instead.
      */
     public function defaultCurrency($currency)
     {
@@ -229,5 +233,17 @@ class NumberHelper extends Helper
     public function implementedEvents()
     {
         return [];
+    }
+
+    /**
+     * Formats a number into locale specific ordinal suffix.
+     *
+     * @param int|float $value An integer
+     * @param array $options An array with options.
+     * @return string formatted number
+     */
+    public function ordinal($value, array $options = [])
+    {
+        return $this->_engine->ordinal($value, $options);
     }
 }

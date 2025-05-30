@@ -1,21 +1,21 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         0.9.1
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\View\Helper;
 
 use Cake\Core\Configure;
-use Cake\Network\Response;
+use Cake\Http\Response;
 use Cake\View\Helper;
 use Cake\View\StringTemplateTrait;
 use Cake\View\View;
@@ -25,11 +25,11 @@ use Cake\View\View;
  *
  * HtmlHelper encloses all methods needed while working with HTML pages.
  *
- * @link http://book.cakephp.org/3.0/en/views/helpers/html.html
+ * @property \Cake\View\Helper\UrlHelper $Url
+ * @link https://book.cakephp.org/3/en/views/helpers/html.html
  */
 class HtmlHelper extends Helper
 {
-
     use StringTemplateTrait;
 
     /**
@@ -42,7 +42,7 @@ class HtmlHelper extends Helper
     /**
      * Reference to the Response object
      *
-     * @var \Cake\Network\Response
+     * @var \Cake\Http\Response
      */
     public $response;
 
@@ -73,21 +73,23 @@ class HtmlHelper extends Helper
             'parastart' => '<p{{attrs}}>',
             'css' => '<link rel="{{rel}}" href="{{url}}"{{attrs}}/>',
             'style' => '<style{{attrs}}>{{content}}</style>',
-            'charset' => '<meta http-equiv="Content-Type" content="text/html; charset={{charset}}"/>',
+            'charset' => '<meta charset="{{charset}}"/>',
             'ul' => '<ul{{attrs}}>{{content}}</ul>',
             'ol' => '<ol{{attrs}}>{{content}}</ol>',
             'li' => '<li{{attrs}}>{{content}}</li>',
             'javascriptblock' => '<script{{attrs}}>{{content}}</script>',
             'javascriptstart' => '<script>',
             'javascriptlink' => '<script src="{{url}}"{{attrs}}></script>',
-            'javascriptend' => '</script>'
-        ]
+            'javascriptend' => '</script>',
+            'confirmJs' => '{{confirm}}',
+        ],
     ];
 
     /**
      * Breadcrumbs.
      *
      * @var array
+     * @deprecated 3.3.6 Use the BreadcrumbsHelper instead
      */
     protected $_crumbs = [];
 
@@ -108,7 +110,7 @@ class HtmlHelper extends Helper
     /**
      * Document type definitions
      *
-     * @var array
+     * @var string[]
      */
     protected $_docTypes = [
         'html4-strict' => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">',
@@ -118,7 +120,7 @@ class HtmlHelper extends Helper
         'xhtml-strict' => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
         'xhtml-trans' => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
         'xhtml-frame' => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">',
-        'xhtml11' => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
+        'xhtml11' => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">',
     ];
 
     /**
@@ -140,22 +142,29 @@ class HtmlHelper extends Helper
     public function __construct(View $View, array $config = [])
     {
         parent::__construct($View, $config);
-        $this->response = $this->_View->response ?: new Response();
+        $this->response = $this->_View->getResponse() ?: new Response();
     }
 
     /**
      * Adds a link to the breadcrumbs array.
      *
      * @param string $name Text for link
-     * @param string|null $link URL for link (if empty it won't be a link)
-     * @param string|array $options Link attributes e.g. ['id' => 'selected']
+     * @param string|array|null $link URL for link (if empty it won't be a link)
+     * @param array $options Link attributes e.g. ['id' => 'selected']
      * @return $this
-     * @see HtmlHelper::link() for details on $options that can be used.
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-breadcrumb-trails-with-htmlhelper
+     * @see \Cake\View\Helper\HtmlHelper::link() for details on $options that can be used.
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-breadcrumb-trails-with-htmlhelper
+     * @deprecated 3.3.6 Use the BreadcrumbsHelper instead
      */
     public function addCrumb($name, $link = null, array $options = [])
     {
+        deprecationWarning(
+            'HtmlHelper::addCrumb() is deprecated. ' .
+            'Use the BreadcrumbsHelper instead.'
+        );
+
         $this->_crumbs[] = [$name, $link, $options];
+
         return $this;
     }
 
@@ -175,13 +184,17 @@ class HtmlHelper extends Helper
      *
      * @param string $type Doctype to use.
      * @return string|null Doctype string
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-doctype-tags
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-doctype-tags
+     * @deprecated 3.9.0 This method will be removed in 4.0.0.
      */
     public function docType($type = 'html5')
     {
+        deprecationWarning('HtmlHelper::docType() is deprecated and will be removed in 4.0.0');
+
         if (isset($this->_docTypes[$type])) {
             return $this->_docTypes[$type];
         }
+
         return null;
     }
 
@@ -190,36 +203,43 @@ class HtmlHelper extends Helper
      *
      * Create a meta tag that is output inline:
      *
-     * `$this->Html->meta('icon', 'favicon.ico');
+     * ```
+     * $this->Html->meta('icon', 'favicon.ico');
+     * ```
      *
      * Append the meta tag to custom view block "meta":
      *
-     * `$this->Html->meta('description', 'A great page', ['block' => true]);`
+     * ```
+     * $this->Html->meta('description', 'A great page', ['block' => true]);
+     * ```
      *
      * Append the meta tag to custom view block:
      *
-     * `$this->Html->meta('description', 'A great page', ['block' => 'metaTags']);`
+     * ```
+     * $this->Html->meta('description', 'A great page', ['block' => 'metaTags']);
+     * ```
      *
      * Create a custom meta tag:
      *
-     * `$this->Html->meta(['property' => 'og:site_name', 'content' => 'CakePHP']);`
+     * ```
+     * $this->Html->meta(['property' => 'og:site_name', 'content' => 'CakePHP']);
+     * ```
      *
      * ### Options
      *
      * - `block` - Set to true to append output to view block "meta" or provide
      *   custom block name.
      *
-     * @param string|array $type The title of the external resource
+     * @param string|array $type The title of the external resource, Or an array of attributes for a
+     *   custom meta tag.
      * @param string|array|null $content The address of the external resource or string for content attribute
      * @param array $options Other attributes for the generated tag. If the type attribute is html,
      *    rss, atom, or icon, the mime-type is returned.
-     * @return string A completed `<link />` element.
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-meta-tags
+     * @return string|null A completed `<link />` element, or null if the element was sent to a block.
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-meta-tags
      */
     public function meta($type, $content = null, array $options = [])
     {
-        $options += ['block' => null];
-
         if (!is_array($type)) {
             $types = [
                 'rss' => ['type' => 'application/rss+xml', 'rel' => 'alternate', 'title' => $type, 'link' => $content],
@@ -229,6 +249,11 @@ class HtmlHelper extends Helper
                 'description' => ['name' => 'description', 'content' => $content],
                 'robots' => ['name' => 'robots', 'content' => $content],
                 'viewport' => ['name' => 'viewport', 'content' => $content],
+                'canonical' => ['rel' => 'canonical', 'link' => $content],
+                'next' => ['rel' => 'next', 'link' => $content],
+                'prev' => ['rel' => 'prev', 'link' => $content],
+                'first' => ['rel' => 'first', 'link' => $content],
+                'last' => ['rel' => 'last', 'link' => $content],
             ];
 
             if ($type === 'icon' && $content === null) {
@@ -243,7 +268,7 @@ class HtmlHelper extends Helper
                 } else {
                     $type = ['name' => $type, 'content' => $content];
                 }
-            } elseif (isset($options['type']) && isset($types[$options['type']])) {
+            } elseif (isset($options['type'], $types[$options['type']])) {
                 $type = $types[$options['type']];
                 unset($options['type']);
             } else {
@@ -251,25 +276,29 @@ class HtmlHelper extends Helper
             }
         }
 
-        $options += $type;
+        $options += $type + ['block' => null];
         $out = null;
 
         if (isset($options['link'])) {
-            $options['link'] = $this->Url->assetUrl($options['link']);
+            if (is_array($options['link'])) {
+                $options['link'] = $this->Url->build($options['link']);
+            } else {
+                $options['link'] = $this->Url->assetUrl($options['link']);
+            }
             if (isset($options['rel']) && $options['rel'] === 'icon') {
                 $out = $this->formatTemplate('metalink', [
                     'url' => $options['link'],
-                    'attrs' => $this->templater()->formatAttributes($options, ['block', 'link'])
+                    'attrs' => $this->templater()->formatAttributes($options, ['block', 'link']),
                 ]);
                 $options['rel'] = 'shortcut icon';
             }
             $out .= $this->formatTemplate('metalink', [
                 'url' => $options['link'],
-                'attrs' => $this->templater()->formatAttributes($options, ['block', 'link'])
+                'attrs' => $this->templater()->formatAttributes($options, ['block', 'link']),
             ]);
         } else {
             $out = $this->formatTemplate('meta', [
-                'attrs' => $this->templater()->formatAttributes($options, ['block', 'type'])
+                'attrs' => $this->templater()->formatAttributes($options, ['block', 'type']),
             ]);
         }
 
@@ -288,15 +317,16 @@ class HtmlHelper extends Helper
      * @param string|null $charset The character set to be used in the meta tag. If empty,
      *  The App.encoding value will be used. Example: "utf-8".
      * @return string A meta tag containing the specified character set.
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-charset-tags
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-charset-tags
      */
     public function charset($charset = null)
     {
         if (empty($charset)) {
             $charset = strtolower(Configure::read('App.encoding'));
         }
+
         return $this->formatTemplate('charset', [
-            'charset' => (!empty($charset) ? $charset : 'utf-8')
+            'charset' => !empty($charset) ? $charset : 'utf-8',
         ]);
     }
 
@@ -305,7 +335,7 @@ class HtmlHelper extends Helper
      *
      * If $url starts with "http://" this is treated as an external link. Else,
      * it is treated as a path to controller/action and parsed with the
-     * UrlHelper::url() method.
+     * UrlHelper::build() method.
      *
      * If the $url is empty, $title is used instead.
      *
@@ -316,18 +346,20 @@ class HtmlHelper extends Helper
      *   over value of `escape`)
      * - `confirm` JavaScript confirmation message.
      *
-     * @param string $title The content to be wrapped by <a> tags.
+     * @param string|array $title The content to be wrapped by `<a>` tags.
+     *   Can be an array if $url is null. If $url is null, $title will be used as both the URL and title.
      * @param string|array|null $url Cake-relative URL or array of URL parameters, or
      *   external URL (starts with http://)
      * @param array $options Array of options and HTML attributes.
      * @return string An `<a />` element.
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-links
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-links
      */
     public function link($title, $url = null, array $options = [])
     {
         $escapeTitle = true;
         if ($url !== null) {
-            $url = $this->Url->build($url);
+            $url = $this->Url->build($url, $options);
+            unset($options['fullBase']);
         } else {
             $url = $this->Url->build($title);
             $title = htmlspecialchars_decode($url, ENT_QUOTES);
@@ -348,20 +380,24 @@ class HtmlHelper extends Helper
             $title = htmlentities($title, ENT_QUOTES, $escapeTitle);
         }
 
+        $templater = $this->templater();
         $confirmMessage = null;
         if (isset($options['confirm'])) {
             $confirmMessage = $options['confirm'];
             unset($options['confirm']);
         }
         if ($confirmMessage) {
-            $options['onclick'] = $this->_confirm($confirmMessage, 'return true;', 'return false;', $options);
+            $confirm = $this->_confirm($confirmMessage, 'return true;', 'return false;', $options);
+            $options['onclick'] = $templater->format('confirmJs', [
+                'confirmMessage' => $this->_cleanConfirmMessage($confirmMessage),
+                'confirm' => $confirm,
+            ]);
         }
 
-        $templater = $this->templater();
         return $templater->format('link', [
             'url' => $url,
             'attrs' => $templater->formatAttributes($options),
-            'content' => $title
+            'content' => $title,
         ]);
     }
 
@@ -372,19 +408,27 @@ class HtmlHelper extends Helper
      *
      * Include one CSS file:
      *
-     * `echo $this->Html->css('styles.css');`
+     * ```
+     * echo $this->Html->css('styles.css');
+     * ```
      *
      * Include multiple CSS files:
      *
-     * `echo $this->Html->css(['one.css', 'two.css']);`
+     * ```
+     * echo $this->Html->css(['one.css', 'two.css']);
+     * ```
      *
      * Add the stylesheet to view block "css":
      *
-     * `$this->Html->css('styles.css', ['block' => true]);`
+     * ```
+     * $this->Html->css('styles.css', ['block' => true]);
+     * ```
      *
      * Add the stylesheet to a custom block:
      *
-     * `$this->Html->css('styles.css', ['block' => 'layoutCss']);`
+     * ```
+     * $this->Html->css('styles.css', ['block' => 'layoutCss']);
+     * ```
      *
      * ### Options
      *
@@ -397,12 +441,12 @@ class HtmlHelper extends Helper
      * - `rel` Defaults to 'stylesheet'. If equal to 'import' the stylesheet will be imported.
      * - `fullBase` If true the URL will get a full address for the css file.
      *
-     * @param string|array $path The name of a CSS style sheet or an array containing names of
+     * @param string|string[] $path The name of a CSS style sheet or an array containing names of
      *   CSS stylesheets. If `$path` is prefixed with '/', the path will be relative to the webroot
      *   of your application. Otherwise, the path will be relative to your CSS path, usually webroot/css.
      * @param array $options Array of options and HTML arguments.
-     * @return string CSS <link /> or <style /> tag, depending on the type of link.
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#linking-to-css-files
+     * @return string|null CSS `<link />` or `<style />` tag, depending on the type of link.
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#linking-to-css-files
      */
     public function css($path, array $options = [])
     {
@@ -416,18 +460,19 @@ class HtmlHelper extends Helper
             if (empty($options['block'])) {
                 return $out . "\n";
             }
-            return;
+
+            return null;
         }
 
         if (strpos($path, '//') !== false) {
             $url = $path;
         } else {
-            $url = $this->Url->assetUrl($path, $options + ['pathPrefix' => Configure::read('App.cssBaseUrl'), 'ext' => '.css']);
+            $url = $this->Url->css($path, $options);
             $options = array_diff_key($options, ['fullBase' => null, 'pathPrefix' => null]);
         }
 
         if ($options['once'] && isset($this->_includedAssets[__METHOD__][$path])) {
-            return '';
+            return null;
         }
         unset($options['once']);
         $this->_includedAssets[__METHOD__][$path] = true;
@@ -453,6 +498,8 @@ class HtmlHelper extends Helper
             $options['block'] = __FUNCTION__;
         }
         $this->_View->append($options['block'], $out);
+
+        return null;
     }
 
     /**
@@ -465,15 +512,21 @@ class HtmlHelper extends Helper
      *
      * Include one script file:
      *
-     * `echo $this->Html->script('styles.js');`
+     * ```
+     * echo $this->Html->script('styles.js');
+     * ```
      *
      * Include multiple script files:
      *
-     * `echo $this->Html->script(['one.js', 'two.js']);`
+     * ```
+     * echo $this->Html->script(['one.js', 'two.js']);
+     * ```
      *
      * Add the script file to a custom block:
      *
-     * `$this->Html->script('styles.js', ['block' => 'bodyScript']);`
+     * ```
+     * $this->Html->script('styles.js', ['block' => 'bodyScript']);
+     * ```
      *
      * ### Options
      *
@@ -484,11 +537,11 @@ class HtmlHelper extends Helper
      * - `plugin` False value will prevent parsing path as a plugin
      * - `fullBase` If true the url will get a full address for the script file.
      *
-     * @param string|array $url String or array of javascript files to include
+     * @param string|string[] $url String or array of javascript files to include
      * @param array $options Array of options, and html attributes see above.
-     * @return mixed String of `<script />` tags or null if block is specified in options
+     * @return string|null String of `<script />` tags or null if block is specified in options
      *   or if $once is true and the file has been included before.
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#linking-to-javascript-files
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#linking-to-javascript-files
      */
     public function script($url, array $options = [])
     {
@@ -503,11 +556,12 @@ class HtmlHelper extends Helper
             if (empty($options['block'])) {
                 return $out . "\n";
             }
+
             return null;
         }
 
         if (strpos($url, '//') === false) {
-            $url = $this->Url->assetUrl($url, $options + ['pathPrefix' => Configure::read('App.jsBaseUrl'), 'ext' => '.js']);
+            $url = $this->Url->script($url, $options);
             $options = array_diff_key($options, ['fullBase' => null, 'pathPrefix' => null]);
         }
         if ($options['once'] && isset($this->_includedAssets[__METHOD__][$url])) {
@@ -527,6 +581,8 @@ class HtmlHelper extends Helper
             $options['block'] = __FUNCTION__;
         }
         $this->_View->append($options['block'], $out);
+
+        return null;
     }
 
     /**
@@ -534,19 +590,20 @@ class HtmlHelper extends Helper
      *
      * ### Options
      *
-     * - `safe` (boolean) Whether or not the $script should be wrapped in <![CDATA[ ]]>
+     * - `safe` (boolean) Whether or not the $script should be wrapped in `<![CDATA[ ]]>`.
+     *   Defaults to `false`.
      * - `block` Set to true to append output to view block "script" or provide
      *   custom block name.
      *
      * @param string $script The script to wrap
      * @param array $options The options to use. Options not listed above will be
      *    treated as HTML attributes.
-     * @return mixed string or null depending on the value of `$options['block']`
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-inline-javascript-blocks
+     * @return string|null String or null depending on the value of `$options['block']`
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-inline-javascript-blocks
      */
     public function scriptBlock($script, array $options = [])
     {
-        $options += ['safe' => true, 'block' => null];
+        $options += ['safe' => false, 'block' => null];
         if ($options['safe']) {
             $script = "\n" . '//<![CDATA[' . "\n" . $script . "\n" . '//]]>' . "\n";
         }
@@ -554,7 +611,7 @@ class HtmlHelper extends Helper
 
         $out = $this->formatTemplate('javascriptblock', [
             'attrs' => $this->templater()->formatAttributes($options, ['block']),
-            'content' => $script
+            'content' => $script,
         ]);
 
         if (empty($options['block'])) {
@@ -564,6 +621,8 @@ class HtmlHelper extends Helper
             $options['block'] = 'script';
         }
         $this->_View->append($options['block'], $out);
+
+        return null;
     }
 
     /**
@@ -573,17 +632,17 @@ class HtmlHelper extends Helper
      *
      * ### Options
      *
-     * - `safe` Whether the code block should contain a CDATA
+     * - `safe` (boolean) Whether or not the $script should be wrapped in `<![CDATA[ ]]>`.
+     *   See scriptBlock().
      * - `block` Set to true to append output to view block "script" or provide
      *   custom block name.
      *
      * @param array $options Options for the code block.
      * @return void
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-javascript-blocks
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-inline-javascript-blocks
      */
     public function scriptStart(array $options = [])
     {
-        $options += ['safe' => true, 'block' => null];
         $this->_scriptBlockOptions = $options;
         ob_start();
     }
@@ -593,14 +652,15 @@ class HtmlHelper extends Helper
      * Generates a script tag inline or appends to specified view block depending on
      * the settings used when the scriptBlock was started
      *
-     * @return mixed depending on the settings of scriptStart() either a script tag or null
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-javascript-blocks
+     * @return string|null Depending on the settings of scriptStart() either a script tag or null
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-inline-javascript-blocks
      */
     public function scriptEnd()
     {
         $buffer = ob_get_clean();
         $options = $this->_scriptBlockOptions;
         $this->_scriptBlockOptions = [];
+
         return $this->scriptBlock($buffer, $options);
     }
 
@@ -619,7 +679,7 @@ class HtmlHelper extends Helper
      * @param array $data Style data array, keys will be used as property names, values as property values.
      * @param bool $oneLine Whether or not the style block should be displayed on one line.
      * @return string CSS styling data
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-css-programatically
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-css-programatically
      */
     public function style(array $data, $oneLine = true)
     {
@@ -630,6 +690,7 @@ class HtmlHelper extends Helper
         if ($oneLine) {
             return implode(' ', $out);
         }
+
         return implode("\n", $out);
     }
 
@@ -647,10 +708,16 @@ class HtmlHelper extends Helper
      * @param string|array|bool $startText This will be the first crumb, if false it defaults to first crumb in array. Can
      *   also be an array, see above for details.
      * @return string|null Composed bread crumbs
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-breadcrumb-trails-with-htmlhelper
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-breadcrumb-trails-with-htmlhelper
+     * @deprecated 3.3.6 Use the BreadcrumbsHelper instead
      */
     public function getCrumbs($separator = '&raquo;', $startText = false)
     {
+        deprecationWarning(
+            'HtmlHelper::getCrumbs() is deprecated. ' .
+            'Use the BreadcrumbsHelper instead.'
+        );
+
         $crumbs = $this->_prepareCrumbs($startText);
         if (!empty($crumbs)) {
             $out = [];
@@ -661,8 +728,10 @@ class HtmlHelper extends Helper
                     $out[] = $crumb[0];
                 }
             }
+
             return implode($separator, $out);
         }
+
         return null;
     }
 
@@ -683,10 +752,16 @@ class HtmlHelper extends Helper
      * @param string|array|bool $startText This will be the first crumb, if false it defaults to first crumb in array. Can
      *   also be an array, see `HtmlHelper::getCrumbs` for details.
      * @return string|null Breadcrumbs HTML list.
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-breadcrumb-trails-with-htmlhelper
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-breadcrumb-trails-with-htmlhelper
+     * @deprecated 3.3.6 Use the BreadcrumbsHelper instead
      */
     public function getCrumbList(array $options = [], $startText = false)
     {
+        deprecationWarning(
+            'HtmlHelper::getCrumbList() is deprecated. ' .
+            'Use the BreadcrumbsHelper instead.'
+        );
+
         $defaults = ['firstClass' => 'first', 'lastClass' => 'last', 'separator' => '', 'escape' => true];
         $options += $defaults;
         $firstClass = $options['firstClass'];
@@ -720,12 +795,13 @@ class HtmlHelper extends Helper
             }
             $result .= $this->formatTemplate('li', [
                 'content' => $elementContent,
-                'attrs' => $this->templater()->formatAttributes($options)
+                'attrs' => $this->templater()->formatAttributes($options),
             ]);
         }
+
         return $this->formatTemplate('ul', [
             'content' => $result,
-            'attrs' => $this->templater()->formatAttributes($ulOptions)
+            'attrs' => $this->templater()->formatAttributes($ulOptions),
         ]);
     }
 
@@ -735,15 +811,21 @@ class HtmlHelper extends Helper
      * @param string|array|bool $startText Text to prepend
      * @param bool $escape If the output should be escaped or not
      * @return array Crumb list including startText (if provided)
+     * @deprecated 3.3.6 Use the BreadcrumbsHelper instead
      */
     protected function _prepareCrumbs($startText, $escape = true)
     {
+        deprecationWarning(
+            'HtmlHelper::_prepareCrumbs() is deprecated. ' .
+            'Use the BreadcrumbsHelper instead.'
+        );
+
         $crumbs = $this->_crumbs;
         if ($startText) {
             if (!is_array($startText)) {
                 $startText = [
                     'url' => '/',
-                    'text' => $startText
+                    'text' => $startText,
                 ];
             }
             $startText += ['url' => '/', 'text' => __d('cake', 'Home')];
@@ -751,6 +833,7 @@ class HtmlHelper extends Helper
             unset($startText['url'], $startText['text']);
             array_unshift($crumbs, [$text, $url, $startText + ['escape' => $escape]]);
         }
+
         return $crumbs;
     }
 
@@ -763,11 +846,15 @@ class HtmlHelper extends Helper
      *
      * Create a regular image:
      *
-     * `echo $this->Html->image('cake_icon.png', ['alt' => 'CakePHP']);`
+     * ```
+     * echo $this->Html->image('cake_icon.png', ['alt' => 'CakePHP']);
+     * ```
      *
      * Create an image link:
      *
-     * `echo $this->Html->image('cake_icon.png', ['alt' => 'CakePHP', 'url' => 'http://cakephp.org']);`
+     * ```
+     * echo $this->Html->image('cake_icon.png', ['alt' => 'CakePHP', 'url' => 'https://cakephp.org']);
+     * ```
      *
      * ### Options:
      *
@@ -776,14 +863,18 @@ class HtmlHelper extends Helper
      * - `fullBase` If true the src attribute will get a full address for the image file.
      * - `plugin` False value will prevent parsing path as a plugin
      *
-     * @param string $path Path to the image file, relative to the app/webroot/img/ directory.
+     * @param string|array $path Path to the image file, relative to the webroot/img/ directory.
      * @param array $options Array of HTML attributes. See above for special options.
      * @return string completed img tag
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#linking-to-images
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#linking-to-images
      */
     public function image($path, array $options = [])
     {
-        $path = $this->Url->assetUrl($path, $options + ['pathPrefix' => Configure::read('App.imageBaseUrl')]);
+        if (is_string($path)) {
+            $path = $this->Url->image($path, $options);
+        } else {
+            $path = $this->Url->build($path, $options);
+        }
         $options = array_diff_key($options, ['fullBase' => null, 'pathPrefix' => null]);
 
         if (!isset($options['alt'])) {
@@ -806,55 +897,58 @@ class HtmlHelper extends Helper
             return $templater->format('link', [
                 'url' => $this->Url->build($url),
                 'attrs' => null,
-                'content' => $image
+                'content' => $image,
             ]);
         }
+
         return $image;
     }
 
     /**
      * Returns a row of formatted and named TABLE headers.
      *
-     * @param array $names Array of tablenames. Each tablename also can be a key that points to an array with a set
+     * @param array $names Array of tablenames. Each tablename can be string, or array with name and an array with a set
      *     of attributes to its specific tag
      * @param array|null $trOptions HTML options for TR elements.
      * @param array|null $thOptions HTML options for TH elements.
      * @return string Completed table headers
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-table-headings
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-table-headings
      */
     public function tableHeaders(array $names, array $trOptions = null, array $thOptions = null)
     {
         $out = [];
         foreach ($names as $arg) {
             if (!is_array($arg)) {
-                $out[] = $this->formatTemplate('tableheader', [
-                    'attrs' => $this->templater()->formatAttributes($thOptions),
-                    'content' => $arg
-                ]);
+                $content = $arg;
+                $attrs = $thOptions;
+            } elseif (isset($arg[0], $arg[1])) {
+                $content = $arg[0];
+                $attrs = $arg[1];
             } else {
-                $out[] = $this->formatTemplate('tableheader', [
-                    'attrs' => $this->templater()->formatAttributes(current($arg)),
-                    'content' => key($arg)
-                ]);
+                $content = key($arg);
+                $attrs = current($arg);
             }
+
+            $out[] = $this->formatTemplate('tableheader', [
+                'attrs' => $this->templater()->formatAttributes($attrs),
+                'content' => $content,
+            ]);
         }
-        return $this->formatTemplate('tablerow', [
-            'attrs' => $this->templater()->formatAttributes($trOptions),
-            'content' => implode(' ', $out)
-        ]);
+
+        return $this->tableRow(implode(' ', $out), (array)$trOptions);
     }
 
     /**
      * Returns a formatted string of table rows (TR's with TD's in them).
      *
-     * @param array $data Array of table data
-     * @param array $oddTrOptions HTML options for odd TR elements if true useCount is used
-     * @param array $evenTrOptions HTML options for even TR elements
+     * @param array|string $data Array of table data
+     * @param array|bool|null $oddTrOptions HTML options for odd TR elements if true useCount is used
+     * @param array|bool|null $evenTrOptions HTML options for even TR elements
      * @param bool $useCount adds class "column-$i"
      * @param bool $continueOddEven If false, will use a non-static $count variable,
      *    so that the odd/even count is reset to zero just for that call.
      * @return string Formatted HTML
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-table-cells
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-table-cells
      */
     public function tableCells($data, $oddTrOptions = null, $evenTrOptions = null, $useCount = false, $continueOddEven = true)
     {
@@ -878,31 +972,82 @@ class HtmlHelper extends Helper
             $count = 0;
         }
 
+        $out = [];
         foreach ($data as $line) {
             $count++;
-            $cellsOut = [];
-            $i = 0;
-            foreach ($line as $cell) {
-                $cellOptions = [];
-
-                if (is_array($cell)) {
-                    $cellOptions = $cell[1];
-                    $cell = $cell[0];
-                } elseif ($useCount) {
-                    $cellOptions['class'] = 'column-' . ++$i;
-                }
-                $cellsOut[] = $this->formatTemplate('tablecell', [
-                    'attrs' => $this->templater()->formatAttributes($cellOptions),
-                    'content' => $cell
-                ]);
-            }
+            $cellsOut = $this->_renderCells($line, $useCount);
             $opts = $count % 2 ? $oddTrOptions : $evenTrOptions;
-            $out[] = $this->formatTemplate('tablerow', [
-                'attrs' => $this->templater()->formatAttributes($opts),
-                'content' => implode(' ', $cellsOut),
-            ]);
+            $out[] = $this->tableRow(implode(' ', $cellsOut), (array)$opts);
         }
+
         return implode("\n", $out);
+    }
+
+    /**
+     * Renders cells for a row of a table.
+     *
+     * This is a helper method for tableCells(). Overload this method as you
+     * need to change the behavior of the cell rendering.
+     *
+     * @param array $line Line data to render.
+     * @param bool $useCount Renders the count into the row. Default is false.
+     * @return string[]
+     */
+    protected function _renderCells($line, $useCount = false)
+    {
+        $i = 0;
+        $cellsOut = [];
+        foreach ($line as $cell) {
+            $cellOptions = [];
+
+            if (is_array($cell)) {
+                $cellOptions = $cell[1];
+                $cell = $cell[0];
+            }
+
+            if ($useCount) {
+                $i += 1;
+                if (isset($cellOptions['class'])) {
+                    $cellOptions['class'] .= ' column-' . $i;
+                } else {
+                    $cellOptions['class'] = 'column-' . $i;
+                }
+            }
+
+            $cellsOut[] = $this->tableCell($cell, $cellOptions);
+        }
+
+        return $cellsOut;
+    }
+
+    /**
+     * Renders a single table row (A TR with attributes).
+     *
+     * @param string $content The content of the row.
+     * @param array $options HTML attributes.
+     * @return string
+     */
+    public function tableRow($content, array $options = [])
+    {
+        return $this->formatTemplate('tablerow', [
+            'attrs' => $this->templater()->formatAttributes($options),
+            'content' => $content,
+        ]);
+    }
+
+    /**
+     * Renders a single table cell (A TD with attributes).
+     *
+     * @param string $content The content of the cell.
+     * @param array $options HTML attributes.
+     * @return string
+     */
+    public function tableCell($content, array $options = [])
+    {
+        return $this->formatTemplate('tablecell', [
+            'attrs' => $this->templater()->formatAttributes($options),
+            'content' => $content,
+        ]);
     }
 
     /**
@@ -913,7 +1058,7 @@ class HtmlHelper extends Helper
      * - `escape` Whether or not the contents should be html_entity escaped.
      *
      * @param string $name Tag name.
-     * @param string $text String content that will appear inside the div element.
+     * @param string|null $text String content that will appear inside the div element.
      *   If null, only a start tag will be printed
      * @param array $options Additional HTML attributes of the DIV tag, see above.
      * @return string The formatted tag element
@@ -932,6 +1077,7 @@ class HtmlHelper extends Helper
         } else {
             $tag = 'tag';
         }
+
         return $this->formatTemplate($tag, [
             'attrs' => $this->templater()->formatAttributes($options),
             'tag' => $name,
@@ -946,8 +1092,8 @@ class HtmlHelper extends Helper
      *
      * - `escape` Whether or not the contents should be html_entity escaped.
      *
-     * @param string $class CSS class name of the div element.
-     * @param string $text String content that will appear inside the div element.
+     * @param string|null $class CSS class name of the div element.
+     * @param string|null $text String content that will appear inside the div element.
      *   If null, only a start tag will be printed
      * @param array $options Additional HTML attributes of the DIV tag
      * @return string The formatted DIV element
@@ -957,6 +1103,7 @@ class HtmlHelper extends Helper
         if (!empty($class)) {
             $options['class'] = $class;
         }
+
         return $this->tag('div', $text, $options);
     }
 
@@ -974,16 +1121,17 @@ class HtmlHelper extends Helper
      */
     public function para($class, $text, array $options = [])
     {
-        if (isset($options['escape'])) {
+        if (!empty($options['escape'])) {
             $text = h($text);
         }
-        if ($class && !empty($class)) {
+        if ($class) {
             $options['class'] = $class;
         }
         $tag = 'para';
         if ($text === null) {
             $tag = 'parastart';
         }
+
         return $this->formatTemplate($tag, [
             'attrs' => $this->templater()->formatAttributes($options),
             'content' => $text,
@@ -997,19 +1145,27 @@ class HtmlHelper extends Helper
      *
      * Using an audio file:
      *
-     * `echo $this->Html->media('audio.mp3', ['fullBase' => true]);`
+     * ```
+     * echo $this->Html->media('audio.mp3', ['fullBase' => true]);
+     * ```
      *
      * Outputs:
      *
-     * `<video src="http://www.somehost.com/files/audio.mp3">Fallback text</video>`
+     * ```
+     * <video src="http://www.somehost.com/files/audio.mp3">Fallback text</video>
+     * ```
      *
      * Using a video file:
      *
-     * `echo $this->Html->media('video.mp4', ['text' => 'Fallback text']);`
+     * ```
+     * echo $this->Html->media('video.mp4', ['text' => 'Fallback text']);
+     * ```
      *
      * Outputs:
      *
-     * `<video src="/files/video.mp4">Fallback text</video>`
+     * ```
+     * <video src="/files/video.mp4">Fallback text</video>
+     * ```
      *
      * Using multiple video files:
      *
@@ -1047,7 +1203,7 @@ class HtmlHelper extends Helper
         $options += [
             'tag' => null,
             'pathPrefix' => 'files/',
-            'text' => ''
+            'text' => '',
         ];
 
         if (!empty($options['tag'])) {
@@ -1071,7 +1227,7 @@ class HtmlHelper extends Helper
                 $source['src'] = $this->Url->assetUrl($source['src'], $options);
                 $sourceTags .= $this->formatTemplate('tagselfclosing', [
                     'tag' => 'source',
-                    'attrs' => $this->templater()->formatAttributes($source)
+                    'attrs' => $this->templater()->formatAttributes($source),
                 ]);
             }
             unset($source);
@@ -1106,8 +1262,9 @@ class HtmlHelper extends Helper
             'tag' => null,
             'fullBase' => null,
             'pathPrefix' => null,
-            'text' => null
+            'text' => null,
         ]);
+
         return $this->tag($tag, $text, $options);
     }
 
@@ -1127,15 +1284,16 @@ class HtmlHelper extends Helper
      * @param array $options Options and additional HTML attributes of the list (ol/ul) tag.
      * @param array $itemOptions Options and additional HTML attributes of the list item (LI) tag.
      * @return string The nested list
-     * @link http://book.cakephp.org/3.0/en/views/helpers/html.html#creating-nested-lists
+     * @link https://book.cakephp.org/3/en/views/helpers/html.html#creating-nested-lists
      */
     public function nestedList(array $list, array $options = [], array $itemOptions = [])
     {
         $options += ['tag' => 'ul'];
         $items = $this->_nestedListItem($list, $options, $itemOptions);
+
         return $this->formatTemplate($options['tag'], [
             'attrs' => $this->templater()->formatAttributes($options, ['tag']),
-            'content' => $items
+            'content' => $items,
         ]);
     }
 
@@ -1146,7 +1304,7 @@ class HtmlHelper extends Helper
      * @param array $options Additional HTML attributes of the list (ol/ul) tag.
      * @param array $itemOptions Options and additional HTML attributes of the list item (LI) tag.
      * @return string The nested list element
-     * @see HtmlHelper::nestedList()
+     * @see \Cake\View\Helper\HtmlHelper::nestedList()
      */
     protected function _nestedListItem($items, $options, $itemOptions)
     {
@@ -1164,10 +1322,11 @@ class HtmlHelper extends Helper
             }
             $out .= $this->formatTemplate('li', [
                 'attrs' => $this->templater()->formatAttributes($itemOptions, ['even', 'odd']),
-                'content' => $item
+                'content' => $item,
             ]);
             $index++;
         }
+
         return $out;
     }
 

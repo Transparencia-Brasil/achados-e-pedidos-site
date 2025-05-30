@@ -1,26 +1,25 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\ORM;
 
 use BadMethodCallException;
 use Cake\Core\App;
 use Cake\Core\ObjectRegistry;
-use Cake\Event\EventManagerTrait;
-use Cake\ORM\Behavior;
+use Cake\Event\EventDispatcherInterface;
+use Cake\Event\EventDispatcherTrait;
 use Cake\ORM\Exception\MissingBehaviorException;
-use Cake\ORM\Table;
 use LogicException;
 
 /**
@@ -28,11 +27,12 @@ use LogicException;
  * and constructing behavior objects.
  *
  * This class also provides method for checking and dispatching behavior methods.
+ *
+ * @extends \Cake\Core\ObjectRegistry<\Cake\ORM\Behavior>
  */
-class BehaviorRegistry extends ObjectRegistry
+class BehaviorRegistry extends ObjectRegistry implements EventDispatcherInterface
 {
-
-    use EventManagerTrait;
+    use EventDispatcherTrait;
 
     /**
      * The table using this registry.
@@ -58,12 +58,45 @@ class BehaviorRegistry extends ObjectRegistry
     /**
      * Constructor
      *
-     * @param \Cake\ORM\Table $table The table this registry is attached to
+     * @param \Cake\ORM\Table|null $table The table this registry is attached to.
      */
-    public function __construct(Table $table)
+    public function __construct($table = null)
+    {
+        if ($table !== null) {
+            $this->setTable($table);
+        }
+    }
+
+    /**
+     * Attaches a table instance to this registry.
+     *
+     * @param \Cake\ORM\Table $table The table this registry is attached to.
+     * @return void
+     */
+    public function setTable(Table $table)
     {
         $this->_table = $table;
-        $this->eventManager($table->eventManager());
+        $eventManager = $table->getEventManager();
+        if ($eventManager !== null) {
+            $this->setEventManager($eventManager);
+        }
+    }
+
+    /**
+     * Resolve a behavior classname.
+     *
+     * @param string $class Partial classname to resolve.
+     * @return string|null Either the correct classname or null.
+     * @since 3.5.7
+     */
+    public static function className($class)
+    {
+        $result = App::className($class, 'Model/Behavior', 'Behavior');
+        if (!$result) {
+            $result = App::className($class, 'ORM/Behavior', 'Behavior');
+        }
+
+        return $result ?: null;
     }
 
     /**
@@ -76,20 +109,17 @@ class BehaviorRegistry extends ObjectRegistry
      */
     protected function _resolveClassName($class)
     {
-        $result = App::className($class, 'Model/Behavior', 'Behavior');
-        if (!$result) {
-            $result = App::className($class, 'ORM/Behavior', 'Behavior');
-        }
-        return $result;
+        return static::className($class) ?: false;
     }
 
     /**
      * Throws an exception when a behavior is missing.
      *
      * Part of the template method for Cake\Core\ObjectRegistry::load()
+     * and Cake\Core\ObjectRegistry::unload()
      *
      * @param string $class The classname that is missing.
-     * @param string $plugin The plugin the behavior is missing in.
+     * @param string|null $plugin The plugin the behavior is missing in.
      * @return void
      * @throws \Cake\ORM\Exception\MissingBehaviorException
      */
@@ -97,7 +127,7 @@ class BehaviorRegistry extends ObjectRegistry
     {
         throw new MissingBehaviorException([
             'class' => $class . 'Behavior',
-            'plugin' => $plugin
+            'plugin' => $plugin,
         ]);
     }
 
@@ -110,18 +140,19 @@ class BehaviorRegistry extends ObjectRegistry
      * @param string $class The classname that is missing.
      * @param string $alias The alias of the object.
      * @param array $config An array of config to use for the behavior.
-     * @return Behavior The constructed behavior class.
+     * @return \Cake\ORM\Behavior The constructed behavior class.
      */
     protected function _create($class, $alias, $config)
     {
         $instance = new $class($this->_table, $config);
         $enable = isset($config['enabled']) ? $config['enabled'] : true;
         if ($enable) {
-            $this->eventManager()->on($instance);
+            $this->getEventManager()->on($instance);
         }
         $methods = $this->_getMethods($instance, $class, $alias);
         $this->_methodMap += $methods['methods'];
         $this->_finderMap += $methods['finders'];
+
         return $instance;
     }
 
@@ -186,6 +217,7 @@ class BehaviorRegistry extends ObjectRegistry
     public function hasMethod($method)
     {
         $method = strtolower($method);
+
         return isset($this->_methodMap[$method]);
     }
 
@@ -201,6 +233,7 @@ class BehaviorRegistry extends ObjectRegistry
     public function hasFinder($method)
     {
         $method = strtolower($method);
+
         return isset($this->_finderMap[$method]);
     }
 
@@ -217,6 +250,7 @@ class BehaviorRegistry extends ObjectRegistry
         $method = strtolower($method);
         if ($this->hasMethod($method) && $this->has($this->_methodMap[$method][0])) {
             list($behavior, $callMethod) = $this->_methodMap[$method];
+
             return call_user_func_array([$this->_loaded[$behavior], $callMethod], $args);
         }
 
@@ -239,6 +273,7 @@ class BehaviorRegistry extends ObjectRegistry
 
         if ($this->hasFinder($type) && $this->has($this->_finderMap[$type][0])) {
             list($behavior, $callMethod) = $this->_finderMap[$type];
+
             return call_user_func_array([$this->_loaded[$behavior], $callMethod], $args);
         }
 

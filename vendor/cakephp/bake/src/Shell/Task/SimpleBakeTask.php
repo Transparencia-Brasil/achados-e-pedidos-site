@@ -19,6 +19,9 @@ use Cake\Utility\Inflector;
 
 /**
  * Base class for simple bake tasks code generator.
+ *
+ * @property \Bake\Shell\Task\BakeTemplateTask $BakeTemplate
+ * @property \Bake\Shell\Task\TestTask $Test
  */
 abstract class SimpleBakeTask extends BakeTask
 {
@@ -29,7 +32,7 @@ abstract class SimpleBakeTask extends BakeTask
      */
     public $tasks = [
         'Bake.BakeTemplate',
-        'Bake.Test'
+        'Bake.Test',
     ];
 
     /**
@@ -65,6 +68,7 @@ abstract class SimpleBakeTask extends BakeTask
         if ($this->plugin) {
             $namespace = $this->_pluginNamespace($this->plugin);
         }
+
         return ['namespace' => $namespace];
     }
 
@@ -72,13 +76,15 @@ abstract class SimpleBakeTask extends BakeTask
      * Execute method
      *
      * @param string|null $name The name of the object to bake.
-     * @return void
+     * @return int|null
      */
     public function main($name = null)
     {
         parent::main();
         if (empty($name)) {
-            return $this->error('You must provide a name to bake a ' . $this->name());
+            $this->abort('You must provide a name to bake a ' . $this->name());
+
+            return null;
         }
         $name = $this->_getName($name);
         $name = Inflector::camelize($name);
@@ -90,7 +96,7 @@ abstract class SimpleBakeTask extends BakeTask
      * Generate a class stub
      *
      * @param string $name The classname to generate.
-     * @return void
+     * @return string
      */
     public function bake($name)
     {
@@ -102,6 +108,7 @@ abstract class SimpleBakeTask extends BakeTask
         $this->createFile($filename, $contents);
         $emptyFile = $this->getPath() . 'empty';
         $this->_deleteEmptyFile($emptyFile);
+
         return $contents;
     }
 
@@ -109,14 +116,15 @@ abstract class SimpleBakeTask extends BakeTask
      * Generate a test case.
      *
      * @param string $className The class to bake a test for.
-     * @return void
+     * @return string|bool|null
      */
     public function bakeTest($className)
     {
         if (!empty($this->params['no-test'])) {
-            return;
+            return null;
         }
         $this->Test->plugin = $this->plugin;
+
         return $this->Test->bake($this->name(), $className);
     }
 
@@ -129,17 +137,17 @@ abstract class SimpleBakeTask extends BakeTask
     {
         $parser = parent::getOptionParser();
         $name = $this->name();
-        $parser->description(
+        $parser->setDescription(
             sprintf('Bake a %s class file.', $name)
         )->addArgument('name', [
             'help' => sprintf(
                 'Name of the %s to bake. Can use Plugin.name to bake %s files into plugins.',
                 $name,
                 $name
-            )
+            ),
         ])->addOption('no-test', [
             'boolean' => true,
-            'help' => 'Do not generate a test skeleton.'
+            'help' => 'Do not generate a test skeleton.',
         ]);
 
         return $parser;

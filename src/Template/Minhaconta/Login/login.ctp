@@ -1,5 +1,9 @@
 
 
+<?
+$this->UCaptcha->CaptchaScript();
+?>
+
 <div class="container">
   <div class="row">
     <ul class="breadcrumb">
@@ -19,6 +23,9 @@
                 <h5>Digite seus dados para login:</h5>
                 <div class="login-box well">
                     <?= $this->Form->create('User', ['url' => ['prefix' => 'minhaconta', 'controller'=>'Login', 'action'=>'logar']]) ?>
+                        <?
+                            $this->UCaptcha->CaptchaTokenInput();
+                        ?>
                         <div class="form-group">
                             <?=$this->Form->text('login', ['tabindex' => 1, 'placeholder' => 'Digite seu e-mail', 'class' => 'form-control', 'required' => 'required']);?>
                             <span style="color:red"><?=$this->ValidationText->exibirErro($erros, "Email"); ?></span>

@@ -1,4 +1,10 @@
 
+
+<?
+$this->UCaptcha->CaptchaScript();
+?>
+
+
 <div class="container-fluid breadcrumbLinha">
   <div class="container">
     <div class="row">
@@ -134,6 +140,9 @@
           }
           ?>
           <?=$this->Form->create($pedido, ['action' => 'novopedido', "id" => "frmPedido", "method" => "post"]) ?>
+             <?
+                $this->UCaptcha->CaptchaTokenInput();
+            ?>
             <?=$this->Form->hidden('CodigoAgente', ['id' => 'codigoAgente', 'class' => '']) ?>
             <?=$this->ValidationText->exibirErro($erros, "CodigoAgente"); ?>
             <div class="col-xs-12 col-md-6 no-gutter-left">

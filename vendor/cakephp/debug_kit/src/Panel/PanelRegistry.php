@@ -14,16 +14,15 @@ namespace DebugKit\Panel;
 
 use Cake\Core\App;
 use Cake\Core\ObjectRegistry;
+use Cake\Event\EventDispatcherTrait;
 use Cake\Event\EventManager;
-use Cake\Event\EventManagerTrait;
 
 /**
  * Registry object for panels.
  */
 class PanelRegistry extends ObjectRegistry
 {
-
-    use EventManagerTrait;
+    use EventDispatcherTrait;
 
     /**
      * Constructor
@@ -33,16 +32,16 @@ class PanelRegistry extends ObjectRegistry
      */
     public function __construct(EventManager $events)
     {
-        $this->eventManager($events);
+        $this->setEventManager($events);
     }
 
     /**
-     * Resolve a panel classname.
+     * Resolve a panel class name.
      *
      * Part of the template method for Cake\Utility\ObjectRegistry::load()
      *
-     * @param string $class Partial classname to resolve.
-     * @return string|false Either the correct classname or false.
+     * @param string $class Partial class name to resolve.
+     * @return string|false Either the correct class name or false.
      */
     protected function _resolveClassName($class)
     {
@@ -61,7 +60,7 @@ class PanelRegistry extends ObjectRegistry
      */
     protected function _throwMissingClassError($class, $plugin)
     {
-        throw new \RuntimeException("Unable to find '$class' panel.");
+        throw new \RuntimeException(__d('debug_kit', "Unable to find ''{0}'' panel.", $class));
     }
 
     /**
@@ -72,12 +71,13 @@ class PanelRegistry extends ObjectRegistry
      * @param string $class The classname to create.
      * @param string $alias The alias of the panel.
      * @param array $config An array of config to use for the panel.
-     * @return DebugKit\DebugPanel The constructed panel class.
+     * @return \DebugKit\DebugPanel The constructed panel class.
      */
     protected function _create($class, $alias, $config)
     {
         $instance = new $class($this, $config);
-        $this->eventManager()->on($instance);
+        $this->getEventManager()->on($instance);
+
         return $instance;
     }
 }

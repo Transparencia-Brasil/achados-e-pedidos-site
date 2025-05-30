@@ -340,4 +340,10 @@ return [
         'Key' => env("BLIPCHAT_KEY"),
         'AppLink' => 'https://chat.blip.ai/?appKey=YWNoYWRvc2VwZWRpZG9zOjllMmYzM2FlLWFhOGItNDliMC1iNjNiLWFmODIwMjEyNDE0Yg==&_gl=1*mvsdxb*_ga*MTU5OTM0ODQ5OS4xNjMxNTYyNjM2*_ga_VYKG6G92NK*MTY0MjA5NzA5OS41Ny4xLjE2NDIwOTcxMjYuMA'
     ],
+    'Recaptcha' => [
+        'ProjectId' => env('GCP_PROJECTID'),
+        'Key' => env('GCP_SITEKEY'),
+        'AccountCredentials' => env('GCP_ACCOUNTCREDENTIALS'),
+        'MinScore' => env('RECAPTCHA_MINSCORE', '0.5')
+    ]
 ];

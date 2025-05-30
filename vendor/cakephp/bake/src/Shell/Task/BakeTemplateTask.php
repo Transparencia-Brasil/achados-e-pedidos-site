@@ -16,12 +16,11 @@ namespace Bake\Shell\Task;
 
 use Bake\View\BakeView;
 use Cake\Console\Shell;
-use Cake\Core\Configure;
 use Cake\Core\ConventionsTrait;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
-use Cake\Network\Request;
-use Cake\Network\Response;
+use Cake\Http\Response;
+use Cake\Http\ServerRequest as Request;
 use Cake\View\Exception\MissingTemplateException;
 use Cake\View\ViewVarsTrait;
 
@@ -37,7 +36,7 @@ class BakeTemplateTask extends Shell
     /**
      * BakeView instance
      *
-     * @var Cake\View\BakeView
+     * @var \Bake\View\BakeView|null
      */
     public $View;
 
@@ -56,13 +55,19 @@ class BakeTemplateTask extends Shell
         $theme = isset($this->params['theme']) ? $this->params['theme'] : '';
 
         $viewOptions = [
-            'helpers' => ['Bake.Bake'],
-            'theme' => $theme
+            'helpers' => [
+                'Bake.Bake',
+                'Bake.DocBlock',
+            ],
+            'theme' => $theme,
         ];
+
         $view = new BakeView(new Request(), new Response(), null, $viewOptions);
         $event = new Event('Bake.initialize', $view);
         EventManager::instance()->dispatch($event);
-        $this->View = $event->subject;
+        /** @var \Bake\View\BakeView $view */
+        $view = $event->getSubject();
+        $this->View = $view;
 
         return $this->View;
     }
@@ -86,6 +91,7 @@ class BakeTemplateTask extends Shell
             return $this->View->render($template);
         } catch (MissingTemplateException $e) {
             $this->_io->verbose(sprintf('No bake template found for "%s"', $template));
+
             return '';
         }
     }

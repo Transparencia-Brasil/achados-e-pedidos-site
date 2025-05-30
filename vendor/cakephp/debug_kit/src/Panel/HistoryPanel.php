@@ -12,8 +12,6 @@
  */
 namespace DebugKit\Panel;
 
-use Cake\Cache\Cache;
-use Cake\Controller\Controller;
 use Cake\ORM\TableRegistry;
 use DebugKit\DebugPanel;
 
@@ -33,8 +31,19 @@ class HistoryPanel extends DebugPanel
     {
         $table = TableRegistry::get('DebugKit.Requests');
         $recent = $table->find('recent');
+
         return [
             'requests' => $recent->toArray(),
         ];
+    }
+
+    /**
+     * Gets the initial text for the history summary
+     *
+     * @return string
+     */
+    public function summary()
+    {
+        return '0 xhr';
     }
 }

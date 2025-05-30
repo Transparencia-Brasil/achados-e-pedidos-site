@@ -1,5 +1,10 @@
 <?php
 return array(
+    'Avant' => array(
+        'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; Avant Browser; rv:11.0) like Gecko' => array('isMobile' => false, 'isTablet' => false),
+        'Mozilla/5.0 (Windows NT 6.1; WOW64; Avant TriCore) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36' => array('isMobile' => false, 'isTablet' => false),
+        'Mozilla/5.0 (Windows NT 5.1; rv:27.0; Avant TriCore) Gecko/20100101 Firefox/27.0' => array('isMobile' => false, 'isTablet' => false),
+    ),
     'Console' => array(
 
         //Nintendo Wii:
@@ -17,6 +22,13 @@ return array(
         ),
 
     'Other' => array(
+        // Possible conflict with Galapad G1 tablet https://github.com/serbanghita/Mobile-Detect/issues/761
+        'Mozilla/5.0 (Linux; Android 8.0.0; K10 G1 Build/O00623; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/58.0.3029.125 Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 8.1.0; GAAMII G1 Build/O11019; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        // Conflict in registered Model Name(#717)
+        'Mozilla/5.0 (Linux; U; Android 7.1.2; zh-cn; Z999 Build/N2G47H) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.132 MQQBrowser/8.4 Mobile Safari/537.36' => array('isMobile' => true, 'isTablet' => false),
+        // Vivaldi Browser
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.148 Safari/537.36 Vivaldi/1.4.589.41' => array('isMobile' => false, 'isTablet' => false),
         // Unknown
         'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SV1; [eburo v4.0]; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; InfoPath.3; .NET4.0C; .NET4.0E)' => array('isMobile' => false, 'isTablet' => false),
 
@@ -68,12 +80,22 @@ return array(
         ),
 
     'TV' => array(
+        // @See https://github.com/serbanghita/Mobile-Detect/issues/591
+        'Mozilla/5.0 (SMART-TV; Linux; Tizen 2.3) AppleWebkit/538.1 (KHTML, like Gecko) SamsungBrowser/1.0 TV Safari/538.1' => array('isMobile' => false, 'isTablet' => false)
         //'Opera/9.80 (Linux mips ; U; HbbTV/1.1.1 (; Philips; ; ; ; ) CE-HTML/1.0 NETTV/3.2.1; en) Presto/2.6.33 Version/10.70' => null
         ),
 
     'Generic' => array(
 
-        'Mozilla/5.0 (Linux; U; Jolla; Sailfish; Mobile; rv:20.0) Gecko/20.0 Firefox/20.0 Sailfish Browser/1.0 like Safari/535.19' => array('isMobile' => true, 'isTablet' => true),
+        //PaleMoon browser
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:38.9) Gecko/20100101 Goanna/2.0 Firefox/38.9 PaleMoon/26.0.0' => array('isMobile' => false, 'isTablet' => false),
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:2.0) Gecko/20100101 Goanna/20160121 PaleMoon/26.0.0' => array('isMobile' => false, 'isTablet' => false),
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:38.9) Gecko/20100101 Goanna/2.0 Firefox/38.9 PaleMoon/26.1.1' => array('isMobile' => false, 'isTablet' => false),
+
+        'Mozilla/5.0 (Maemo; Linux; U; Jolla; Sailfish; Mobile; rv:31.0) Gecko/31.0 Firefox/31.0 SailfishBrowser/1.0' => array('isMobile' => true, 'isTablet' => false),
+        'Mozilla/5.0 (Maemo; Linux; U; Jolla; Sailfish; Tablet; rv:31.0) Gecko/31.0 Firefox/31.0 SailfishBrowser/1.0' => array('isMobile' => true, 'isTablet' => true),
+        'Mozilla/5.0 (Linux; U; Sailfish 3.0; Mobile; rv:38.0) Gecko/38.0 Firefox/38.0 SailfishBrowser/1.0' => array('isMobile' => true, 'isTablet' => false, 'version' => array('Sailfish' => '3.0', 'SailfishBrowser' => '1.0', 'Gecko' => '38.0')),
+        'Mozilla/5.0 (Linux; U; Sailfish 3.0; Tablet; rv:38.0) Gecko/38.0 Firefox/38.0 SailfishBrowser/1.0' => array('isMobile' => true, 'isTablet' => true, 'version' => array('Sailfish' => '3.0', 'SailfishBrowser' => '1.0', 'Gecko' => '38.0')),
 
         // Generic Firefox User-agents
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Gecko_user_agent_string_reference#Firefox_OS
@@ -196,6 +218,8 @@ return array(
         'AdsBot-Google (+http://www.google.com/adsbot.html)' => array('isMobile' => false, 'isTablet' => false, /*'isBot' => true*/),
         'AdsBot-Google-Mobile (+http://www.google.com/mobile/adsbot.html) Mozilla (iPhone; U; CPU iPhone OS 3 0 like Mac OS X) AppleWebKit (KHTML, like Gecko) Mobile Safari' => array('isMobile' => true, 'isTablet' => false, /*'isBot' => true*/),
         'Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.16 (KHTML, like Gecko, Google Keyword Suggestion) Chrome/10.0.648.127 Safari/534.16' => array('isMobile' => false, 'isTablet' => false, /*'isBot' => true*/),
-        'Facebot' => array('isMobile' => false, 'isTablet' => false, /*'isBot' => true*/)
+        'Facebot' => array('isMobile' => false, 'isTablet' => false, /*'isBot' => true*/),
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36 (+https://whatis.contentkingapp.com)' => array('isMobile' => false, 'isTablet' => false),
+        'Mozilla/5.0 (Linux; Android 7.0;) AppleWebKit/537.36 (KHTML, like Gecko) Mobile Safari/537.36 (compatible; AspiegelBot)' => array('isMobile' => true, 'isTablet' => false, /*'isBot' => true*/),
         ),
 );

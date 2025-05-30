@@ -9,6 +9,7 @@ use App\Controller\Component\UEmailComponent;
 
 class ContatoController extends AppController
 {
+    public $helpers = ["UCaptcha"];
     public function initialize()
     {
         parent::initialize();
@@ -23,9 +24,10 @@ class ContatoController extends AppController
         $this->loadComponent('Auth');
         $this->loadComponent('UString');
         $this->loadComponent('UNumero');
+        $this->loadComponent('UCaptcha');
     }
 
-	public function index()
+    public function index()
     {
         $contato = new Contato();
         $mensagem = '';
@@ -38,7 +40,8 @@ class ContatoController extends AppController
         $this->set('mensagem', $mensagem);
     }
 
-    public function novoContato(){
+    public function novoContato()
+    {
 
         /*$token = $this->request->param('_csrfToken');
 
@@ -46,64 +49,67 @@ class ContatoController extends AppController
             $this->Security->requireSecure();*/
         $sucesso = null;
 
-    	if ($this->request->is(['post', 'put'])) {
+        if ($this->request->is(['post', 'put'])) {
 
             $dados = $this->request->data;
             $contato = new Contato();
 
             $guid_anterior = $this->request->session()->read('guidContatoEnviado');
             $guid = $this->UString->AntiXSSComLimite($dados["guid"], 100);
-
             $arrayErros = [];
-            // tentativa de reenvio de formulário
-            if($guid == null || ($guid_anterior != null && $guid == $guid_anterior)){
+            $captchaResult = $this->UCaptcha->ValidateToken($this->request->data['recaptcha_token']);
+            if ($captchaResult !== 'human') {
+                $erros['Mensagem'] = 'Por favor, tente novamente não foi possivel validar a sua requisição.';
                 $erro = true;
-                $arrayErros["Mensagem"] = 'Erro ao enviar contato.[3]';
-                $this->request->data = [];
-            }else{
-                $dados = $this->request->data;
+            } else {
+                // tentativa de reenvio de formulário
+                if ($guid == null || ($guid_anterior != null && $guid == $guid_anterior)) {
+                    $erro = true;
+                    $arrayErros["Mensagem"] = 'Erro ao enviar contato.[3]';
+                    $this->request->data = [];
+                } else {
+                    $dados = $this->request->data;
 
-                $contato->Nome = $this->UString->AntiXSSComLimite($dados["Nome"], 100);
-                $contato->Email = $this->UString->AntiXSSComLimite($dados["Email"], 100);
-                $contato->Assunto = $this->UString->AntiXSSComLimite($dados["Assunto"], 100);
-                $contato->Mensagem = $this->UString->AntiXSSComLimite($dados["Mensagem"], 3000);
+                    $contato->Nome = $this->UString->AntiXSSComLimite($dados["Nome"], 100);
+                    $contato->Email = $this->UString->AntiXSSComLimite($dados["Email"], 100);
+                    $contato->Assunto = $this->UString->AntiXSSComLimite($dados["Assunto"], 100);
+                    $contato->Mensagem = $this->UString->AntiXSSComLimite($dados["Mensagem"], 3000);
 
-                $novidades = !isset($dados["Novidades"]) ? 0 : $this->UNumero->ValidarNumero($dados["Novidades"]) > 0 ? 1 : 0;
+                    $novidades = !isset($dados["Novidades"]) ? 0 : $this->UNumero->ValidarNumero($dados["Novidades"]) > 0 ? 1 : 0;
 
-                $contato->AceitouNovidades = $novidades;
-                $arrayErros = $contato->Validar();
+                    $contato->AceitouNovidades = $novidades;
+                    $arrayErros = $contato->Validar();
 
-        		if($contato != null)
-        		{
-        			if(count($arrayErros) == 0){
-        				$contato->Respondido = 0;
-        				if($contato->Salvar($contato))
-        				{
-                            // insere um novo usuário de newsletter
-                            if($novidades)
-                            {
-                                try{
-                                    $newsletterBU = new Newsletter();
-                                    $newsletterBU->Salvar($contato->Nome, $contato->Email);
-                                }catch(Exception $ex){}
+                    if ($contato != null) {
+                        if (count($arrayErros) == 0) {
+                            $contato->Respondido = 0;
+                            if ($contato->Salvar($contato)) {
+                                // insere um novo usuário de newsletter
+                                if ($novidades) {
+                                    try {
+                                        $newsletterBU = new Newsletter();
+                                        $newsletterBU->Salvar($contato->Nome, $contato->Email);
+                                    } catch (Exception $ex) {
+                                    }
+                                }
+
+                                // enviar e-mail
+                                UEmailComponent::EmailContato($contato->Nome, $contato->Email, $contato->Assunto, $contato->Mensagem);
+
+
+                                // evita reenvio de dados
+                                $this->request->session()->write('guidContatoEnviado', $guid);
+                                $contato = new Contato();
+                                $this->request->data = [];
+                                $sucesso = true;
                             }
-
-                            // enviar e-mail
-                            UEmailComponent::EmailContato($contato->Nome, $contato->Email, $contato->Assunto, $contato->Mensagem);
-
-
-                            // evita reenvio de dados
-                            $this->request->session()->write('guidContatoEnviado', $guid);
-                            $contato = new Contato();
-                            $this->request->data = [];
-                            $sucesso = true;
-        				}
-        			}
-        		}else{
-                    $arrayErros["Mensagem"] = 'Erro ao enviar contato.[2]';
-        		}
+                        }
+                    } else {
+                        $arrayErros["Mensagem"] = 'Erro ao enviar contato.[2]';
+                    }
+                }
             }
-    	}else{
+        } else {
             $this->redirect(['action' => 'index']);
             return;
         }

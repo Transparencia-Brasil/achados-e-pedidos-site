@@ -1,21 +1,23 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\View;
 
 use Cake\Core\Configure\Engine\PhpConfig;
 use Cake\Core\InstanceConfigTrait;
+use Cake\Utility\Hash;
+use RuntimeException;
 
 /**
  * Provides an interface for registering and inserting
@@ -26,9 +28,8 @@ use Cake\Core\InstanceConfigTrait;
  */
 class StringTemplate
 {
-
     use InstanceConfigTrait {
-        config as get;
+        getConfig as get;
     }
 
     /**
@@ -37,26 +38,47 @@ class StringTemplate
      * @var array
      */
     protected $_compactAttributes = [
-        'compact' => true,
-        'checked' => true,
-        'declare' => true,
-        'readonly' => true,
-        'disabled' => true,
-        'selected' => true,
-        'defer' => true,
-        'ismap' => true,
-        'nohref' => true,
-        'noshade' => true,
-        'nowrap' => true,
-        'multiple' => true,
-        'noresize' => true,
+        'allowfullscreen' => true,
+        'async' => true,
+        'autofocus' => true,
         'autoplay' => true,
+        'checked' => true,
+        'compact' => true,
         'controls' => true,
-        'loop' => true,
-        'muted' => true,
-        'required' => true,
-        'novalidate' => true,
+        'declare' => true,
+        'default' => true,
+        'defaultchecked' => true,
+        'defaultmuted' => true,
+        'defaultselected' => true,
+        'defer' => true,
+        'disabled' => true,
+        'enabled' => true,
         'formnovalidate' => true,
+        'hidden' => true,
+        'indeterminate' => true,
+        'inert' => true,
+        'ismap' => true,
+        'itemscope' => true,
+        'loop' => true,
+        'multiple' => true,
+        'muted' => true,
+        'nohref' => true,
+        'noresize' => true,
+        'noshade' => true,
+        'novalidate' => true,
+        'nowrap' => true,
+        'open' => true,
+        'pauseonexit' => true,
+        'readonly' => true,
+        'required' => true,
+        'reversed' => true,
+        'scoped' => true,
+        'seamless' => true,
+        'selected' => true,
+        'sortable' => true,
+        'truespeed' => true,
+        'typemustmatch' => true,
+        'visible' => true,
     ];
 
     /**
@@ -64,8 +86,7 @@ class StringTemplate
      *
      * @var array
      */
-    protected $_defaultConfig = [
-    ];
+    protected $_defaultConfig = [];
 
     /**
      * A stack of template sets that have been stashed temporarily.
@@ -100,7 +121,7 @@ class StringTemplate
     {
         $this->_configStack[] = [
             $this->_config,
-            $this->_compiled
+            $this->_compiled,
         ];
     }
 
@@ -129,20 +150,21 @@ class StringTemplate
      * ]);
      * ```
      *
-     * @param array $templates An associative list of named templates.
+     * @param string[] $templates An associative list of named templates.
      * @return $this
      */
     public function add(array $templates)
     {
-        $this->config($templates);
+        $this->setConfig($templates);
         $this->_compileTemplates(array_keys($templates));
+
         return $this;
     }
 
     /**
      * Compile templates into a more efficient printf() compatible format.
      *
-     * @param array $templates The template names to compile. If empty all templates will be compiled.
+     * @param string[] $templates The template names to compile. If empty all templates will be compiled.
      * @return void
      */
     protected function _compileTemplates(array $templates = [])
@@ -156,10 +178,11 @@ class StringTemplate
                 $this->_compiled[$name] = [null, null];
             }
 
-            preg_match_all('#\{\{(\w+)\}\}#', $template, $matches);
+            $template = str_replace('%', '%%', $template);
+            preg_match_all('#\{\{([\w\._]+)\}\}#', $template, $matches);
             $this->_compiled[$name] = [
                 str_replace($matches[0], '%s', $template),
-                $matches[1]
+                $matches[1],
             ];
         }
     }
@@ -189,7 +212,7 @@ class StringTemplate
      */
     public function remove($name)
     {
-        $this->config($name, null);
+        $this->setConfig($name, null);
         unset($this->_compiled[$name]);
     }
 
@@ -198,21 +221,28 @@ class StringTemplate
      *
      * @param string $name The template name.
      * @param array $data The data to insert.
-     * @return string
+     * @return string|null Formatted string or null if template not found.
      */
     public function format($name, array $data)
     {
         if (!isset($this->_compiled[$name])) {
-            return '';
+            throw new RuntimeException("Cannot find template named '$name'.");
         }
         list($template, $placeholders) = $this->_compiled[$name];
-        if ($template === null) {
-            return '';
+
+        if (isset($data['templateVars'])) {
+            $data += $data['templateVars'];
+            unset($data['templateVars']);
         }
         $replace = [];
         foreach ($placeholders as $placeholder) {
-            $replace[] = isset($data[$placeholder]) ? $data[$placeholder] : null;
+            $replacement = isset($data[$placeholder]) ? $data[$placeholder] : null;
+            if (is_array($replacement)) {
+                $replacement = implode('', $replacement);
+            }
+            $replace[] = $replacement;
         }
+
         return vsprintf($template, $replace);
     }
 
@@ -251,7 +281,7 @@ class StringTemplate
             $exclude = [];
         }
 
-        $exclude = ['escape' => true, 'idPrefix' => true] + array_flip($exclude);
+        $exclude = ['escape' => true, 'idPrefix' => true, 'templateVars' => true] + array_flip($exclude);
         $escape = $options['escape'];
         $attributes = [];
 
@@ -261,6 +291,7 @@ class StringTemplate
             }
         }
         $out = trim(implode(' ', $attributes));
+
         return $out ? $insertBefore . $out : '';
     }
 
@@ -269,7 +300,7 @@ class StringTemplate
      * Works with minimized attributes that have the same value as their name such as 'disabled' and 'checked'
      *
      * @param string $key The name of the attribute to create
-     * @param string|array $value The value of the attribute to create.
+     * @param string|string[] $value The value of the attribute to create.
      * @param bool $escape Define if the value must be escaped
      * @return string The composed attribute.
      */
@@ -283,12 +314,58 @@ class StringTemplate
         }
         $truthy = [1, '1', true, 'true', $key];
         $isMinimized = isset($this->_compactAttributes[$key]);
+        if (!preg_match('/\A(\w|[.-])+\z/', $key)) {
+            $key = h($key);
+        }
         if ($isMinimized && in_array($value, $truthy, true)) {
             return "$key=\"$key\"";
         }
         if ($isMinimized) {
             return '';
         }
+
         return $key . '="' . ($escape ? h($value) : $value) . '"';
+    }
+
+    /**
+     * Adds a class and returns a unique list either in array or space separated
+     *
+     * @param array|string $input The array or string to add the class to
+     * @param array|string $newClass the new class or classes to add
+     * @param string $useIndex if you are inputting an array with an element other than default of 'class'.
+     * @return string|string[]
+     */
+    public function addClass($input, $newClass, $useIndex = 'class')
+    {
+        // NOOP
+        if (empty($newClass)) {
+            return $input;
+        }
+
+        if (is_array($input)) {
+            $class = Hash::get($input, $useIndex, []);
+        } else {
+            $class = $input;
+            $input = [];
+        }
+
+        // Convert and sanitise the inputs
+        if (!is_array($class)) {
+            if (is_string($class) && !empty($class)) {
+                $class = explode(' ', $class);
+            } else {
+                $class = [];
+            }
+        }
+
+        if (is_string($newClass)) {
+            $newClass = explode(' ', $newClass);
+        }
+
+        $class = array_unique(array_merge($class, $newClass));
+
+        $input = Hash::insert($input, $useIndex, $class);
+
+        return $input;
     }
 }

@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         2.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Core\Configure\Engine;
 
@@ -25,11 +25,25 @@ use Cake\Core\Exception\Exception;
  * Files compatible with PhpConfig should return an array that
  * contains all of the configuration data contained in the file.
  *
- * @deprecated 3.0.0 Setting a `$config` variable is deprecated. Use `return` instead.
+ * An example configuration file would look like::
+ *
+ * ```
+ * <?php
+ * return [
+ *     'debug' => false,
+ *     'Security' => [
+ *         'salt' => 'its-secret'
+ *     ],
+ *     'App' => [
+ *         'namespace' => 'App'
+ *     ]
+ * ];
+ * ```
+ *
+ * @see \Cake\Core\Configure::load() for how to load custom configuration files.
  */
 class PhpConfig implements ConfigEngineInterface
 {
-
     use FileConfigTrait;
 
     /**
@@ -58,6 +72,8 @@ class PhpConfig implements ConfigEngineInterface
      * Files with `.` in the name will be treated as values in plugins. Instead of
      * reading from the initialized path, plugin keys will be located using Plugin::path().
      *
+     * Setting a `$config` variable is deprecated. Use `return` instead.
+     *
      * @param string $key The identifier to read from. If the key has a . it will be treated
      *  as a plugin prefix.
      * @return array Parsed configuration values.
@@ -68,14 +84,20 @@ class PhpConfig implements ConfigEngineInterface
     {
         $file = $this->_getFilePath($key, true);
 
+        $config = null;
+
         $return = include $file;
         if (is_array($return)) {
             return $return;
         }
 
-        if (!isset($config)) {
+        if ($config === null) {
             throw new Exception(sprintf('Config file "%s" did not return an array', $key . '.php'));
         }
+        deprecationWarning(sprintf(
+            'PHP configuration files like "%s" should not set `$config`. Instead return an array.',
+            $key . '.php'
+        ));
 
         return $config;
     }
@@ -87,13 +109,14 @@ class PhpConfig implements ConfigEngineInterface
      * @param string $key The identifier to write to. If the key has a . it will be treated
      *  as a plugin prefix.
      * @param array $data Data to dump.
-     * @return int Bytes saved.
+     * @return bool Success
      */
     public function dump($key, array $data)
     {
         $contents = '<?php' . "\n" . 'return ' . var_export($data, true) . ';';
 
         $filename = $this->_getFilePath($key);
-        return file_put_contents($filename, $contents);
+
+        return file_put_contents($filename, $contents) > 0;
     }
 }

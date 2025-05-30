@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         0.2.9
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\View;
 
@@ -37,11 +37,9 @@ use Cake\Event\EventListenerInterface;
  * - `beforeRenderFile(Event $event, $viewFile)` - Called before any view fragment is rendered.
  * - `afterRenderFile(Event $event, $viewFile, $content)` - Called after any view fragment is rendered.
  *   If a listener returns a non-null value, the output of the rendered file will be set to that.
- *
  */
 class Helper implements EventListenerInterface
 {
-
     use InstanceConfigTrait;
 
     /**
@@ -49,7 +47,7 @@ class Helper implements EventListenerInterface
      *
      * @var array
      */
-    public $helpers = [];
+    protected $helpers = [];
 
     /**
      * Default config for this helper.
@@ -66,38 +64,18 @@ class Helper implements EventListenerInterface
     protected $_helperMap = [];
 
     /**
-     * The current theme name if any.
-     *
-     * @var string
-     */
-    public $theme = null;
-
-    /**
-     * Request object
-     *
-     * @var \Cake\Network\Request
-     */
-    public $request = null;
-
-    /**
-     * Plugin path
-     *
-     * @var string
-     */
-    public $plugin = null;
-
-    /**
-     * Holds the fields ['field_name' => ['type' => 'string', 'length' => 100]],
-     * primaryKey and validates ['field_name']
+     * Unused.
      *
      * @var array
+     * @deprecated 3.7.0 This property is unused and will be removed in 4.0.0.
      */
     public $fieldset = [];
 
     /**
-     * Holds tag templates.
+     * Unused.
      *
      * @var array
+     * @deprecated 3.7.0 This property is unused and will be removed in 4.0.0.
      */
     public $tags = [];
 
@@ -117,13 +95,13 @@ class Helper implements EventListenerInterface
     public function __construct(View $View, array $config = [])
     {
         $this->_View = $View;
-        $this->request = $View->request;
-
-        $this->config($config);
+        $this->setConfig($config);
 
         if (!empty($this->helpers)) {
             $this->_helperMap = $View->helpers()->normalizeArray($this->helpers);
         }
+
+        $this->initialize($config);
     }
 
     /**
@@ -131,7 +109,7 @@ class Helper implements EventListenerInterface
      *
      * @param string $method Method to invoke
      * @param array $params Array of params for the method.
-     * @return void
+     * @return mixed|void
      */
     public function __call($method, $params)
     {
@@ -142,15 +120,101 @@ class Helper implements EventListenerInterface
      * Lazy loads helpers.
      *
      * @param string $name Name of the property being accessed.
-     * @return \Cake\View\Helper|void Helper instance if helper with provided name exists
+     * @return \Cake\View\Helper|null Helper instance if helper with provided name exists
      */
     public function __get($name)
     {
         if (isset($this->_helperMap[$name]) && !isset($this->{$name})) {
             $config = ['enabled' => false] + (array)$this->_helperMap[$name]['config'];
             $this->{$name} = $this->_View->loadHelper($this->_helperMap[$name]['class'], $config);
+
             return $this->{$name};
         }
+
+        $removed = [
+            'theme' => 'getTheme',
+            'plugin' => 'getPlugin',
+        ];
+        if (isset($removed[$name])) {
+            $method = $removed[$name];
+            deprecationWarning(sprintf(
+                'Helper::$%s is deprecated. Use $view->%s() instead.',
+                $name,
+                $method
+            ));
+
+            return $this->_View->{$method}();
+        }
+
+        if ($name === 'request') {
+            deprecationWarning(
+                'Helper::$request is deprecated. Use $helper->getView()->getRequest() instead.'
+            );
+
+            return $this->_View->getRequest();
+        }
+
+        if ($name === 'helpers') {
+            deprecationWarning(
+                'Helper::$helpers is now protected and should not be accessed from outside a helper class.'
+            );
+
+            return $this->helpers;
+        }
+    }
+
+    /**
+     * Magic setter for removed properties.
+     *
+     * @param string $name Property name.
+     * @param mixed $value Value to set.
+     * @return void
+     */
+    public function __set($name, $value)
+    {
+        $removed = [
+            'theme' => 'setTheme',
+            'plugin' => 'setPlugin',
+        ];
+        if (isset($removed[$name])) {
+            $method = $removed[$name];
+            deprecationWarning(sprintf(
+                'Helper::$%s is deprecated. Use $view->%s() instead.',
+                $name,
+                $method
+            ));
+            $this->_View->{$method}($value);
+
+            return;
+        }
+
+        if ($name === 'request') {
+            deprecationWarning(
+                'Helper::$request is deprecated. Use $helper->getView()->setRequest() instead.'
+            );
+
+            $this->_View->setRequest($value);
+
+            return;
+        }
+
+        if ($name === 'helpers') {
+            deprecationWarning(
+                'Helper::$helpers is now protected and should not be accessed from outside a helper class.'
+            );
+        }
+
+        $this->{$name} = $value;
+    }
+
+    /**
+     * Get the view instance this helper is bound to.
+     *
+     * @return \Cake\View\View The bound view instance.
+     */
+    public function getView()
+    {
+        return $this->_View;
     }
 
     /**
@@ -164,29 +228,47 @@ class Helper implements EventListenerInterface
      */
     protected function _confirm($message, $okCode, $cancelCode = '', $options = [])
     {
-        $message = json_encode($message);
+        $message = $this->_cleanConfirmMessage($message);
         $confirm = "if (confirm({$message})) { {$okCode} } {$cancelCode}";
-        if (isset($options['escape']) && $options['escape'] === false) {
+        // We cannot change the key here in 3.x, but the behavior is inverted in this case
+        $escape = isset($options['escape']) && $options['escape'] === false;
+        if ($escape) {
+            /** @var string $confirm */
             $confirm = h($confirm);
         }
+
         return $confirm;
+    }
+
+    /**
+     * Returns a string read to be used in confirm()
+     *
+     * @param string $message The message to clean
+     * @return mixed
+     */
+    protected function _cleanConfirmMessage($message)
+    {
+        return str_replace('\\\n', '\n', json_encode($message));
     }
 
     /**
      * Adds the given class to the element options
      *
      * @param array $options Array options/attributes to add a class to
-     * @param string $class The class name being added.
-     * @param string $key the key to use for class.
+     * @param string|null $class The class name being added.
+     * @param string $key the key to use for class. Defaults to `'class'`.
      * @return array Array of options with $key set.
      */
     public function addClass(array $options = [], $class = null, $key = 'class')
     {
-        if (isset($options[$key]) && trim($options[$key])) {
+        if (isset($options[$key]) && is_array($options[$key])) {
+            $options[$key][] = $class;
+        } elseif (isset($options[$key]) && trim($options[$key])) {
             $options[$key] .= ' ' . $class;
         } else {
             $options[$key] = $class;
         }
+
         return $options;
     }
 
@@ -209,7 +291,7 @@ class Helper implements EventListenerInterface
             'View.beforeRender' => 'beforeRender',
             'View.afterRender' => 'afterRender',
             'View.beforeLayout' => 'beforeLayout',
-            'View.afterLayout' => 'afterLayout'
+            'View.afterLayout' => 'afterLayout',
         ];
         $events = [];
         foreach ($eventMap as $event => $method) {
@@ -217,6 +299,34 @@ class Helper implements EventListenerInterface
                 $events[$event] = $method;
             }
         }
+
         return $events;
+    }
+
+    /**
+     * Constructor hook method.
+     *
+     * Implement this method to avoid having to overwrite the constructor and call parent.
+     *
+     * @param array $config The configuration settings provided to this helper.
+     * @return void
+     */
+    public function initialize(array $config)
+    {
+    }
+
+    /**
+     * Returns an array that can be used to describe the internal state of this
+     * object.
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return [
+            'helpers' => $this->helpers,
+            'implementedEvents' => $this->implementedEvents(),
+            '_config' => $this->getConfig(),
+        ];
     }
 }

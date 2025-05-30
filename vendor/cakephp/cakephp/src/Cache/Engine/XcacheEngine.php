@@ -1,16 +1,16 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         1.2.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Cache\Engine;
 
@@ -20,10 +20,10 @@ use Cake\Cache\CacheEngine;
  * Xcache storage engine for cache
  *
  * @link          http://trac.lighttpd.net/xcache/ Xcache
+ * @deprecated 3.6.0 Xcache engine has been deprecated and will be removed in 4.0.0.
  */
 class XcacheEngine extends CacheEngine
 {
-
     /**
      * The default config used unless overridden by runtime configuration
      *
@@ -45,7 +45,7 @@ class XcacheEngine extends CacheEngine
         'prefix' => null,
         'probability' => 100,
         'PHP_AUTH_USER' => 'user',
-        'PHP_AUTH_PW' => 'password'
+        'PHP_AUTH_PW' => 'password',
     ];
 
     /**
@@ -58,11 +58,12 @@ class XcacheEngine extends CacheEngine
      */
     public function init(array $config = [])
     {
-        if (PHP_SAPI === 'cli' || !extension_loaded('xcache')) {
+        if (!extension_loaded('xcache')) {
             return false;
         }
 
         parent::init($config);
+
         return true;
     }
 
@@ -77,9 +78,14 @@ class XcacheEngine extends CacheEngine
     {
         $key = $this->_key($key);
 
+        if (!is_numeric($value)) {
+            $value = serialize($value);
+        }
+
         $duration = $this->_config['duration'];
         $expires = time() + $duration;
         xcache_set($key . '_expires', $expires, $duration);
+
         return xcache_set($key, $value, $duration);
     }
 
@@ -100,8 +106,15 @@ class XcacheEngine extends CacheEngine
             if ($cachetime < $time || ($time + $this->_config['duration']) < $cachetime) {
                 return false;
             }
-            return xcache_get($key);
+
+            $value = xcache_get($key);
+            if (is_string($value) && !is_numeric($value)) {
+                $value = unserialize($value);
+            }
+
+            return $value;
         }
+
         return false;
     }
 
@@ -111,7 +124,7 @@ class XcacheEngine extends CacheEngine
      *
      * @param string $key Identifier for the data
      * @param int $offset How much to increment
-     * @return bool|int New incremented value, false otherwise
+     * @return int|false New incremented value, false otherwise
      */
     public function increment($key, $offset = 1)
     {
@@ -126,7 +139,7 @@ class XcacheEngine extends CacheEngine
      *
      * @param string $key Identifier for the data
      * @param int $offset How much to subtract
-     * @return bool|int New decremented value, false otherwise
+     * @return int|false New decremented value, false otherwise
      */
     public function decrement($key, $offset = 1)
     {
@@ -164,6 +177,7 @@ class XcacheEngine extends CacheEngine
             xcache_clear_cache(XC_TYPE_VAR, $i);
         }
         $this->_auth(true);
+
         return true;
     }
 
@@ -172,7 +186,7 @@ class XcacheEngine extends CacheEngine
      * If the group initial value was not found, then it initializes
      * the group accordingly.
      *
-     * @return array
+     * @return string[]
      */
     public function groups()
     {
@@ -185,6 +199,7 @@ class XcacheEngine extends CacheEngine
             }
             $result[] = $group . $value;
         }
+
         return $result;
     }
 

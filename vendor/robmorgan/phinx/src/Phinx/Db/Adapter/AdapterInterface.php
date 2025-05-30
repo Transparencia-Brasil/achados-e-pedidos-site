@@ -28,6 +28,7 @@
  */
 namespace Phinx\Db\Adapter;
 
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Phinx\Db\Table;
 use Phinx\Db\Table\Column;
@@ -54,8 +55,11 @@ interface AdapterInterface
     const PHINX_TYPE_TIME           = 'time';
     const PHINX_TYPE_DATE           = 'date';
     const PHINX_TYPE_BINARY         = 'binary';
+    const PHINX_TYPE_VARBINARY      = 'varbinary';
+    const PHINX_TYPE_BLOB           = 'blob';
     const PHINX_TYPE_BOOLEAN        = 'boolean';
     const PHINX_TYPE_JSON           = 'json';
+    const PHINX_TYPE_JSONB          = 'jsonb';
     const PHINX_TYPE_UUID           = 'uuid';
     const PHINX_TYPE_FILESTREAM     = 'filestream';
 
@@ -65,7 +69,7 @@ interface AdapterInterface
     const PHINX_TYPE_LINESTRING     = 'linestring';
     const PHINX_TYPE_POLYGON        = 'polygon';
 
-	// only for mysql so far
+    // only for mysql so far
     const PHINX_TYPE_ENUM           = 'enum';
     const PHINX_TYPE_SET            = 'set';
 
@@ -75,6 +79,14 @@ interface AdapterInterface
      * @return array
      */
     public function getVersions();
+
+    /**
+     * Get all migration log entries, indexed by version creation time and sorted ascendingly by the configuration's 
+     * version order option
+     * 
+     * @return array
+     */
+    public function getVersionLog();
 
     /**
      * Set adapter configuration options.
@@ -108,6 +120,21 @@ interface AdapterInterface
     public function getOption($name);
 
     /**
+     * Sets the console input.
+     *
+     * @param InputInterface $input Input
+     * @return AdapterInterface
+     */
+    public function setInput(InputInterface $input);
+
+    /**
+     * Gets the console input.
+     *
+     * @return InputInterface
+     */
+    public function getInput();
+
+    /**
      * Sets the console output.
      *
      * @param OutputInterface $output Output
@@ -132,6 +159,22 @@ interface AdapterInterface
      * @return AdapterInterface
      */
     public function migrated(MigrationInterface $migration, $direction, $startTime, $endTime);
+
+    /**
+     * Toggle a migration breakpoint.
+     *
+     * @param MigrationInterface $migration
+     *
+     * @return AdapterInterface
+     */
+    public function toggleBreakpoint(MigrationInterface $migration);
+
+    /**
+     * Reset all migration breakpoints.
+     *
+     * @return int The number of breakpoints reset
+     */
+    public function resetAllBreakpoints();
 
     /**
      * Does the schema table exist?
@@ -231,6 +274,15 @@ interface AdapterInterface
     public function fetchAll($sql);
 
     /**
+     * Inserts data into a table.
+     *
+     * @param Table $table where to insert data
+     * @param array $row
+     * @return void
+     */
+    public function insert(Table $table, $row);
+
+    /**
      * Quotes a table name for use in a query.
      *
      * @param string $tableName Table Name
@@ -278,6 +330,15 @@ interface AdapterInterface
      * @return void
      */
     public function dropTable($tableName);
+
+
+    /**
+     * Truncates the specified table
+     *
+     * @param string $tableName
+     * @return void
+     */
+    public function truncateTable($tableName);
 
     /**
      * Returns table columns
@@ -342,6 +403,15 @@ interface AdapterInterface
      * @return boolean
      */
     public function hasIndex($tableName, $columns);
+
+    /**
+     * Checks to see if an index specified by name exists.
+     *
+     * @param string $tableName Table Name
+     * @param string $indexName
+     * @return boolean
+     */
+    public function hasIndexByName($tableName, $indexName);
 
     /**
      * Adds the specified index to a database table.
@@ -419,7 +489,7 @@ interface AdapterInterface
      *
      * @param string $type
      * @param integer $limit
-     * @return string
+     * @return string[]
      */
     public function getSqlType($type, $limit = null);
 
@@ -447,4 +517,13 @@ interface AdapterInterface
      * @return void
      */
     public function dropDatabase($name);
+
+    /**
+     * Cast a value to a boolean appropriate for the adapter.
+     *
+     * @param mixed $value The value to be cast
+     *
+     * @return mixed
+     */
+    public function castToBool($value);
 }

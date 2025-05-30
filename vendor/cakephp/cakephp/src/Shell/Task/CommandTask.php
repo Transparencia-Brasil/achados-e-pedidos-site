@@ -1,35 +1,33 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         2.5.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Shell\Task;
 
-use Cake\Console\ConsoleOptionParser;
 use Cake\Console\Shell;
 use Cake\Core\App;
 use Cake\Core\Plugin;
 use Cake\Filesystem\Folder;
+use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use ReflectionClass;
 use ReflectionMethod;
 
 /**
  * Base class for Shell Command reflection.
- *
  */
 class CommandTask extends Shell
 {
-
     /**
      * Gets the shell command listing.
      *
@@ -37,43 +35,71 @@ class CommandTask extends Shell
      */
     public function getShellList()
     {
-        $skipFiles = ['AppShell'];
-        $hiddenCommands = ['CommandListShell', 'CompletionShell'];
-
+        $skipFiles = ['app'];
+        $hiddenCommands = ['command_list', 'completion'];
         $plugins = Plugin::loaded();
         $shellList = array_fill_keys($plugins, null) + ['CORE' => null, 'app' => null];
 
-        $shells = $this->_scanDir(dirname(__DIR__));
-        $shells = array_diff($shells, $skipFiles, $hiddenCommands);
-        $shellList = $this->_appendShells('CORE', $shells, $shellList);
-
         $appPath = App::path('Shell');
-        $appShells = $this->_scanDir($appPath[0]);
-        $appShells = array_diff($appShells, $shells, $skipFiles);
-        $shellList = $this->_appendShells('app', $appShells, $shellList);
+        $shellList = $this->_findShells($shellList, $appPath[0], 'app', $skipFiles);
+
+        $appPath = App::path('Command');
+        $shellList = $this->_findShells($shellList, $appPath[0], 'app', $skipFiles);
+
+        $skipCore = array_merge($skipFiles, $hiddenCommands, $shellList['app']);
+        $corePath = dirname(__DIR__);
+        $shellList = $this->_findShells($shellList, $corePath, 'CORE', $skipCore);
+
+        $corePath = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'Command';
+        $shellList = $this->_findShells($shellList, $corePath, 'CORE', $skipCore);
 
         foreach ($plugins as $plugin) {
             $pluginPath = Plugin::classPath($plugin) . 'Shell';
-            $pluginShells = $this->_scanDir($pluginPath);
-            $shellList = $this->_appendShells($plugin, $pluginShells, $shellList);
+            $shellList = $this->_findShells($shellList, $pluginPath, $plugin, []);
         }
 
         return array_filter($shellList);
     }
 
     /**
+     * Find shells in $path and add them to $shellList
+     *
+     * @param array $shellList The shell listing array.
+     * @param string $path The path to look in.
+     * @param string $key The key to add shells to
+     * @param string[] $skip A list of commands to exclude.
+     * @return array The updated list of shells.
+     */
+    protected function _findShells($shellList, $path, $key, $skip)
+    {
+        $shells = $this->_scanDir($path);
+
+        return $this->_appendShells($key, $shells, $shellList, $skip);
+    }
+
+    /**
      * Scan the provided paths for shells, and append them into $shellList
      *
      * @param string $type The type of object.
-     * @param array $shells The shell name.
+     * @param string[] $shells The shell names.
      * @param array $shellList List of shells.
+     * @param string[] $skip List of command names to skip.
      * @return array The updated $shellList
      */
-    protected function _appendShells($type, $shells, $shellList)
+    protected function _appendShells($type, $shells, $shellList, $skip)
     {
-        foreach ($shells as $shell) {
-            $shellList[$type][] = Inflector::underscore(str_replace('Shell', '', $shell));
+        if (!isset($shellList[$type])) {
+            $shellList[$type] = [];
         }
+
+        foreach ($shells as $shell) {
+            $name = Inflector::underscore(preg_replace('/(Shell|Command)$/', '', $shell));
+            if (!in_array($name, $skip, true)) {
+                $shellList[$type][] = $name;
+            }
+        }
+        sort($shellList[$type]);
+
         return $shellList;
     }
 
@@ -98,6 +124,7 @@ class CommandTask extends Shell
             }
             $shells[] = substr($file, 0, -4);
         }
+
         return $shells;
     }
 
@@ -109,15 +136,22 @@ class CommandTask extends Shell
     public function commands()
     {
         $shellList = $this->getShellList();
+        $flatten = Hash::flatten($shellList);
+        $duplicates = array_intersect($flatten, array_unique(array_diff_key($flatten, array_unique($flatten))));
+        $duplicates = Hash::expand($duplicates);
 
         $options = [];
         foreach ($shellList as $type => $commands) {
-            $prefix = '';
-            if (!in_array(strtolower($type), ['app', 'core'])) {
-                $prefix = $type . '.';
-            }
-
             foreach ($commands as $shell) {
+                $prefix = '';
+                if (
+                    !in_array(strtolower($type), ['app', 'core']) &&
+                    isset($duplicates[$type]) &&
+                    in_array($shell, $duplicates[$type])
+                ) {
+                    $prefix = $type . '.';
+                }
+
                 $options[] = $prefix . $shell;
             }
         }
@@ -129,7 +163,8 @@ class CommandTask extends Shell
      * Return a list of subcommands for a given command
      *
      * @param string $commandName The command you want subcommands from.
-     * @return array
+     * @return string[]
+     * @throws \ReflectionException
      */
     public function subCommands($commandName)
     {
@@ -143,7 +178,7 @@ class CommandTask extends Shell
         $return = array_keys($taskMap);
         $return = array_map('Cake\Utility\Inflector::underscore', $return);
 
-        $shellMethodNames = ['main', 'help', 'getOptionParser'];
+        $shellMethodNames = ['main', 'help', 'getOptionParser', 'initialize', 'runCommand'];
 
         $baseClasses = ['Object', 'Shell', 'AppShell'];
 
@@ -157,7 +192,7 @@ class CommandTask extends Shell
             }
         }
 
-        $return += array_diff($methodNames, $shellMethodNames);
+        $return = array_merge($return, array_diff($methodNames, $shellMethodNames));
         sort($return);
 
         return $return;
@@ -166,8 +201,8 @@ class CommandTask extends Shell
     /**
      * Get Shell instance for the given command
      *
-     * @param mixed $commandName The command you want.
-     * @return mixed
+     * @param string $commandName The command you want.
+     * @return \Cake\Console\Shell|false Shell instance if the command can be found, false otherwise.
      */
     public function getShell($commandName)
     {
@@ -178,8 +213,22 @@ class CommandTask extends Shell
             $pluginDot = '';
         }
 
-        if (!in_array($commandName, $this->commands())) {
+        if (!in_array($commandName, $this->commands()) && (empty($pluginDot) && !in_array($name, $this->commands()))) {
             return false;
+        }
+
+        if (empty($pluginDot)) {
+            $shellList = $this->getShellList();
+
+            if (!in_array($commandName, $shellList['app']) && !in_array($commandName, $shellList['CORE'])) {
+                unset($shellList['CORE'], $shellList['app']);
+                foreach ($shellList as $plugin => $commands) {
+                    if (in_array($commandName, $commands)) {
+                        $pluginDot = $plugin . '.';
+                        break;
+                    }
+                }
+            }
         }
 
         $name = Inflector::camelize($name);
@@ -189,6 +238,7 @@ class CommandTask extends Shell
             return false;
         }
 
+        /** @var \Cake\Console\Shell $Shell */
         $Shell = new $class();
         $Shell->plugin = trim($pluginDot, '.');
         $Shell->initialize();
@@ -197,22 +247,35 @@ class CommandTask extends Shell
     }
 
     /**
-     * Get Shell instance for the given command
+     * Get options list for the given command or subcommand
      *
-     * @param mixed $commandName The command to get options for.
-     * @return array
+     * @param string $commandName The command to get options for.
+     * @param string $subCommandName The subcommand to get options for. Can be empty to get options for the command.
+     * If this parameter is used, the subcommand must be a valid subcommand of the command passed
+     * @return array Options list for the given command or subcommand
      */
-    public function options($commandName)
+    public function options($commandName, $subCommandName = '')
     {
         $Shell = $this->getShell($commandName);
+
         if (!$Shell) {
-            $parser = new ConsoleOptionParser();
-        } else {
-            $parser = $Shell->getOptionParser();
+            return [];
+        }
+
+        $parser = $Shell->getOptionParser();
+
+        if (!empty($subCommandName)) {
+            $subCommandName = Inflector::camelize($subCommandName);
+            if ($Shell->hasTask($subCommandName)) {
+                $parser = $Shell->{$subCommandName}->getOptionParser();
+            } else {
+                return [];
+            }
         }
 
         $options = [];
         $array = $parser->options();
+        /** @var \Cake\Console\ConsoleInputOption $obj */
         foreach ($array as $name => $obj) {
             $options[] = "--$name";
             $short = $obj->short();
@@ -220,6 +283,7 @@ class CommandTask extends Shell
                 $options[] = "-$short";
             }
         }
+
         return $options;
     }
 }

@@ -39,6 +39,16 @@ use Symfony\Component\Yaml\Yaml;
 class Config implements ConfigInterface
 {
     /**
+     * The value that identifies a version order by creation time.
+     */
+    const VERSION_ORDER_CREATION_TIME = 'creation';
+
+    /**
+     * The value that identifies a version order by execution time.
+     */
+    const VERSION_ORDER_EXECUTION_TIME = 'execution';
+
+    /**
      * @var array
      */
     private $values = array();
@@ -66,7 +76,9 @@ class Config implements ConfigInterface
      */
     public static function fromYaml($configFilePath)
     {
-        $configArray = Yaml::parse(file_get_contents($configFilePath));
+        $configFile = file_get_contents($configFilePath);
+        $configArray = Yaml::parse($configFile);
+
         if (!is_array($configArray)) {
             throw new \RuntimeException(sprintf(
                 'File \'%s\' must be valid YAML',
@@ -164,7 +176,7 @@ class Config implements ConfigInterface
      */
     public function hasEnvironment($name)
     {
-        return (!(null === $this->getEnvironment($name)));
+        return (null !== $this->getEnvironment($name));
     }
 
     /**
@@ -210,6 +222,13 @@ class Config implements ConfigInterface
     /**
      * {@inheritdoc}
      */
+    public function getAlias($alias){
+        return !empty($this->values['aliases'][$alias]) ? $this->values['aliases'][$alias] : null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getConfigFilePath()
     {
         return $this->configFilePath;
@@ -218,10 +237,14 @@ class Config implements ConfigInterface
     /**
      * {@inheritdoc}
      */
-    public function getMigrationPath()
+    public function getMigrationPaths()
     {
         if (!isset($this->values['paths']['migrations'])) {
             throw new \UnexpectedValueException('Migrations path missing from config file');
+        }
+
+        if (is_string($this->values['paths']['migrations'])) {
+            $this->values['paths']['migrations'] = array($this->values['paths']['migrations']);
         }
 
         return $this->values['paths']['migrations'];
@@ -237,8 +260,80 @@ class Config implements ConfigInterface
     {
         $className = !isset($this->values['migration_base_class']) ? 'Phinx\Migration\AbstractMigration' : $this->values['migration_base_class'];
 
-        return $dropNamespace ? substr(strrchr($className, '\\'), 1) : $className;
+        return $dropNamespace ? substr(strrchr($className, '\\'), 1) ?: $className : $className;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSeedPaths()
+    {
+        if (!isset($this->values['paths']['seeds'])) {
+            throw new \UnexpectedValueException('Seeds path missing from config file');
+        }
+
+        if (is_string($this->values['paths']['seeds'])) {
+            $this->values['paths']['seeds'] = array($this->values['paths']['seeds']);
+        }
+
+        return $this->values['paths']['seeds'];
+    }
+
+    /**
+     * Get the template file name.
+     *
+     * @return string|false
+     */
+     public function getTemplateFile()
+     {
+        if (!isset($this->values['templates']['file'])) {
+            return false;
+        }
+
+        return $this->values['templates']['file'];
+     }
+
+    /**
+     * Get the template class name.
+     *
+     * @return string|false
+     */
+     public function getTemplateClass()
+     {
+        if (!isset($this->values['templates']['class'])) {
+            return false;
+        }
+
+        return $this->values['templates']['class'];
+     }
+
+    /**
+     * Get the version order.
+     *
+     * @return string
+     */
+    public function getVersionOrder()
+    {
+        if (!isset($this->values['version_order'])) {
+            return self::VERSION_ORDER_CREATION_TIME;
+        }
+
+        return $this->values['version_order'];
+    }
+
+    /**
+     * Is version order creation time?
+     *
+     * @return boolean
+     */
+    public function isVersionOrderCreationTime()
+    {
+        $versionOrder = $this->getVersionOrder();
+
+        return $versionOrder == self::VERSION_ORDER_CREATION_TIME;
+    }
+
+    
 
     /**
      * Replace tokens in the specified array.
@@ -246,7 +341,7 @@ class Config implements ConfigInterface
      * @param array $arr Array to replace
      * @return array
      */
-    protected function replaceTokens($arr)
+    protected function replaceTokens(array $arr)
     {
         // Get environment variables
         // $_ENV is empty because variables_order does not include it normally
@@ -262,11 +357,7 @@ class Config implements ConfigInterface
         $tokens['%%PHINX_CONFIG_DIR%%'] = dirname($this->getConfigFilePath());
 
         // Recurse the array and replace tokens
-        if (is_array($arr)) {
-            return $this->recurseArrayForTokens($arr, $tokens);
-        }
-
-        return $arr;
+        return $this->recurseArrayForTokens($arr, $tokens);
     }
 
     /**

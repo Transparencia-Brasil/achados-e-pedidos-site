@@ -1,34 +1,34 @@
 <?php
 /**
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  * Redistributions of files must retain the above copyright notice.
  *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
  * @since         3.0.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 namespace Cake\Collection\Iterator;
 
 use Cake\Collection\Collection;
 use Countable;
+use Serializable;
 use SplDoublyLinkedList;
 
 /**
  * Creates an iterator from another iterator that will keep the results of the inner
  * iterator in memory, so that results don't have to be re-calculated.
  */
-class BufferedIterator extends Collection implements Countable
+class BufferedIterator extends Collection implements Countable, Serializable
 {
-
     /**
      * The in-memory cache containing results from previous iterators
      *
-     * @var callable
+     * @var \SplDoublyLinkedList
      */
     protected $_buffer;
 
@@ -76,7 +76,7 @@ class BufferedIterator extends Collection implements Countable
      */
     public function __construct($items)
     {
-        $this->_buffer = new SplDoublyLinkedList;
+        $this->_buffer = new SplDoublyLinkedList();
         parent::__construct($items);
     }
 
@@ -110,6 +110,7 @@ class BufferedIterator extends Collection implements Countable
         if ($this->_index === 0 && !$this->_started) {
             $this->_started = true;
             parent::rewind();
+
             return;
         }
 
@@ -127,6 +128,7 @@ class BufferedIterator extends Collection implements Countable
             $current = $this->_buffer->offsetGet($this->_index);
             $this->_current = $current['value'];
             $this->_key = $current['key'];
+
             return true;
         }
 
@@ -137,11 +139,12 @@ class BufferedIterator extends Collection implements Countable
             $this->_key = parent::key();
             $this->_buffer->push([
                 'key' => $this->_key,
-                'value' => $this->_current
+                'value' => $this->_current,
             ]);
         }
 
         $this->_finished = !$valid;
+
         return $valid;
     }
 
@@ -154,6 +157,10 @@ class BufferedIterator extends Collection implements Countable
     {
         $this->_index++;
 
+        // Don't move inner iterator if we have more buffer
+        if ($this->_buffer->offsetExists($this->_index)) {
+            return;
+        }
         if (!$this->_finished) {
             parent::next();
         }
@@ -175,5 +182,34 @@ class BufferedIterator extends Collection implements Countable
         }
 
         return $this->_buffer->count();
+    }
+
+    /**
+     * Returns a string representation of this object that can be used
+     * to reconstruct it
+     *
+     * @return string
+     */
+    public function serialize()
+    {
+        if (!$this->_finished) {
+            $this->count();
+        }
+
+        return serialize($this->_buffer);
+    }
+
+    /**
+     * Unserializes the passed string and rebuilds the BufferedIterator instance
+     *
+     * @param string $buffer The serialized buffer iterator
+     * @return void
+     */
+    public function unserialize($buffer)
+    {
+        $this->__construct([]);
+        $this->_buffer = unserialize($buffer);
+        $this->_started = true;
+        $this->_finished = true;
     }
 }

@@ -16,10 +16,10 @@ class UCaptchaComponent extends Component
     {
         $projectId = Configure::read("Recaptcha.ProjectId");
         $siteKey = Configure::read("Recaptcha.Key");
-      //  $accountFile = Configure::read("Recaptcha.AccountCredentials");
+        $accountFile = Configure::read("Recaptcha.AccountCredentials");
 
-     //   putenv("GOOGLE_APPLICATION_CREDENTIALS=" . ROOT . "/" . $accountFile);
-        $client = new RecaptchaEnterpriseServiceClient();        
+        putenv("GOOGLE_APPLICATION_CREDENTIALS=" . ROOT . "/" . $accountFile);
+        $client = new RecaptchaEnterpriseServiceClient();
         $project = $client->projectName($projectId);
 
         // Build the Event

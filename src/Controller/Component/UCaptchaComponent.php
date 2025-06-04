@@ -2,6 +2,7 @@
 
 namespace App\Controller\Component;
 
+use App\Model\Entity\Opcoes;
 use Cake\Controller\Component;
 use Cake\Core\Configure;
 use Cake\Log\Log;
@@ -15,11 +16,14 @@ class UCaptchaComponent extends Component
     function ValidateToken($token)
     {
         $projectId = Configure::read("Recaptcha.ProjectId");
-        $siteKey = Configure::read("Recaptcha.Key");
-        $accountFile = Configure::read("Recaptcha.AccountCredentials");
+        $siteKey = Configure::read("Recaptcha.Key");        
+        $credentials = json_decode(Opcoes::Ler("Recaptcha.Credentials"), true);
 
-        putenv("GOOGLE_APPLICATION_CREDENTIALS=" . ROOT . "/" . $accountFile);
-        $client = new RecaptchaEnterpriseServiceClient();
+        Log::debug("[RECAPTCHA] User = " . $credentials['client_email']);
+
+        $client = new RecaptchaEnterpriseServiceClient([
+            'credentials' => $credentials
+        ]);
         $project = $client->projectName($projectId);
 
         // Build the Event

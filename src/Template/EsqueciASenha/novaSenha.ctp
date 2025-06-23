@@ -1,3 +1,7 @@
+<?
+$this->UCaptcha->CaptchaScript();
+?>
+
 
 <div class="container-fluid breadcrumbLinha">
   <div class="container">
@@ -27,7 +31,9 @@
             ?>
             
             <?= $this->Form->create('', ['method' => 'post']) ?>
-              
+                        <?
+                            $this->UCaptcha->CaptchaTokenInput();
+                        ?>
                 <div class="col-md-3">
                   <div class="form-group">
                       Nova Senha

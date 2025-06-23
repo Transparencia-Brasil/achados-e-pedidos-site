@@ -10,22 +10,8 @@ services:
     working_dir: /var/www
     volumes:
       - ./:/var/www
-    environment:
-      - "DB_PORT=3306"
-      - "DB_HOST=database"
-      - "APP_DEBUG=TRUE"
-      - "APP_URL=http://localhost:8080/"
-      - "API_URL=https://endp.achadosepedidos.org.br/api/"
-      - "SECURITY_SALT=dasfewrvuiofngfdsadsadsadasavunquy32r7831287413"
-      - "MYSQL_HOST=transparencia-db.mysql.database.azure.com"
-      - "MYSQL_USERNAME=achadosepedidos@transparencia-db.mysql.database.azure.com"
-      - "MYSQL_PASSWORD=sheiNe3aek2eeN1ahchoghaphaiGhox6"
-      - "MYSQL_DATABASE=achadosepedidos"
-      - "MAIL_DRIVER=Smtp"
-      - "MAIL_HOST="
-      - "MAIL_USERNAME="
-      - "MAIL_PASSWORD="   
-      - "MYSQL_ATTR_SSL_CA=/var/www/DigiCertGlobalRootG2.crt.pem"
+    env_file:
+      - .env
 
   # The Web Server
   web:
@@ -45,7 +31,7 @@ services:
       - dbdata:/var/lib/mysql
     environment:
       - "MYSQL_DATABASE=tblai"
-      - "MYSQL_USER=root"
+      - "MYSQL_USER=lai"
       - "MYSQL_PASSWORD=secret"
       - "MYSQL_ROOT_PASSWORD=secret"
     ports:

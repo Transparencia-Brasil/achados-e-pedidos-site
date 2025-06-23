@@ -12,4 +12,9 @@ RUN docker-php-ext-configure intl
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \     
+    php composer-setup.php && \
+    php -r "unlink('composer-setup.php');" && \
+    mv composer.phar /usr/local/bin/composer
+
 # CMD ["npm", "run", "watch-poll"]

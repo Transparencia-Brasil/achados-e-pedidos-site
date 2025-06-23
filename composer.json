@@ -9,7 +9,8 @@
         "cakephp/cakephp": "~3.0",
         "mobiledetect/mobiledetectlib": "2.*",
         "cakephp/migrations": "~1.0",
-        "cakephp/plugin-installer": "*"
+        "cakephp/plugin-installer": "*",
+        "google/cloud-recaptcha-enterprise": "^1.9"
     },
     "require-dev": {
         "psy/psysh": "@stable",
@@ -31,9 +32,12 @@
             "Cake\\Test\\": "./vendor/cakephp/cakephp/tests"
         }
     },
-    "scripts": {
-        "post-autoload-dump": "Cake\\Composer\\Installer\\PluginInstaller::postAutoloadDump"
-    },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "aura/installer-default": true,
+            "cakephp/plugin-installer": true
+        }
+    }
 }

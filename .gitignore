@@ -10,3 +10,6 @@ script_deletar_pedidos.php
 script.php
 .env
 recaptcha-creds.json
+
+vendor
+

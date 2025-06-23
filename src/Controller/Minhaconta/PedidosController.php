@@ -17,6 +17,9 @@ use Cake\Log\Log;
 
 class PedidosController extends AppController
 {
+
+    public $helpers = ["UCaptcha"];
+
     public function initialize()
     {
         parent::initialize();
@@ -32,6 +35,7 @@ class PedidosController extends AppController
         $this->loadComponent('UNumero');
         $this->loadComponent('USessao');
         $this->loadComponent('UArquivo');
+        $this->loadComponent('UCaptcha');
     }
 
     public function index()
@@ -48,30 +52,35 @@ class PedidosController extends AppController
         $nomeAgente = "";
 
         if ($this->request->is('post') || $this->request->is('put')) {
-            
-            Log::debug("[0] Novo Pedido", "pedidos");
+            $captchaResult = $this->UCaptcha->ValidateToken($this->request->data['recaptcha_token']);
+            if ($captchaResult !== 'human') {
+                Log::debug("[0] Falhou o Anti-bot...", "pedidos");
+                $erros['Titulo'] = 'Por favor, tente novamente não foi possivel validar a sua requisição.';
+            } else {
+                Log::debug("[0] Novo Pedido", "pedidos");
 
-            $conn = TableRegistry::get("Pedidos");
+                $conn = TableRegistry::get("Pedidos");
 
-            $conn->patchEntity($pedido, $this->request->data);
+                $conn->patchEntity($pedido, $this->request->data);
 
-            $codigoAgente = $this->UNumero->ValidarNumero($pedido->CodigoAgente);
+                $codigoAgente = $this->UNumero->ValidarNumero($pedido->CodigoAgente);
 
-            Log::debug("[1] Agente: $codigoAgente", "pedidos");
+                Log::debug("[1] Agente: $codigoAgente", "pedidos");
 
-            if ($codigoAgente > 0) {
-                $agenteBU = new Agente();
-                $agenteBU->Codigo = $codigoAgente;
-                $agente = $agenteBU->GetByCodigo();
+                if ($codigoAgente > 0) {
+                    $agenteBU = new Agente();
+                    $agenteBU->Codigo = $codigoAgente;
+                    $agente = $agenteBU->GetByCodigo();
 
-                if ($agente != null) {
-                    $nomeAgente = $agente->Nome;
+                    if ($agente != null) {
+                        $nomeAgente = $agente->Nome;
+                    }
                 }
+
+                $erros = $pedido->ValidarNovoPedido();
+
+                Log::debug("[2] Validação do Pedido resulton em: " . count($erros) . " erros", "pedidos");
             }
-
-            $erros = $pedido->ValidarNovoPedido();
-
-            Log::debug("[2] Validação do Pedido resulton em: " . count($erros) . " erros", "pedidos");
 
             if (count($erros) == 0) {
 

@@ -1,4 +1,7 @@
 
+<?
+$this->UCaptcha->CaptchaScript();
+?>
 
 <div class="container-fluid breadcrumbLinha">
   <div class="container">
@@ -29,6 +32,9 @@
         <img src="<?=BASE_URL?>assets/images/home/linhas.png" alt="Como Funciona">
         <p>Para dúvidas sobre o projeto, consulte o nosso FAQ. Para sugestões e<br> feedbacks, entre em contato conosco pelo formulário abaixo.</p>
           <?=$this->Form->create($contato, ['action' => 'novoContato', "id" => "frmContato"]) ?>
+             <?
+                            $this->UCaptcha->CaptchaTokenInput();
+                        ?>
             <?=$this->Form->hidden('guid', ['value' => $guid])?>
             <div class="col-md-6">
               <div class="form-group">

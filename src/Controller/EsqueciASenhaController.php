@@ -7,10 +7,11 @@ use App\Model\Entity\Usuario;
 
 class EsqueciASenhaController extends AppController
 {
-	public function initialize()
+    public $helpers = ["UCaptcha"];
+    public function initialize()
     {
         parent::initialize();
-        
+
         $this->loadModel('Usuario');
         $this->set('slug_pai', "esqueci-a-senha");
 
@@ -20,22 +21,29 @@ class EsqueciASenhaController extends AppController
         $this->loadComponent('Auth');
         $this->loadComponent('UString');
         $this->loadComponent('UNumero');
+        $this->loadComponent('UCaptcha');
     }
 
 
-    public function index(){
+    public function index()
+    {
         $erros = [];
         $sucesso = null;
 
         // pegar dados do form e validá-los
         if ($this->request->is('post')) {
-            $email = $this->UString->AntiXSSComLimite($this->request->data['email'], 100);
+            $captchaResult = $this->UCaptcha->ValidateToken($this->request->data['recaptcha_token']);
+            if ($captchaResult !== 'human') {
+                $erros['Email'] = 'Por favor, tente novamente não foi possivel validar a sua requisição.';
+            } else {
+                $email = $this->UString->AntiXSSComLimite($this->request->data['email'], 100);
 
-            $usuario = new Usuario();
-            $usuario->Email = $email;
+                $usuario = new Usuario();
+                $usuario->Email = $email;
 
-            $erros = $usuario->EsqueciASenha();
-            
+                $erros = $usuario->EsqueciASenha();
+            }
+
             $sucesso = count($erros) == 0;
         }
 
@@ -52,29 +60,33 @@ class EsqueciASenhaController extends AppController
         $sucesso = null;
         $erros = [];
 
-        $usuarioBU = new Usuario();
+        $captchaResult = $this->UCaptcha->ValidateToken($this->request->data['recaptcha_token']);
+        if ($captchaResult !== 'human') {
+            $erros['Email'] = 'Por favor, tente novamente não foi possivel validar a sua requisição.';
+            $sucesso = false;
+        } else {
+            $usuarioBU = new Usuario();
 
-        $usuario = $usuarioBU->ListarPorChaveEsqueciASenha($chave);
+            $usuario = $usuarioBU->ListarPorChaveEsqueciASenha($chave);
 
-        if($usuario != null){
-            if(is_numeric($usuario)){
-                $chaveVencida = true;
-                $usuario = null;
+            if ($usuario != null) {
+                if (is_numeric($usuario)) {
+                    $chaveVencida = true;
+                    $usuario = null;
+                }
+            } else {
+                $usuarioNaoEncontrado = true;
             }
-        }else{
-            $usuarioNaoEncontrado = true;
-        }
 
-        if($this->request->isPost() && $usuario != null)
-        {
-            $novaSenha = $this->UString->AntiXSSEmArrayComLimite($this->request->data, "Senha", 100);
-            $confirmarSenha = $this->UString->AntiXSSEmArrayComLimite($this->request->data, "ConfirmarSenha", 100);
+            if ($this->request->isPost() && $usuario != null) {
+                $novaSenha = $this->UString->AntiXSSEmArrayComLimite($this->request->data, "Senha", 100);
+                $confirmarSenha = $this->UString->AntiXSSEmArrayComLimite($this->request->data, "ConfirmarSenha", 100);
 
-            $erros = $usuarioBU->ValidarTrocaDeSenha($novaSenha, $confirmarSenha);
+                $erros = $usuarioBU->ValidarTrocaDeSenha($novaSenha, $confirmarSenha);
 
-            if(count($erros) == 0)
-            {
-                $sucesso = $usuario->AlterarSenha($novaSenha);
+                if (count($erros) == 0) {
+                    $sucesso = $usuario->AlterarSenha($novaSenha);
+                }
             }
         }
 

@@ -64,15 +64,6 @@ $blipchat_key = Configure::read("BlipChat.Key");
         </style>
     </head>
 <body>
-      <!-- 
-<?php
-    echo "max_file = " . ini_get('upload_max_filesize') . "<br>";
-    echo "post_max_size = " . ini_get('post_max_size'). "<br>";
-    echo "max_execution_time = " . ini_get('max_execution_time'). "<br>";
-    echo "upload_max_size = " . ini_get('upload_max_size'). "<br>";
-?>
-        --->
-
       <!-- Google Tag Manager (noscript) -->
       <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MN3TZMR"
       height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>

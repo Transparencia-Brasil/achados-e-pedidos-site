@@ -1,4 +1,9 @@
 
+<?
+$this->UCaptcha->CaptchaScript();
+?>
+
+
 <div class="container">
   <div class="row">
     <ul class="breadcrumb">
@@ -19,6 +24,9 @@
                     <h2>ESQUECI MINHA SENHA</h2>
                     <form method="post" data-parsley-validate data-parsley-errors-messages-disabled>
                     <?=$this->Form->create('EsqueciSenha', ['method' => 'post'])?>
+                         <?
+                            $this->UCaptcha->CaptchaTokenInput();
+                        ?>
                         <div class="form-group">
                             <?php
                             if($sucesso == null){

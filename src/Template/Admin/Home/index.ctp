@@ -75,7 +75,7 @@
 							<?php foreach($ultimos_usuarios as $usuario): ?>
 							<li class="green" style="padding:5px;">
 								<strong>Nome:</strong> <?=$usuario->Nome?> | 
-								<strong>Data de cadastro:</strong> <?=$usuario->Criacao->nice()?>
+								<strong>Data de cadastro:</strong> <?=$usuario->Criacao?>
 							</li>
 							<?php endforeach; ?>
 						</ul>
